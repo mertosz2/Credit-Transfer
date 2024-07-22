@@ -28,12 +28,12 @@ public class UniversityCourseController {
         this.ocrService = ocrService;
     }
 
-//    @GetMapping("")
-//    public List<UniversityCourse> getAll(){
-//        return universityCourseService.findAll();
-//    }
-
     @GetMapping("")
+    public List<UniversityCourse> getAll(){
+        return universityCourseService.findAll();
+    }
+
+    @GetMapping("/get")
     public List<String> getId() throws IOException {
         return ocrService.getCourseId();
     }
