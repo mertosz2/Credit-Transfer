@@ -27,4 +27,12 @@ public class TransferCreditController {
     public ResponseEntity<List<TransferCreditResponse>> getResult(@RequestBody List<TransferCreditRequest> transferCreditRequestList) {
         return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
     }
+
+    @GetMapping("/import")
+    public ResponseEntity<List<TransferCreditResponse>> importTranscript() {
+        List<String> dipCourseIdList  = List.of("30000-9205", "30000-1201", "30000-1207", "30000-9201");
+        return ResponseEntity.status(OK).body(
+                transferCreditService.getTransferableCourse(TransferCreditService.mapToTransferCreditRequestList(dipCourseIdList)));
+
+    }
 }

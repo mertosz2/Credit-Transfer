@@ -21,6 +21,7 @@ public class TransferCreditService {
         this.universityCourseRepository = universityCourseRepository;
     }
 
+
     public List<TransferCreditResponse> getTransferableCourse(List<TransferCreditRequest> transferCreditRequestList) {
         List<TransferCreditResponse> transferCreditResponseList = new ArrayList<>();
 
@@ -29,37 +30,36 @@ public class TransferCreditService {
 
         // Iterate through each TransferCreditRequest
         for (TransferCreditRequest request : transferCreditRequestList) {
-            DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
+            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
             Integer uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
             courseMap.computeIfAbsent(uniCourseId, k -> new ArrayList<>()).add(request);
         }
 
-        // แยก List ออกมาเป็นสอง list
-        List<TransferCreditRequest> duplicatedRequests = new ArrayList<>();
-        List<TransferCreditRequest> uniqueRequests = new ArrayList<>();
+        List<TransferCreditRequest> sameUniversityCourse = new ArrayList<>();
+        List<TransferCreditRequest> uniqueUniversityCourse = new ArrayList<>();
 
         for (Map.Entry<Integer, List<TransferCreditRequest>> entry : courseMap.entrySet()) {
             List<TransferCreditRequest> requests = entry.getValue();
             if (requests.size() > 1) {
-                duplicatedRequests.addAll(requests);
+                sameUniversityCourse.addAll(requests);
             } else {
-                uniqueRequests.addAll(requests);
+                uniqueUniversityCourse.addAll(requests);
             }
         }
 
         // Process the unique requests
-        for (TransferCreditRequest request : uniqueRequests) {
+        for (TransferCreditRequest request : uniqueUniversityCourse) {
             TransferCreditResponse transferCreditResponse = processRequest(request);
             transferCreditResponseList.add(transferCreditResponse);
         }
 
         // Process the duplicated requests
-        transferCreditResponseList.addAll(processDuplicateRequest(duplicatedRequests));
+        transferCreditResponseList.addAll(processDuplicateRequest(sameUniversityCourse));
 
-        System.out.println("unique size = " + uniqueRequests.size());
-        System.out.println("duplicated size = " + duplicatedRequests.size() + "and " + duplicatedRequests);
+        System.out.println("unique size = " + uniqueUniversityCourse.size());
+        System.out.println("duplicated size = " + sameUniversityCourse.size() + "and " + sameUniversityCourse);
 
 
         return transferCreditResponseList;
@@ -68,7 +68,7 @@ public class TransferCreditService {
     private TransferCreditResponse processRequest(TransferCreditRequest request) {
         List<DiplomaCourse> diplomaCourseList = new ArrayList<>();
         TransferCreditResponse transferCreditResponse = new TransferCreditResponse();
-        DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
+        DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
         diplomaCourseList.add(diplomaCourse);
 
         if (diplomaCourse.getDipCredit() < diplomaCourse.getUniversityCourse().getUniCredit() || request.getDipGrade() < 2) {
@@ -92,7 +92,7 @@ public class TransferCreditService {
         Map<Integer, List<TransferCreditRequest>> courseMap = new HashMap<>();
 
         for (TransferCreditRequest request : transferCreditRequestList) {
-            DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
+            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
             int uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
@@ -111,7 +111,7 @@ public class TransferCreditService {
             int uniCredit = 0;
 
             for (TransferCreditRequest request : requests) {
-                DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
+                DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
                 diplomaCourseList.add(diplomaCourse);
                 if (request.getDipGrade() >= 2) {
                     totalDipCredit += diplomaCourse.getDipCredit();
@@ -138,4 +138,13 @@ public class TransferCreditService {
         return transferCreditResponseList;
     }
 
+    public static List<TransferCreditRequest> mapToTransferCreditRequestList(List<String> dipCourseIdList) {
+        List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>();
+        for (String dipCourseId : dipCourseIdList) {
+            TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
+            transferCreditRequest.setDipCourseId(dipCourseId);
+            transferCreditRequestList.add(transferCreditRequest);
+        }
+        return transferCreditRequestList;
+    }
 }

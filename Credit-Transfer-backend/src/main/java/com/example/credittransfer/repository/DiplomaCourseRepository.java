@@ -13,4 +13,7 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
 
     @Query("select d from DiplomaCourse d where d.dipCourseId in :dipCourseIdList")
     List<DiplomaCourse> findByDipCourseIdList(List<String> dipCourseIdList);
+
+    @Query("select d from DiplomaCourse d where d.dipCourseId = :dipCourseId")
+    DiplomaCourse findByDipCourseId(String dipCourseId);
 }

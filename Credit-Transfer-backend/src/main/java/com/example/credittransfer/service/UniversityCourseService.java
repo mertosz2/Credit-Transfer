@@ -29,5 +29,6 @@ public class UniversityCourseService {
         universityCourse.setUniCredit(request.getUniCredit());
         universityCourseRepository.save(universityCourse);
         return new ResponseAPI(HttpStatus.OK, "create course successfully");
+
     }
 }

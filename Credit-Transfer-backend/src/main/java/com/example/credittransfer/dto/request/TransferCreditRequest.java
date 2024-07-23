@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TransferCreditRequest {
 
-    private int dipId;
+    private String dipCourseId;
 
     private double dipGrade;
 
