@@ -24,5 +24,6 @@ public class DiplomaCourse {
 
     @ManyToOne
     @JoinColumn(name = "universityCourse_id")
+    @JsonIgnore
     private UniversityCourse universityCourse;
 }

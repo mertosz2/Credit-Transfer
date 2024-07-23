@@ -13,5 +13,4 @@ public class TransferCreditRequest {
 
     private double dipGrade;
 
-    private int dipCredit;
 }
