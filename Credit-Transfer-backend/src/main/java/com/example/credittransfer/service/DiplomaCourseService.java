@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class DiplomaCourseService {
@@ -34,7 +35,19 @@ public class DiplomaCourseService {
 
     public List<DiplomaCourse> getByDipCourseIdList(List<String> dipCourseIdList) {
         List<DiplomaCourse> diplomaCourseList = diplomaCourseRepository.findByDipCourseIdList(dipCourseIdList);
-        return  diplomaCourseList;
+        return diplomaCourseList;
 
+    }
+
+    public String validateDipCourseId(List<String> dipCourseIdList) {
+        List<String> notFoundDipCourseId = dipCourseIdList.stream()
+                .filter(dipCourseId -> Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))
+                .toList();
+
+        if (notFoundDipCourseId.isEmpty()) {
+            return "success";
+        }
+
+        return "วิชาที่ยังไม่ลงทะเบียนกับระบบ : " + String.join(", ", notFoundDipCourseId);
     }
 }

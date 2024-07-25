@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TransferCreditResponse {
 
-    private List<DiplomaCourse> diplomaCourseList;
+    private List<DipCourseResponse> diplomaCourseList;
 
     private String uniCourseId;
 

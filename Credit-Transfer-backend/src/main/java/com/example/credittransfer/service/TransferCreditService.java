@@ -2,6 +2,7 @@ package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
 import com.example.credittransfer.dto.request.TransferCreditRequest;
+import com.example.credittransfer.dto.response.DipCourseResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
@@ -29,7 +30,7 @@ public class TransferCreditService {
 
         // Iterate through each TransferCreditRequest
         for (TransferCreditRequest request : transferCreditRequestList) {
-            DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
+            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
             Integer uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
@@ -66,10 +67,10 @@ public class TransferCreditService {
     }
 
     private TransferCreditResponse processRequest(TransferCreditRequest request) {
-        List<DiplomaCourse> diplomaCourseList = new ArrayList<>();
+        List<DipCourseResponse> diplomaCourseList = new ArrayList<>();
         TransferCreditResponse transferCreditResponse = new TransferCreditResponse();
-        DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
-        diplomaCourseList.add(diplomaCourse);
+        DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
+        diplomaCourseList.add(mapToDipCourseResponse(diplomaCourse, request.getDipGrade()));
 
         if (diplomaCourse.getDipCredit() < diplomaCourse.getUniversityCourse().getUniCredit() || request.getDipGrade() < 2) {
             transferCreditResponse.setTransferable(false);
@@ -92,7 +93,7 @@ public class TransferCreditService {
         Map<Integer, List<TransferCreditRequest>> courseMap = new HashMap<>();
 
         for (TransferCreditRequest request : transferCreditRequestList) {
-            DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
+            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
             int uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
@@ -103,7 +104,7 @@ public class TransferCreditService {
         for (Map.Entry<Integer, List<TransferCreditRequest>> entry : courseMap.entrySet()) {
 
             List<TransferCreditRequest> requests = entry.getValue();
-            List<DiplomaCourse> diplomaCourseList = new ArrayList<>();
+            List<DipCourseResponse> diplomaCourseList = new ArrayList<>();
             int totalDipCredit = 0;
             boolean transferable = true;
             String uniCourseId = "";
@@ -111,8 +112,8 @@ public class TransferCreditService {
             int uniCredit = 0;
 
             for (TransferCreditRequest request : requests) {
-                DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(request.getDipId()).orElseThrow();
-                diplomaCourseList.add(diplomaCourse);
+                DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
+                diplomaCourseList.add(mapToDipCourseResponse(diplomaCourse, request.getDipGrade()));
                 if (request.getDipGrade() >= 2) {
                     totalDipCredit += diplomaCourse.getDipCredit();
                 }
@@ -138,4 +139,29 @@ public class TransferCreditService {
         return transferCreditResponseList;
     }
 
+    public List<TransferCreditRequest> mapToTransferCreditRequest(List<String> dipCourseId){
+        List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>();
+        for (String dipCourseIdStr : dipCourseId) {
+            TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
+            transferCreditRequest.setDipCourseId(dipCourseIdStr);
+            transferCreditRequestList.add(transferCreditRequest);
+        }
+        return transferCreditRequestList;
+    }
+
+    public DipCourseResponse mapToDipCourseResponse(DiplomaCourse diplomaCourse, double grade) {
+        return DipCourseResponse.builder()
+                .id(diplomaCourse.getId())
+                .dipCourseId(diplomaCourse.getDipCourseId())
+                .dipCourseName(diplomaCourse.getDipCourseName())
+                .dipCredit(diplomaCourse.getDipCredit())
+                .grade(grade)
+                .build();
+    }
+
+    public List<TransferCreditResponse> validateTransferableResponse(List<TransferCreditResponse> transferCreditResponseList) {
+        return transferCreditResponseList.stream()
+                .filter(TransferCreditResponse::isTransferable)
+                .toList();
+    }
 }
