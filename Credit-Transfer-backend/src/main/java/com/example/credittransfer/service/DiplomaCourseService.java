@@ -3,13 +3,13 @@ package com.example.credittransfer.service;
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.entity.DiplomaCourse;
-import com.example.credittransfer.entity.UniversityCourse;
+import com.example.credittransfer.exception.ExistByCourseIdException;
+import com.example.credittransfer.exception.ExistByCourseNameException;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,6 +25,14 @@ public class DiplomaCourseService {
     }
 
     public ResponseAPI createCourse(DiplomaCourseRequest request) {
+        if(diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId()))
+        {
+            throw new ExistByCourseIdException(request.getDipCourseId());
+        }
+        if(diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName()))
+        {
+            throw new ExistByCourseNameException(request.getDipCourseName());
+        }
         DiplomaCourse diplomaCourse = new DiplomaCourse();
         diplomaCourse.setDipCourseId(request.getDipCourseId());
         diplomaCourse.setDipCourseName(request.getDipCourseName());

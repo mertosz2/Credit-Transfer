@@ -59,9 +59,6 @@ public class TransferCreditService {
         // Process the duplicated requests
         transferCreditResponseList.addAll(processDuplicateRequest(duplicatedRequests));
 
-        System.out.println("unique size = " + uniqueRequests.size());
-        System.out.println("duplicated size = " + duplicatedRequests.size() + "and " + duplicatedRequests);
-
 
         return transferCreditResponseList;
     }

@@ -16,4 +16,13 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
 
     @Query("select d from DiplomaCourse d where d.dipCourseId = :dipCourseId")
     DiplomaCourse findByDipCourseId(String dipCourseId);
+
+    @Query("select case when count(d) > 0 then true else false end from DiplomaCourse d where d.dipCourseId = :dipCourseId and d.dipCourseName = :dipCourseName")
+    boolean existsByDipCourseIdAndDipCourseName(String dipCourseId, String dipCourseName);
+
+    @Query("select case when count(d) > 0 then true else false end from DiplomaCourse d where d.dipCourseId = :dipCourseId")
+    boolean existsByDipCourseId(String dipCourseId);
+
+    @Query("select case when count(d) > 0 then true else false end from DiplomaCourse d where d.dipCourseName = :dipCourseName")
+    boolean existsByDipCourseName(String dipCourseName);
 }
