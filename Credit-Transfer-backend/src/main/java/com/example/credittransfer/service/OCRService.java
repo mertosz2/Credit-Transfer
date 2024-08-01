@@ -8,12 +8,19 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class OCRService {
+
+    private final DiplomaCourseService diplomaCourseService;
+
+    public OCRService(DiplomaCourseService diplomaCourseService) {
+        this.diplomaCourseService = diplomaCourseService;
+    }
 
     public List<String> getCourseId() throws IOException {
         Tesseract tesseract = new Tesseract();
@@ -29,7 +36,9 @@ public class OCRService {
                 TesseractException e) {
             e.printStackTrace();
         }
-        return filterData(text);
+        List<String> filter = filterData(text);
+
+        return Collections.singletonList(diplomaCourseService.validateDipCourseId(filter));
 
     }
 

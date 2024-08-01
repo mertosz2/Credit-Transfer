@@ -41,9 +41,25 @@ public class DiplomaCourseService {
         return new ResponseAPI(HttpStatus.OK, "create successfully");
     }
 
+    public ResponseAPI updateCourse(DiplomaCourseRequest request, Integer dipCourseId) {
+        if(diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId()))
+        {
+            throw new ExistByCourseIdException(request.getDipCourseId());
+        }
+        if(diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName()))
+        {
+            throw new ExistByCourseNameException(request.getDipCourseName());
+        }
+        DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(dipCourseId).orElseThrow();
+        diplomaCourse.setDipCourseId(request.getDipCourseId());
+        diplomaCourse.setDipCourseName(request.getDipCourseName());
+        diplomaCourse.setDipCredit(request.getDipCredit());
+        diplomaCourseRepository.save(diplomaCourse);
+        return new ResponseAPI(HttpStatus.OK, "update successfully");
+    }
+
     public List<DiplomaCourse> getByDipCourseIdList(List<String> dipCourseIdList) {
-        List<DiplomaCourse> diplomaCourseList = diplomaCourseRepository.findByDipCourseIdList(dipCourseIdList);
-        return diplomaCourseList;
+        return diplomaCourseRepository.findByDipCourseIdList(dipCourseIdList);
 
     }
 
