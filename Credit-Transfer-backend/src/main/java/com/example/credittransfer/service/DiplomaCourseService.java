@@ -38,19 +38,22 @@ public class DiplomaCourseService {
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
         diplomaCourseRepository.save(diplomaCourse);
-        return new ResponseAPI(HttpStatus.OK, "create successfully");
+        return new ResponseAPI(HttpStatus.CREATED, "create successfully");
     }
 
     public ResponseAPI updateCourse(DiplomaCourseRequest request, Integer dipCourseId) {
-        if(diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId()))
+
+        DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(dipCourseId).orElseThrow();
+        if(diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId())
+                && !Objects.equals(diplomaCourse.getDipCourseId(), request.getDipCourseId()))
         {
             throw new ExistByCourseIdException(request.getDipCourseId());
         }
-        if(diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName()))
+        if(diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName())
+                && !Objects.equals(diplomaCourse.getDipCourseName(), request.getDipCourseName()))
         {
             throw new ExistByCourseNameException(request.getDipCourseName());
         }
-        DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(dipCourseId).orElseThrow();
         diplomaCourse.setDipCourseId(request.getDipCourseId());
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());

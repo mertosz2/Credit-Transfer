@@ -58,6 +58,8 @@ public class TransferCreditService {
 
         // Process the duplicated requests
         transferCreditResponseList.addAll(processDuplicateRequest(duplicatedRequests));
+        transferCreditResponseList.sort(Comparator.comparing(TransferCreditResponse::getUniCourseId));
+
 
 
         return transferCreditResponseList;

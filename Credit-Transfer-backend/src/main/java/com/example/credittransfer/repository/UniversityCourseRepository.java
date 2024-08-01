@@ -16,4 +16,10 @@ public interface UniversityCourseRepository extends JpaRepository<UniversityCour
 
     @Query("select u.id as id, u.uniCourseId as value, concat(u.uniCourseId,' - ') as label from UniversityCourse u")
     List<DropDown> getUniversityCoursesDropDown();
+
+    @Query("select case when count(uc) > 0 then true else false end from UniversityCourse uc where uc.uniCourseId = :UniCourseId")
+    boolean existsByUniCourseId(String UniCourseId);
+
+    @Query("select case when count(uc) > 0 then true else false end from UniversityCourse uc where uc.uniCourseName = :UniCourseName")
+    boolean existsByUniCourseName(String UniCourseName);
 }
