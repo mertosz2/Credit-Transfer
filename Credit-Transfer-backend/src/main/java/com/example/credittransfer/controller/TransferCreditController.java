@@ -29,9 +29,14 @@ public class TransferCreditController {
         this.pdfGeneratorService = pdfGeneratorService;
     }
 
-    @GetMapping("")
+    @GetMapping("/testRe")
     public ResponseEntity<List<TransferCreditResponse>> getResult(@RequestBody List<TransferCreditRequest> transferCreditRequestList) {
         return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<TransferCreditResponse>> getAllTransferCourse() {
+        return ResponseEntity.status(OK).body(transferCreditService.getAllTransferCourse());
     }
 
     @GetMapping("/import")

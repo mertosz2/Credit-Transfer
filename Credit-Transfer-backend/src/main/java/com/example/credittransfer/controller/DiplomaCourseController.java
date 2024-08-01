@@ -24,12 +24,22 @@ public class DiplomaCourseController {
         this.diplomaCourseService = diplomaCourseService;
     }
 
+    @GetMapping("")
+    public ResponseEntity<List<DiplomaCourse>> getAllDipCourse() {
+        return ResponseEntity.status(OK).body(diplomaCourseService.getAllDipCourse());
+    }
+
+    @PutMapping("/{dipId}")
+    public ResponseEntity<ResponseAPI> updateDipCourse(@PathVariable Integer dipId, @RequestBody DiplomaCourseRequest request) {
+        return ResponseEntity.status(OK).body(diplomaCourseService.updateCourse(request, dipId));
+    }
+
     @PostMapping("")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody DiplomaCourseRequest diplomaCourseRequest) {
         return ResponseEntity.ok(diplomaCourseService.createCourse(diplomaCourseRequest));
     }
 
-    @GetMapping("")
+    @GetMapping("/byId")
     public ResponseEntity<List<DiplomaCourse>> getDiplomaDetailByIdList() {
         List<String> id = List.of("30000-9205", "30000-2003");
         return ResponseEntity.status(OK).body(diplomaCourseService.getByDipCourseIdList(id));

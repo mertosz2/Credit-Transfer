@@ -63,6 +63,9 @@ public class DiplomaCourseService {
 
     }
 
+    public List<DiplomaCourse> getAllDipCourse() {
+        return diplomaCourseRepository.findAll();
+    }
     public String validateDipCourseId(List<String> dipCourseIdList) {
         List<String> notFoundDipCourseId = dipCourseIdList.stream()
                 .filter(dipCourseId -> Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))

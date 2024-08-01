@@ -161,4 +161,11 @@ public class TransferCreditService {
                 .filter(TransferCreditResponse::isTransferable)
                 .toList();
     }
+
+    public List<TransferCreditResponse> getAllTransferCourse() {
+        List<String> dipCourseIdList = diplomaCourseRepository.findAll().stream().map(DiplomaCourse::getDipCourseId).toList();
+        List<TransferCreditRequest> requestList = mapToTransferCreditRequest(dipCourseIdList);
+        return getTransferableCourse(requestList);
+
+    }
 }

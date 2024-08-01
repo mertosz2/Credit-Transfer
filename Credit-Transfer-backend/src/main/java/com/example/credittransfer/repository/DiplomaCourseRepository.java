@@ -25,4 +25,6 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
 
     @Query("select case when count(d) > 0 then true else false end from DiplomaCourse d where d.dipCourseName = :dipCourseName")
     boolean existsByDipCourseName(String dipCourseName);
+
+
 }
