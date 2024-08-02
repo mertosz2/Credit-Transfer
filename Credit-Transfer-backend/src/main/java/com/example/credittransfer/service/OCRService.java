@@ -76,4 +76,20 @@ public class OCRService {
         multipartFile.transferTo(file);
         return file;
     }
+
+    public boolean isValidFileExtension(String fileName) {
+        String[] allowedExtensions = {".pdf", ".jpg", ".png"};
+        String fileExtension = "";
+        int dotIndex = fileName.lastIndexOf(".");
+        if(dotIndex > 0 && dotIndex < fileName.length() - 1){
+            fileExtension = fileName.substring(dotIndex + 1).toLowerCase();
+        }
+
+        for(String extension : allowedExtensions){
+            if(fileExtension.equals(extension)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

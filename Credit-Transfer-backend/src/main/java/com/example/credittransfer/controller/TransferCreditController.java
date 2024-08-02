@@ -2,6 +2,7 @@ package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
+import com.example.credittransfer.exception.FileExtensionNotMatchException;
 import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.PDFGeneratorService;
 import com.example.credittransfer.service.TransferCreditService;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Objects;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -50,7 +52,9 @@ public class TransferCreditController {
 
     @GetMapping("/testimp/")
     public ResponseEntity<String> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
-        //List<String> dipCourseIdList = ocrService.getCourseIdByImport(file);
+        if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
+            throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());
+        }
         File file = ocrService.convertFile(multipartFile);
         String fileName = file.getName();
 
