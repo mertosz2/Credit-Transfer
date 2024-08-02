@@ -2,15 +2,15 @@ package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
+import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.PDFGeneratorService;
 import com.example.credittransfer.service.TransferCreditService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -23,10 +23,12 @@ public class TransferCreditController {
 
     private final TransferCreditService transferCreditService;
     private final PDFGeneratorService pdfGeneratorService;
+    private final OCRService ocrService;
 
-    public TransferCreditController(TransferCreditService transferCreditService, PDFGeneratorService pdfGeneratorService) {
+    public TransferCreditController(TransferCreditService transferCreditService, PDFGeneratorService pdfGeneratorService, OCRService ocrService) {
         this.transferCreditService = transferCreditService;
         this.pdfGeneratorService = pdfGeneratorService;
+        this.ocrService = ocrService;
     }
 
     @GetMapping("/testRe")
@@ -44,6 +46,15 @@ public class TransferCreditController {
         List<String> mockId = List.of("30000-9205", "30000-1201", "30000-1207", "30000-9201", "30000-1401", "3221-1055");
         List<TransferCreditRequest> transferCreditRequestList = transferCreditService.mapToTransferCreditRequest(mockId);
         return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
+    }
+
+    @GetMapping("/testimp/")
+    public ResponseEntity<String> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
+        //List<String> dipCourseIdList = ocrService.getCourseIdByImport(file);
+        File file = ocrService.convertFile(multipartFile);
+        String fileName = file.getName();
+
+        return ResponseEntity.status(OK).body(fileName);
     }
 
     @GetMapping("/export-pdf")
@@ -82,12 +93,14 @@ public class TransferCreditController {
                 new TransferCreditRequest("30000-1101", 4),
                 new TransferCreditRequest("30000-9205", 4),
                 new TransferCreditRequest("30000-9201",2),
-                new TransferCreditRequest("30000-1401", 4));
-
-//        List<TransferCreditResponse> mockResponseList = transferCreditService.validateTransferableResponse(
-//                transferCreditService.getTransferableCourse(mockData));
+                new TransferCreditRequest("30000-1401", 4),
+                new TransferCreditRequest("31105-4820", 2.5),
+                new TransferCreditRequest("31105-4821", 2.5));
         List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
         transferCreditService.exportExcel(response, mockResponseList);
 
     }
+
+
+
 }

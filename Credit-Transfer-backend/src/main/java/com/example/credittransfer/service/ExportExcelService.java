@@ -2,7 +2,6 @@ package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.response.DipCourseResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
-
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ExportExcelService {
@@ -51,11 +49,9 @@ public class ExportExcelService {
         cellStyle.setWrapText(true);
         setBorder(cellStyle);
 
-
         int count = 3;
         for(String header : headerList) {
             createCell(row, count++, header, cellStyle);
-
         }
         for (int i = 3; i < headerList.size() + 3; i++) {
             sheet.autoSizeColumn(i);
@@ -63,6 +59,8 @@ public class ExportExcelService {
     }
 
     private void writeData(List<TransferCreditResponse> transferCreditResponseList) {
+        int totalDipCredit = 0;
+        int totalUniCredit = 0;
         CellStyle defaultStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeight(14);
@@ -89,6 +87,15 @@ public class ExportExcelService {
         numberMergeStyle.setWrapText(true);
         setBorder(numberMergeStyle);
 
+        CellStyle totalCreditStyle = workbook.createCellStyle();
+        totalCreditStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        totalCreditStyle.setAlignment(HorizontalAlignment.CENTER);
+        XSSFFont totalCreditFont = workbook.createFont();
+        totalCreditFont.setFontHeight(18);
+        totalCreditFont.setBold(true);
+        totalCreditStyle.setFont(totalCreditFont);
+        setBorder(totalCreditStyle);
+
         CellStyle style;
         int rowCount = 5;
 
@@ -103,8 +110,9 @@ public class ExportExcelService {
             int endRow = 0;
             int endColumn = 0;
 
-
+            totalUniCredit = totalUniCredit + response.getUniCredit();
             for (DipCourseResponse dipCourse : response.getDiplomaCourseList()) {
+                totalDipCredit = totalDipCredit + dipCourse.getDipCredit();
                 style = defaultStyle;
                 if (!firstRow) {
                     columnCount = 3;
@@ -143,7 +151,7 @@ public class ExportExcelService {
                 }
 
             }
-            if (dipCourseListSize > 1) {
+            if (dipCourseListSize > 1 ) {
                 mergeAndSetBorder(new CellRangeAddress(startRow, endRow, startColumn, endColumn), mergeStyle);
                 startColumn++;
                 endColumn++;
@@ -154,12 +162,17 @@ public class ExportExcelService {
             }
 
         }
+        Row lastRow = sheet.createRow(sheet.getLastRowNum() + 1);
+        lastRow.setHeightInPoints(40);
+        createCell(lastRow, 4, "รวม", totalCreditStyle);
+        createCell(lastRow, 6, totalDipCredit, totalCreditStyle);
+        createCell(lastRow, 8, "รวม", totalCreditStyle);
+        createCell(lastRow, 9, totalUniCredit, totalCreditStyle);
+
         for (int i = 3; i < 10; i++) {
             sheet.autoSizeColumn(i);
         }
-
     }
-
 
     public void exportDataToExcel(HttpServletResponse response, List<String> headerList, List<TransferCreditResponse> transferCreditResponseList) throws IOException {
         workbook = new XSSFWorkbook();

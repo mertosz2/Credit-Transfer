@@ -181,7 +181,7 @@ public class TransferCreditService {
     public void exportExcel(HttpServletResponse response, List<TransferCreditResponse> transferCreditResponseList) throws IOException {
         List<String> heaerList = List.of(
                 "รหัสวิชา\nCourse Code",
-                "วิชาที่ขอเทียบโอนจาก\nCourse transferred from",
+                "วิชาที่ขอเทียบโอน\nCourse transferred from",
                 "เกรด\nGrade",
                 "หน่วยกิต\nCredit",
                 "รหัสวิชา\nCourse Code",
