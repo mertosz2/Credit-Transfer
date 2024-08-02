@@ -68,6 +68,26 @@ public class TransferCreditController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("/exportExcel")
+    public void exportExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=credit-transfer.xlsx";
+        response.setHeader(headerKey, headerValue);
+        List<TransferCreditRequest> mockData = List.of(
+                new TransferCreditRequest("30001-1055", 4),
+                new TransferCreditRequest("30204-2004", 3),
+                new TransferCreditRequest("30000-1101", 4),
+                new TransferCreditRequest("30000-9205", 4),
+                new TransferCreditRequest("30000-9201",2),
+                new TransferCreditRequest("30000-1401", 4));
+
+//        List<TransferCreditResponse> mockResponseList = transferCreditService.validateTransferableResponse(
+//                transferCreditService.getTransferableCourse(mockData));
+        List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
+        transferCreditService.exportExcel(response, mockResponseList);
 
     }
 }

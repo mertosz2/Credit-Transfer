@@ -7,8 +7,10 @@ import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -16,10 +18,13 @@ public class TransferCreditService {
 
     private final DiplomaCourseRepository diplomaCourseRepository;
     private final UniversityCourseRepository universityCourseRepository;
+    private final ExportExcelService exportExcelService;
 
-    public TransferCreditService(DiplomaCourseRepository diplomaCourseRepository, UniversityCourseRepository universityCourseRepository) {
+
+    public TransferCreditService(DiplomaCourseRepository diplomaCourseRepository, UniversityCourseRepository universityCourseRepository, ExportExcelService exportExcelService) {
         this.diplomaCourseRepository = diplomaCourseRepository;
         this.universityCourseRepository = universityCourseRepository;
+        this.exportExcelService = exportExcelService;
     }
 
     public List<TransferCreditResponse> getTransferableCourse(List<TransferCreditRequest> transferCreditRequestList) {
@@ -159,9 +164,11 @@ public class TransferCreditService {
     }
 
     public List<TransferCreditResponse> validateTransferableResponse(List<TransferCreditResponse> transferCreditResponseList) {
-        return transferCreditResponseList.stream()
+        List<TransferCreditResponse> responseList = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(TransferCreditResponse::isTransferable)
-                .toList();
+                .toList());
+        responseList.sort(Comparator.comparing(TransferCreditResponse::getUniCourseId));
+        return responseList;
     }
 
     public List<TransferCreditResponse> getAllTransferCourse() {
@@ -169,5 +176,18 @@ public class TransferCreditService {
         List<TransferCreditRequest> requestList = mapToTransferCreditRequest(dipCourseIdList);
         return getTransferableCourse(requestList);
 
+    }
+
+    public void exportExcel(HttpServletResponse response, List<TransferCreditResponse> transferCreditResponseList) throws IOException {
+        List<String> heaerList = List.of(
+                "รหัสวิชา\nCourse Code",
+                "วิชาที่ขอเทียบโอนจาก\nCourse transferred from",
+                "เกรด\nGrade",
+                "หน่วยกิต\nCredit",
+                "รหัสวิชา\nCourse Code",
+                "วิชาที่เทียบโอนหน่วยกิตได้\nTransferred Course Equivalents",
+                "หน่วยกิต\nCredit"
+        );
+        exportExcelService.exportDataToExcel(response,heaerList, validateTransferableResponse(transferCreditResponseList));
     }
 }
