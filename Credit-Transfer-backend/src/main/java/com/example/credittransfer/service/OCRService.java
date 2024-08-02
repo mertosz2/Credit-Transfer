@@ -1,5 +1,6 @@
 package com.example.credittransfer.service;
 
+import com.example.credittransfer.exception.NotFoundCourseException;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.springframework.core.io.ClassPathResource;
@@ -54,6 +55,9 @@ public class OCRService {
             e.printStackTrace();
         }
         List<String> filter = filterData(text);
+        if(filter.isEmpty()) {
+            throw new NotFoundCourseException(file.getName());
+        }
 
         return Collections.singletonList(diplomaCourseService.validateDipCourseId(filter));
 

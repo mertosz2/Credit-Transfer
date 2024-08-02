@@ -28,5 +28,14 @@ public class GlobalHandleException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
     }
 
+    @ExceptionHandler(NotFoundCourseException.class)
+    public ResponseEntity<Object> handleNotFoundCourseException(NotFoundCourseException ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
+
 
 }
