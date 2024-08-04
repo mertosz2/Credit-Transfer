@@ -9,14 +9,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class OCRService {
+    private static final String UPLOAD_TEMP_DIR = "C:/uploads/temp/";
 
     private final DiplomaCourseService diplomaCourseService;
 
@@ -43,10 +48,10 @@ public class OCRService {
         return Collections.singletonList(diplomaCourseService.validateDipCourseId(filter));
 
     }
-    public List<String> getCourseIdByImport(MultipartFile multipartFile) throws IOException {
+
+    public List<String> getCourseIdByImport(File file) throws IOException {
         Tesseract tesseract = new Tesseract();
-        File file = convertFile(multipartFile);
-        String text ="";
+        String text = "";
         try {
             tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
             text = tesseract.doOCR(file);
@@ -55,11 +60,12 @@ public class OCRService {
             e.printStackTrace();
         }
         List<String> filter = filterData(text);
+
         if(filter.isEmpty()) {
             throw new NotFoundCourseException(file.getName());
         }
 
-        return Collections.singletonList(diplomaCourseService.validateDipCourseId(filter));
+        return diplomaCourseService.getExistDipCourseId(filter);
 
     }
 
@@ -76,13 +82,20 @@ public class OCRService {
     }
 
     public File convertFile(MultipartFile multipartFile) throws IOException {
-        File file = new File(System.getProperty("java.io.tmpdir") + "/" + multipartFile.getOriginalFilename());
+        Path tempDirPath = Paths.get(UPLOAD_TEMP_DIR);
+        if (!Files.exists(tempDirPath)) {
+            Files.createDirectories(tempDirPath);
+        }
+        String fileName = Objects.requireNonNull(multipartFile.getOriginalFilename());
+        Path filePath = tempDirPath.resolve(fileName);
+        File file = filePath.toFile();
         multipartFile.transferTo(file);
+
         return file;
     }
 
     public boolean isValidFileExtension(String fileName) {
-        String[] allowedExtensions = {".pdf", ".jpg", ".png"};
+        String[] allowedExtensions = {"pdf", "jpg", "png"};
         String fileExtension = "";
         int dotIndex = fileName.lastIndexOf(".");
         if(dotIndex > 0 && dotIndex < fileName.length() - 1){

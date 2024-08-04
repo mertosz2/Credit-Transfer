@@ -65,10 +65,16 @@ public class DiplomaCourseService {
         return diplomaCourseRepository.findByDipCourseIdList(dipCourseIdList);
 
     }
-
     public List<DiplomaCourse> getAllDipCourse() {
         return diplomaCourseRepository.findAll();
     }
+
+    public List<String> getExistDipCourseId(List<String> dipCourseIdList) {
+        return dipCourseIdList.stream()
+                .filter(dipCourseId -> !Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))
+                .toList();
+    }
+
     public String validateDipCourseId(List<String> dipCourseIdList) {
         List<String> notFoundDipCourseId = dipCourseIdList.stream()
                 .filter(dipCourseId -> Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))

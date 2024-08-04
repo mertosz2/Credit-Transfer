@@ -43,47 +43,32 @@ public class TransferCreditController {
         return ResponseEntity.status(OK).body(transferCreditService.getAllTransferCourse());
     }
 
-    @GetMapping("/import")
-    public ResponseEntity<List<TransferCreditResponse>> importTranscript() {
-        List<String> mockId = List.of("30000-9205", "30000-1201", "30000-1207", "30000-9201", "30000-1401", "3221-1055");
-        List<TransferCreditRequest> transferCreditRequestList = transferCreditService.mapToTransferCreditRequest(mockId);
-        return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
-    }
 
     @GetMapping("/testimp/")
-    public ResponseEntity<String> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<List<TransferCreditResponse>> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
         if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
             throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());
         }
         File file = ocrService.convertFile(multipartFile);
-        String fileName = file.getName();
+        List<String> dipCourseIdList = ocrService.getCourseIdByImport(file);
+        System.out.println("dip id = " + dipCourseIdList);
+        file.delete();
+        List<TransferCreditRequest> transferCreditRequestList = transferCreditService.mapToTransferCreditRequest(dipCourseIdList);
 
-        return ResponseEntity.status(OK).body(fileName);
+        return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
+    }
+    @GetMapping("/testimpt/")
+    public ResponseEntity<List<String>> testImportTranscrip2t(@RequestParam("file") MultipartFile multipartFile) throws IOException {
+//        if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
+//            throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());
+//        }
+        File file = ocrService.convertFile(multipartFile);
+        List<String> dipCourseIdList = ocrService.getCourseIdByImport(file);
+        file.delete();
+
+        return ResponseEntity.status(OK).body(dipCourseIdList);
     }
 
-    @GetMapping("/export-pdf")
-    public void exportPdf(HttpServletResponse response){
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=credit-transfer.pdf");
-        List<TransferCreditRequest> mockData = List.of(
-                new TransferCreditRequest("30001-1055", 4),
-                new TransferCreditRequest("30204-2004", 3),
-                new TransferCreditRequest("30000-1101", 4),
-                new TransferCreditRequest("30000-9205", 4),
-                new TransferCreditRequest("30000-9201",2),
-                new TransferCreditRequest("30000-1401", 4));
-
-//        List<TransferCreditResponse> mockResponseList = transferCreditService.validateTransferableResponse(
-//                transferCreditService.getTransferableCourse(mockData));
-        List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
-        System.out.println(mockResponseList);
-        try (OutputStream os = response.getOutputStream()) {
-            pdfGeneratorService.createPdf(mockResponseList, os);
-            os.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @GetMapping("/exportExcel")
     public void exportExcel(HttpServletResponse response) throws IOException {
@@ -97,9 +82,9 @@ public class TransferCreditController {
                 new TransferCreditRequest("30000-1101", 4),
                 new TransferCreditRequest("30000-9205", 4),
                 new TransferCreditRequest("30000-9201",2),
-                new TransferCreditRequest("30000-1401", 4),
-                new TransferCreditRequest("31105-4820", 2.5),
-                new TransferCreditRequest("31105-4821", 2.5));
+                new TransferCreditRequest("30000-1401", 4));
+//                new TransferCreditRequest("31105-4820", 2.5),
+//                new TransferCreditRequest("31105-4821", 2.5));
         List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
         transferCreditService.exportExcel(response, mockResponseList);
 
