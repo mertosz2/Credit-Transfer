@@ -49,6 +49,12 @@ public class DiplomaCourseController {
         return ResponseEntity.status(OK).body(diplomaCourseService.findByDipId(dipId));
     }
 
+    @GetMapping("/")
+    public ResponseEntity<DiplomaCourse> findByDipCourseId(@RequestParam String dipCourseId) {
+        return ResponseEntity.status(OK).body(diplomaCourseService.findByDipId(dipCourseId));
+
+    }
+
 
 //    @GetMapping("/test")
 //    public ResponseEntity<String> testvalidate(){
