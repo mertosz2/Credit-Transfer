@@ -65,10 +65,13 @@ public class OCRService {
         if(filter.isEmpty()) {
             throw new NotFoundCourseException(file.getName());
         }
-
+        List<String> founded = diplomaCourseService.getExistDipCourseId(filter);
+        List<String> notFound = diplomaCourseService.validateDipCourseId(filter);
         DipCourseIdResponse dipCourseIdResponse = new DipCourseIdResponse();
-        dipCourseIdResponse.setFoundedDipCourseIdList(diplomaCourseService.getExistDipCourseId(filter));
-        dipCourseIdResponse.setNotFoundedDipCourseIdList(diplomaCourseService.validateDipCourseId(filter));
+        dipCourseIdResponse.setFoundedDipCourseIdList(founded);
+        dipCourseIdResponse.setTotalFounded(founded.size());
+        dipCourseIdResponse.setNotFoundedDipCourseIdList(notFound);
+        dipCourseIdResponse.setTotalNotFounded(notFound.size());
         dipCourseIdResponse.setTotal(filter.size());
 
         return dipCourseIdResponse;

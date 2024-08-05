@@ -55,10 +55,4 @@ public class DiplomaCourseController {
 
     }
 
-
-//    @GetMapping("/test")
-//    public ResponseEntity<String> testvalidate(){
-//        List<String> mockId = List.of("30000-9205", "30000-1201", "30000-1267", "30000-9221", "30000-1401", "3221-1895");
-//        return ResponseEntity.status(OK).body(diplomaCourseService.validateDipCourseId(mockId));
-//    }
 }

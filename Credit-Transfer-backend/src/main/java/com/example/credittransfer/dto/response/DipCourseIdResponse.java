@@ -13,7 +13,9 @@ import java.util.List;
 public class DipCourseIdResponse {
 
     private List<String> foundedDipCourseIdList;
+    private int totalFounded;
     private List<String> notFoundedDipCourseIdList;
+    private int totalNotFounded;
     private List<TransferCreditResponse> transferCreditResponseList;
     private int total;
 }
