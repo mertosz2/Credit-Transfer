@@ -3,7 +3,7 @@ package com.example.credittransfer.service;
 import com.example.credittransfer.dto.request.LoginRequest;
 import com.example.credittransfer.entity.Users;
 import com.example.credittransfer.repository.UsersRepository;
-import com.example.credittransfer.tempf.JwtService;
+import com.example.credittransfer.config.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;

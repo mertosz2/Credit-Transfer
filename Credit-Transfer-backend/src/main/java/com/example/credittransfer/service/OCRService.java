@@ -65,6 +65,7 @@ public class OCRService {
         if(filter.isEmpty()) {
             throw new NotFoundCourseException(file.getName());
         }
+
         DipCourseIdResponse dipCourseIdResponse = new DipCourseIdResponse();
         dipCourseIdResponse.setFoundedDipCourseIdList(diplomaCourseService.getExistDipCourseId(filter));
         dipCourseIdResponse.setNotFoundedDipCourseIdList(diplomaCourseService.validateDipCourseId(filter));

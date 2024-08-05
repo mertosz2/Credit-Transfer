@@ -100,9 +100,8 @@ public class DiplomaCourseService {
         return diplomaCourseRepository.findByDipId(dipId).orElseThrow();
     }
 
-    public DiplomaCourse findByDipId(String dipCourseId) {
-        return diplomaCourseRepository.findByDipCourseId(dipCourseId).orElseThrow(
-                () -> new NotFoundDiplomaCourseException(dipCourseId)
-        );
+    public DiplomaCourse findByDipCourseId(String dipCourseId) {
+        return diplomaCourseRepository.findByDipCourseId(dipCourseId);
+
     }
 }

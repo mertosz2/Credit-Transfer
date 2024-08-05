@@ -26,24 +26,15 @@ import static org.springframework.http.HttpStatus.OK;
 public class UniversityCourseController {
 
     private final UniversityCourseService universityCourseService;
-    private final OCRService ocrService;
-    private final UsersRepository usersRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final RolesRepository rolesRepository;
 
-    public UniversityCourseController(UniversityCourseService universityCourseService, OCRService ocrService, UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder, RolesRepository rolesRepository) {
+    public UniversityCourseController(UniversityCourseService universityCourseService) {
         this.universityCourseService = universityCourseService;
-        this.ocrService = ocrService;
-        this.usersRepository = usersRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.rolesRepository = rolesRepository;
     }
 
     @GetMapping("")
     public ResponseEntity<List<UniversityCourse>> getAll(){
         return ResponseEntity.status(OK).body(universityCourseService.findAll());
     }
-
 
     @PostMapping("")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody UniversityCourseRequest universityCourseRequest) {

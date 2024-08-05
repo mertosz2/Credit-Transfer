@@ -1,4 +1,4 @@
-package com.example.credittransfer.tempf;
+package com.example.credittransfer.config;
 
 import com.example.credittransfer.service.AuthService;
 import jakarta.servlet.FilterChain;

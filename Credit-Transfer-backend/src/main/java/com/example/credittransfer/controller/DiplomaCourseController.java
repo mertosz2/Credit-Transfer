@@ -51,7 +51,7 @@ public class DiplomaCourseController {
 
     @GetMapping("/")
     public ResponseEntity<DiplomaCourse> findByDipCourseId(@RequestParam String dipCourseId) {
-        return ResponseEntity.status(OK).body(diplomaCourseService.findByDipId(dipCourseId));
+        return ResponseEntity.status(OK).body(diplomaCourseService.findByDipCourseId(dipCourseId));
 
     }
 

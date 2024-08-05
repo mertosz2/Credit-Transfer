@@ -1,4 +1,4 @@
-package com.example.credittransfer.tempf;
+package com.example.credittransfer.config;
 
 import com.example.credittransfer.service.AuthService;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +30,6 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/login").permitAll()
-                        .requestMatchers("/api/dip").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(authService)

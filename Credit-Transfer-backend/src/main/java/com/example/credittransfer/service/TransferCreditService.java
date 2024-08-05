@@ -34,7 +34,7 @@ public class TransferCreditService {
 
         // Iterate through each TransferCreditRequest
         for (TransferCreditRequest request : transferCreditRequestList) {
-            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId()).orElseThrow();
+            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
             Integer uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
@@ -72,7 +72,7 @@ public class TransferCreditService {
     private TransferCreditResponse processRequest(TransferCreditRequest request) {
         List<DipCourseResponse> diplomaCourseList = new ArrayList<>();
         TransferCreditResponse transferCreditResponse = new TransferCreditResponse();
-        DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId()).orElseThrow();
+        DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
         diplomaCourseList.add(mapToDipCourseResponse(diplomaCourse, request.getDipGrade()));
 
         if (diplomaCourse.getDipCredit() < diplomaCourse.getUniversityCourse().getUniCredit() || request.getDipGrade() < 2) {
@@ -96,7 +96,7 @@ public class TransferCreditService {
         Map<Integer, List<TransferCreditRequest>> courseMap = new HashMap<>();
 
         for (TransferCreditRequest request : transferCreditRequestList) {
-            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId()).orElseThrow();
+            DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
             int uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
@@ -115,7 +115,7 @@ public class TransferCreditService {
             int uniCredit = 0;
 
             for (TransferCreditRequest request : requests) {
-                DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId()).orElseThrow();
+                DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
                 diplomaCourseList.add(mapToDipCourseResponse(diplomaCourse, request.getDipGrade()));
                 if (request.getDipGrade() >= 2) {
                     totalDipCredit += diplomaCourse.getDipCredit();
