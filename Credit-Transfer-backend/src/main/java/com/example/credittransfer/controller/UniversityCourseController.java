@@ -3,11 +3,15 @@ package com.example.credittransfer.controller;
 import com.example.credittransfer.dto.request.UniversityCourseRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.entity.UniversityCourse;
+import com.example.credittransfer.entity.Users;
 import com.example.credittransfer.projection.DropDown;
+import com.example.credittransfer.repository.RolesRepository;
+import com.example.credittransfer.repository.UsersRepository;
 import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.UniversityCourseService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +27,16 @@ public class UniversityCourseController {
 
     private final UniversityCourseService universityCourseService;
     private final OCRService ocrService;
+    private final UsersRepository usersRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final RolesRepository rolesRepository;
 
-    public UniversityCourseController(UniversityCourseService universityCourseService, OCRService ocrService) {
+    public UniversityCourseController(UniversityCourseService universityCourseService, OCRService ocrService, UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder, RolesRepository rolesRepository) {
         this.universityCourseService = universityCourseService;
         this.ocrService = ocrService;
+        this.usersRepository = usersRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.rolesRepository = rolesRepository;
     }
 
     @GetMapping("")
@@ -59,6 +69,5 @@ public class UniversityCourseController {
     public ResponseEntity<List<DropDown>> getUniCourseDropdown(){
         return ResponseEntity.status(OK).body(universityCourseService.getUniCourseDropdown());
     }
-
 
 }

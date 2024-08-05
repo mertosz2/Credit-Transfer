@@ -3,7 +3,6 @@ package com.example.credittransfer.service;
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.entity.DiplomaCourse;
-import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.exception.ExistByCourseIdException;
 import com.example.credittransfer.exception.ExistByCourseNameException;
 import com.example.credittransfer.exception.NotFoundDiplomaCourseException;

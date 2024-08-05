@@ -1,6 +1,5 @@
 package com.example.credittransfer.service;
 
-import com.example.credittransfer.dto.request.DiplomaCourseRequest;
 import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.DipCourseResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
