@@ -22,6 +22,8 @@ public class DiplomaCourse {
 
     private int dipCredit;
 
+    private boolean isActive;
+
     @ManyToOne
     @JoinColumn(name = "universityCourse_id")
     @JsonIgnore

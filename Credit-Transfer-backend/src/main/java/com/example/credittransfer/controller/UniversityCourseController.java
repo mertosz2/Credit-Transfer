@@ -3,6 +3,7 @@ package com.example.credittransfer.controller;
 import com.example.credittransfer.dto.request.UniversityCourseRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.entity.UniversityCourse;
+import com.example.credittransfer.projection.DropDown;
 import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.UniversityCourseService;
 import jakarta.validation.Valid;
@@ -16,7 +17,7 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/uni")
 @Validated
 public class UniversityCourseController {
 
@@ -29,18 +30,34 @@ public class UniversityCourseController {
     }
 
     @GetMapping("")
-    public List<UniversityCourse> getAll(){
-        return universityCourseService.findAll();
+    public ResponseEntity<List<UniversityCourse>> getAll(){
+        return ResponseEntity.status(OK).body(universityCourseService.findAll());
     }
 
-    @GetMapping("/get")
-    public List<String> getId() throws IOException {
-        return ocrService.getCourseId();
-    }
 
     @PostMapping("")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody UniversityCourseRequest universityCourseRequest) {
         return ResponseEntity.status(OK).body(universityCourseService.createCourse(universityCourseRequest));
+    }
+
+    @PutMapping("/{uniId}")
+    public ResponseEntity<ResponseAPI> updateCourse(@PathVariable Integer uniId, @Valid @RequestBody UniversityCourseRequest universityCourseRequest) {
+        return ResponseEntity.status(OK).body(universityCourseService.updateCourse(universityCourseRequest, uniId));
+    }
+
+    @DeleteMapping("/{uniId}")
+    public ResponseEntity<ResponseAPI> deleteCourse(@PathVariable Integer uniId) {
+        return ResponseEntity.status(OK).body(universityCourseService.deleteUniCourse(uniId));
+    }
+
+    @GetMapping("/{uniId}")
+    public ResponseEntity<UniversityCourse> getCourseByUniId(@PathVariable Integer uniId) {
+        return ResponseEntity.status(OK).body(universityCourseService.findByUniId(uniId));
+    }
+
+    @GetMapping("/uniDropdown")
+    public ResponseEntity<List<DropDown>> getUniCourseDropdown(){
+        return ResponseEntity.status(OK).body(universityCourseService.getUniCourseDropdown());
     }
 
 
