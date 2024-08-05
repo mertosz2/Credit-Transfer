@@ -79,16 +79,11 @@ public class DiplomaCourseService {
                 .toList();
     }
 
-    public String validateDipCourseId(List<String> dipCourseIdList) {
-        List<String> notFoundDipCourseId = dipCourseIdList.stream()
+    public List<String> validateDipCourseId(List<String> dipCourseIdList) {
+
+        return dipCourseIdList.stream()
                 .filter(dipCourseId -> Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))
                 .toList();
-
-        if (notFoundDipCourseId.isEmpty()) {
-            return "success";
-        }
-
-        return "วิชาที่ยังไม่ลงทะเบียนกับระบบ : " + String.join(", ", notFoundDipCourseId);
     }
     @Transactional
     public ResponseAPI deleteDipCourse(Integer dipId) {
