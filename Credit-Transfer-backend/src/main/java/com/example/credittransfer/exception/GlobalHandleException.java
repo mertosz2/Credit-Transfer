@@ -37,5 +37,33 @@ public class GlobalHandleException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
     }
 
+    @ExceptionHandler(ExistByCourseIdException.class)
+    public ResponseEntity<Object> handleExistByCourseIdException(ExistByCourseIdException ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
+
+    @ExceptionHandler(ExistByCourseNameException.class)
+    public ResponseEntity<Object> handleExistByCourseNameException(ExistByCourseNameException ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
+
+    @ExceptionHandler(NotFoundDiplomaCourseException.class)
+    public ResponseEntity<Object> handleNotFoundDiplomaCourseException(NotFoundDiplomaCourseException ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
+
+
 
 }

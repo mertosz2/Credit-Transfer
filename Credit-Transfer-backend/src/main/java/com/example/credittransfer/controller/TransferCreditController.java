@@ -1,6 +1,7 @@
 package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.TransferCreditRequest;
+import com.example.credittransfer.dto.response.DipCourseIdResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.exception.FileExtensionNotMatchException;
 import com.example.credittransfer.service.OCRService;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,29 +47,31 @@ public class TransferCreditController {
 
 
     @GetMapping("/testimp/")
-    public ResponseEntity<List<TransferCreditResponse>> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<DipCourseIdResponse> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
         if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
             throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());
         }
         File file = ocrService.convertFile(multipartFile);
-        List<String> dipCourseIdList = ocrService.getCourseIdByImport(file);
+        DipCourseIdResponse dipCourseIdList = ocrService.getCourseIdByImport(file);
         System.out.println("dip id = " + dipCourseIdList);
         file.delete();
-        List<TransferCreditRequest> transferCreditRequestList = transferCreditService.mapToTransferCreditRequest(dipCourseIdList);
-
-        return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
-    }
-    @GetMapping("/testimpt/")
-    public ResponseEntity<List<String>> testImportTranscrip2t(@RequestParam("file") MultipartFile multipartFile) throws IOException {
-//        if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
-//            throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());
-//        }
-        File file = ocrService.convertFile(multipartFile);
-        List<String> dipCourseIdList = ocrService.getCourseIdByImport(file);
-        file.delete();
+        List<TransferCreditRequest> transferCreditRequestList = transferCreditService.mapToTransferCreditRequest(dipCourseIdList.getFoundedDipCourseIdList());
+        List<TransferCreditResponse> transferCreditResponseList = transferCreditService.getTransferableCourse(transferCreditRequestList);
+        dipCourseIdList.setTransferCreditResponseList(transferCreditResponseList);
 
         return ResponseEntity.status(OK).body(dipCourseIdList);
     }
+//    @GetMapping("/testimpt/")
+//    public ResponseEntity<List<String>> testImportTranscrip2t(@RequestParam("file") MultipartFile multipartFile) throws IOException {
+////        if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
+////            throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());
+////        }
+//        File file = ocrService.convertFile(multipartFile);
+//        List<String> dipCourseIdList = ocrService.getCourseIdByImport(file);
+//        file.delete();
+//
+//        return ResponseEntity.status(OK).body(dipCourseIdList);
+//    }
 
 
     @GetMapping("/exportExcel")

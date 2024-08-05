@@ -5,13 +5,16 @@ import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.exception.ExistByCourseIdException;
 import com.example.credittransfer.exception.ExistByCourseNameException;
+import com.example.credittransfer.exception.NotFoundDiplomaCourseException;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class DiplomaCourseService {
@@ -37,6 +40,7 @@ public class DiplomaCourseService {
         diplomaCourse.setDipCourseId(request.getDipCourseId());
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
+        diplomaCourse.setActive(true);
         diplomaCourseRepository.save(diplomaCourse);
         return new ResponseAPI(HttpStatus.CREATED, "create successfully");
     }
@@ -75,15 +79,30 @@ public class DiplomaCourseService {
                 .toList();
     }
 
-    public String validateDipCourseId(List<String> dipCourseIdList) {
-        List<String> notFoundDipCourseId = dipCourseIdList.stream()
+    public List<String> validateDipCourseId(List<String> dipCourseIdList) {
+
+        return dipCourseIdList.stream()
                 .filter(dipCourseId -> Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))
                 .toList();
-
-        if (notFoundDipCourseId.isEmpty()) {
-            return "success";
+    }
+    @Transactional
+    public ResponseAPI deleteDipCourse(Integer dipId) {
+        Optional<DiplomaCourse> diplomaCourse = diplomaCourseRepository.findByDipId(dipId);
+        if(diplomaCourse.isPresent()){
+            diplomaCourseRepository.deleteByDipId(diplomaCourse.get().getId());
+            return new ResponseAPI(HttpStatus.OK, "delete course successfully");
+        } else {
+            return new ResponseAPI(HttpStatus.BAD_REQUEST, "course not found with given id: " + dipId);
         }
+    }
 
-        return "วิชาที่ยังไม่ลงทะเบียนกับระบบ : " + String.join(", ", notFoundDipCourseId);
+    public DiplomaCourse findByDipId(Integer dipId) {
+        return diplomaCourseRepository.findByDipId(dipId).orElseThrow();
+    }
+
+    public DiplomaCourse findByDipId(String dipCourseId) {
+        return diplomaCourseRepository.findByDipCourseId(dipCourseId).orElseThrow(
+                () -> new NotFoundDiplomaCourseException(dipCourseId)
+        );
     }
 }

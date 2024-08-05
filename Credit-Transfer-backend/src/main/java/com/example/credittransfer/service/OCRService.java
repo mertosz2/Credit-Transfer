@@ -1,5 +1,6 @@
 package com.example.credittransfer.service;
 
+import com.example.credittransfer.dto.response.DipCourseIdResponse;
 import com.example.credittransfer.exception.NotFoundCourseException;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
@@ -29,27 +30,27 @@ public class OCRService {
         this.diplomaCourseService = diplomaCourseService;
     }
 
-    public List<String> getCourseId() throws IOException {
-        Tesseract tesseract = new Tesseract();
-        String fileName = "ใบเกรด 2.pdf";
-        File pdfFile = new ClassPathResource("templates/" + fileName).getFile();
+//    public List<String> getCourseId() throws IOException {
+//        Tesseract tesseract = new Tesseract();
+//        String fileName = "ใบเกรด 2.pdf";
+//        File pdfFile = new ClassPathResource("templates/" + fileName).getFile();
+//
+//        File file = new ClassPathResource("templates/" + fileName).getFile();
+//        String text ="";
+//        try {
+//            tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
+//            text = tesseract.doOCR(file);
+//        } catch (
+//                TesseractException e) {
+//            e.printStackTrace();
+//        }
+//        List<String> filter = filterData(text);
+//
+//        return Collections.singletonList(diplomaCourseService.validateDipCourseId(filter));
+//
+//    }
 
-        File file = new ClassPathResource("templates/" + fileName).getFile();
-        String text ="";
-        try {
-            tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
-            text = tesseract.doOCR(file);
-        } catch (
-                TesseractException e) {
-            e.printStackTrace();
-        }
-        List<String> filter = filterData(text);
-
-        return Collections.singletonList(diplomaCourseService.validateDipCourseId(filter));
-
-    }
-
-    public List<String> getCourseIdByImport(File file) throws IOException {
+    public DipCourseIdResponse getCourseIdByImport(File file) throws IOException {
         Tesseract tesseract = new Tesseract();
         String text = "";
         try {
@@ -64,8 +65,12 @@ public class OCRService {
         if(filter.isEmpty()) {
             throw new NotFoundCourseException(file.getName());
         }
+        DipCourseIdResponse dipCourseIdResponse = new DipCourseIdResponse();
+        dipCourseIdResponse.setFoundedDipCourseIdList(diplomaCourseService.getExistDipCourseId(filter));
+        dipCourseIdResponse.setNotFoundedDipCourseIdList(diplomaCourseService.validateDipCourseId(filter));
+        dipCourseIdResponse.setTotal(filter.size());
 
-        return diplomaCourseService.getExistDipCourseId(filter);
+        return dipCourseIdResponse;
 
     }
 

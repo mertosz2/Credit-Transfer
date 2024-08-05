@@ -42,7 +42,7 @@ public class PDFGeneratorService {
 
 
             table.addCell(new Paragraph("รหัสวิชา \nCourse Code", font));
-            table.addCell(new Paragraph("วิชาที่ขอเทียบโอนจาก \nCourse transferred from\n สถานบัน (institute)…………………………\n คณะ (School of)…………………………", font));
+            table.addCell(new Paragraph("วิชาที่ขอเทียบโอนจาก \nCourse transferred from\n สถานบัน (institute)\n คณะ (School of)", font));
             table.addCell(new Paragraph("เกรด \nGrade", font));
             table.addCell(new Paragraph("หน่วยกิต \nCredit", font));
             table.addCell(new Paragraph("รหัสวิชา \nCourse Code", font));

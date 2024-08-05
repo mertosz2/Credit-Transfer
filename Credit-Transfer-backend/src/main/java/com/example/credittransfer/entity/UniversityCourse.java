@@ -21,4 +21,6 @@ public class UniversityCourse {
 
     private int uniCredit;
 
+    private boolean isActive;
+
 }

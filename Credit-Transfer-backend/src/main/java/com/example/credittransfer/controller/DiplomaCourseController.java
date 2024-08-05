@@ -36,14 +36,25 @@ public class DiplomaCourseController {
 
     @PostMapping("")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody DiplomaCourseRequest diplomaCourseRequest) {
-        return ResponseEntity.ok(diplomaCourseService.createCourse(diplomaCourseRequest));
+        return ResponseEntity.status(OK).body(diplomaCourseService.createCourse(diplomaCourseRequest));
     }
 
-    @GetMapping("/byId")
-    public ResponseEntity<List<DiplomaCourse>> getDiplomaDetailByIdList() {
-        List<String> id = List.of("30000-9205", "30000-2003");
-        return ResponseEntity.status(OK).body(diplomaCourseService.getByDipCourseIdList(id));
+    @DeleteMapping("/{dipId}")
+    public ResponseEntity<ResponseAPI> deleteDipCourse(@PathVariable Integer dipId) {
+        return ResponseEntity.status(OK).body(diplomaCourseService.deleteDipCourse(dipId));
     }
+
+    @GetMapping("/{dipId}")
+    public ResponseEntity<DiplomaCourse> findByDipId(@PathVariable Integer dipId) {
+        return ResponseEntity.status(OK).body(diplomaCourseService.findByDipId(dipId));
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<DiplomaCourse> findByDipCourseId(@RequestParam String dipCourseId) {
+        return ResponseEntity.status(OK).body(diplomaCourseService.findByDipId(dipCourseId));
+
+    }
+
 
 //    @GetMapping("/test")
 //    public ResponseEntity<String> testvalidate(){
