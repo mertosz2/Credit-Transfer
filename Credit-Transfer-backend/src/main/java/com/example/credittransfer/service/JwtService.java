@@ -1,4 +1,4 @@
-package com.example.credittransfer.config;
+package com.example.credittransfer.service;
 
 import com.example.credittransfer.entity.UserSecurity;
 import com.example.credittransfer.entity.Users;

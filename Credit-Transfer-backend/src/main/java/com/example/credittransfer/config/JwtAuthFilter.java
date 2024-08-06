@@ -1,6 +1,7 @@
 package com.example.credittransfer.config;
 
 import com.example.credittransfer.service.AuthService;
+import com.example.credittransfer.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

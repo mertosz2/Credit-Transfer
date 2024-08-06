@@ -3,7 +3,6 @@ package com.example.credittransfer.service;
 import com.example.credittransfer.entity.UserSecurity;
 import com.example.credittransfer.entity.Users;
 import com.example.credittransfer.repository.UsersRepository;
-import com.example.credittransfer.config.JwtService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
