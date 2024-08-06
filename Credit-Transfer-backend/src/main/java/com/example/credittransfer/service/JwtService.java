@@ -73,7 +73,7 @@ public class JwtService {
         return createToken(claims, users.getUsername());
     }
 
-    List<GrantedAuthority> getAuthorities(String token) {
+    public List<GrantedAuthority> getAuthorities(String token) {
         List<String> grantedAuthorities = extractClaims(token, claims -> claims.get("role", List.class));
         return  grantedAuthorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
