@@ -80,7 +80,6 @@ public class DiplomaCourseService {
     }
 
     public List<String> validateDipCourseId(List<String> dipCourseIdList) {
-
         return dipCourseIdList.stream()
                 .filter(dipCourseId -> Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))
                 .toList();
@@ -101,7 +100,11 @@ public class DiplomaCourseService {
     }
 
     public DiplomaCourse findByDipCourseId(String dipCourseId) {
-        return diplomaCourseRepository.findByDipCourseId(dipCourseId);
+        DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(dipCourseId);
+        if(Objects.isNull(diplomaCourse)) {
+            throw new NotFoundDiplomaCourseException(dipCourseId);
+        }
+        return diplomaCourse;
 
     }
 }

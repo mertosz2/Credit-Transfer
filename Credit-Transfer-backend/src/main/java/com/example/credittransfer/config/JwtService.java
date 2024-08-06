@@ -17,11 +17,14 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
+
 
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "asdadsada)(!*$&(@&(@SJADKSDKN*#HRasdasdasd";
+    @Value("${SECRET_KEY}")
+    private String SECRET_KEY;
 
     public Claims extractAllClaims(String token) {
         return (Claims) Jwts.parserBuilder().setSigningKey(SECRET_KEY.getBytes()).build().parse(token).getBody();
