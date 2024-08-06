@@ -6,6 +6,7 @@ import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.exception.ExistByCourseIdException;
 import com.example.credittransfer.exception.ExistByCourseNameException;
 import com.example.credittransfer.exception.NotFoundDiplomaCourseException;
+import com.example.credittransfer.exception.NotFoundUniversityCourseException;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
 import jakarta.transaction.Transactional;
@@ -41,7 +42,9 @@ public class DiplomaCourseService {
         diplomaCourse.setDipCourseId(request.getDipCourseId());
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
-        diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow());
+        diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow(
+                NotFoundUniversityCourseException::new
+        ));
         diplomaCourse.setActive(true);
         diplomaCourseRepository.save(diplomaCourse);
         return new ResponseAPI(HttpStatus.CREATED, "create successfully");
@@ -63,7 +66,9 @@ public class DiplomaCourseService {
         diplomaCourse.setDipCourseId(request.getDipCourseId());
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
-        diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow());
+        diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow(
+                NotFoundUniversityCourseException::new
+        ));
         diplomaCourseRepository.save(diplomaCourse);
         return new ResponseAPI(HttpStatus.OK, "update successfully");
     }

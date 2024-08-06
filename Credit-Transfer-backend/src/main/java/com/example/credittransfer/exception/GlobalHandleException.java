@@ -1,6 +1,7 @@
 package com.example.credittransfer.exception;
 
 import com.example.credittransfer.dto.response.ResponseAPI;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
@@ -64,6 +67,26 @@ public class GlobalHandleException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
     }
 
+    @ExceptionHandler(NotFoundUniversityCourseException.class)
+    public ResponseEntity<Object> handleNotFoundUniversityCourseException(NotFoundUniversityCourseException ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
 
-
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<String> errors = new ArrayList<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String message = error.getDefaultMessage();
+            errors.add(message);
+        });
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                errors.toString()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
 }
