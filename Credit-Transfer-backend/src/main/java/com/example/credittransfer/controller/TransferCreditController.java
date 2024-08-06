@@ -3,6 +3,7 @@ package com.example.credittransfer.controller;
 import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.DipCourseIdResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
+import com.example.credittransfer.exception.FileEmptyException;
 import com.example.credittransfer.exception.FileExtensionNotMatchException;
 import com.example.credittransfer.service.DiplomaCourseService;
 import com.example.credittransfer.service.OCRService;
@@ -43,6 +44,9 @@ public class TransferCreditController {
     public ResponseEntity<DipCourseIdResponse> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
         if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
             throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());
+        }
+        if(multipartFile.getSize() == 0) {
+            throw new FileEmptyException();
         }
         File file = ocrService.convertFile(multipartFile);
         DipCourseIdResponse dipCourseIdResponse = ocrService.getCourseIdByImport(file);

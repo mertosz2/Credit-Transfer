@@ -30,7 +30,7 @@ public class TransferCreditService {
         List<TransferCreditResponse> transferCreditResponseList = new ArrayList<>();
 
         // Map เพื่อเก็บรายการที่มี reference to the same UniversityCourse
-        Map<Integer, List<TransferCreditRequest>> courseMap = new HashMap<>();
+        Map<Integer, List<TransferCreditRequest>> sameUniCourseId = new HashMap<>();
 
         // Iterate through each TransferCreditRequest
         for (TransferCreditRequest request : transferCreditRequestList) {
@@ -38,14 +38,14 @@ public class TransferCreditService {
             Integer uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
-            courseMap.computeIfAbsent(uniCourseId, k -> new ArrayList<>()).add(request);
+            sameUniCourseId.computeIfAbsent(uniCourseId, k -> new ArrayList<>()).add(request);
         }
 
         // แยก List ออกมาเป็นสอง list
         List<TransferCreditRequest> duplicatedRequests = new ArrayList<>();
         List<TransferCreditRequest> uniqueRequests = new ArrayList<>();
 
-        for (Map.Entry<Integer, List<TransferCreditRequest>> entry : courseMap.entrySet()) {
+        for (Map.Entry<Integer, List<TransferCreditRequest>> entry : sameUniCourseId.entrySet()) {
             List<TransferCreditRequest> requests = entry.getValue();
             if (requests.size() > 1) {
                 duplicatedRequests.addAll(requests);
@@ -63,8 +63,6 @@ public class TransferCreditService {
         // Process the duplicated requests
         transferCreditResponseList.addAll(processDuplicateRequest(duplicatedRequests));
         transferCreditResponseList.sort(Comparator.comparing(TransferCreditResponse::getUniCourseId));
-
-
 
         return transferCreditResponseList;
     }
@@ -93,18 +91,18 @@ public class TransferCreditService {
         List<TransferCreditResponse> transferCreditResponseList = new ArrayList<>();
 
         // Map เพื่อเก็บรายการที่มี reference to the same UniversityCourse
-        Map<Integer, List<TransferCreditRequest>> courseMap = new HashMap<>();
+        Map<Integer, List<TransferCreditRequest>> sameUniCourseId = new HashMap<>();
 
         for (TransferCreditRequest request : transferCreditRequestList) {
             DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
             int uniCourseId = diplomaCourse.getUniversityCourse().getId();
 
             // Add the request to the map based on the uniCourseId
-            courseMap.computeIfAbsent(uniCourseId, k -> new ArrayList<>()).add(request);
+            sameUniCourseId.computeIfAbsent(uniCourseId, k -> new ArrayList<>()).add(request);
         }
 
         // Process each group of TransferCreditRequest with the same UniversityCourse id
-        for (Map.Entry<Integer, List<TransferCreditRequest>> entry : courseMap.entrySet()) {
+        for (Map.Entry<Integer, List<TransferCreditRequest>> entry : sameUniCourseId.entrySet()) {
 
             List<TransferCreditRequest> requests = entry.getValue();
             List<DipCourseResponse> diplomaCourseList = new ArrayList<>();

@@ -76,6 +76,15 @@ public class GlobalHandleException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
     }
 
+    @ExceptionHandler(FileEmptyException.class)
+    public ResponseEntity<Object> handleFileEmptyException(FileEmptyException ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<String> errors = new ArrayList<>();

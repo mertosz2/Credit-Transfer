@@ -11,6 +11,7 @@ import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.UniversityCourseService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,21 +33,25 @@ public class UniversityCourseController {
     }
 
     @GetMapping("")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<List<UniversityCourse>> getAll(){
         return ResponseEntity.status(OK).body(universityCourseService.findAll());
     }
 
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody UniversityCourseRequest universityCourseRequest) {
         return ResponseEntity.status(OK).body(universityCourseService.createCourse(universityCourseRequest));
     }
 
     @PutMapping("/{uniId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> updateCourse(@PathVariable Integer uniId, @Valid @RequestBody UniversityCourseRequest universityCourseRequest) {
         return ResponseEntity.status(OK).body(universityCourseService.updateCourse(universityCourseRequest, uniId));
     }
 
     @DeleteMapping("/{uniId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> deleteCourse(@PathVariable Integer uniId) {
         return ResponseEntity.status(OK).body(universityCourseService.deleteUniCourse(uniId));
     }
@@ -54,6 +59,11 @@ public class UniversityCourseController {
     @GetMapping("/{uniId}")
     public ResponseEntity<UniversityCourse> getCourseByUniId(@PathVariable Integer uniId) {
         return ResponseEntity.status(OK).body(universityCourseService.findByUniId(uniId));
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<UniversityCourse> getCourseByUniCourseId(@RequestParam String uniCourseId) {
+        return ResponseEntity.status(OK).body(universityCourseService.findByUniCourseId(uniCourseId));
     }
 
     @GetMapping("/uniDropdown")

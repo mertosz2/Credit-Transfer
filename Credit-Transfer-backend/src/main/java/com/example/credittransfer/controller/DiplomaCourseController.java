@@ -6,6 +6,7 @@ import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.service.DiplomaCourseService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,21 +26,25 @@ public class DiplomaCourseController {
     }
 
     @GetMapping("")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<List<DiplomaCourse>> getAllDipCourse() {
         return ResponseEntity.status(OK).body(diplomaCourseService.getAllDipCourse());
     }
 
     @PutMapping("/{dipId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> updateDipCourse(@PathVariable Integer dipId, @RequestBody DiplomaCourseRequest request) {
         return ResponseEntity.status(OK).body(diplomaCourseService.updateCourse(request, dipId));
     }
 
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody DiplomaCourseRequest diplomaCourseRequest) {
         return ResponseEntity.status(OK).body(diplomaCourseService.createCourse(diplomaCourseRequest));
     }
 
     @DeleteMapping("/{dipId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> deleteDipCourse(@PathVariable Integer dipId) {
         return ResponseEntity.status(OK).body(diplomaCourseService.deleteDipCourse(dipId));
     }

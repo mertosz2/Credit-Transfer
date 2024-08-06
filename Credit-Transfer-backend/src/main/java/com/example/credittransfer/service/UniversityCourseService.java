@@ -80,7 +80,11 @@ public class UniversityCourseService {
     }
 
     public UniversityCourse findByUniId(Integer uniId) {
-        return universityCourseRepository.findByUniId(uniId).orElseThrow();
+        return universityCourseRepository.findByUniId(uniId).orElseThrow(NoClassDefFoundError::new);
+    }
+
+    public UniversityCourse findByUniCourseId(String uniCourseId) {
+        return universityCourseRepository.findByUniCourseId(uniCourseId).orElseThrow(NoClassDefFoundError::new);
     }
 
     public List<DropDown> getUniCourseDropdown() {
