@@ -36,10 +36,12 @@ public class DiplomaCourseService {
         {
             throw new ExistByCourseNameException(request.getDipCourseName());
         }
+
         DiplomaCourse diplomaCourse = new DiplomaCourse();
         diplomaCourse.setDipCourseId(request.getDipCourseId());
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
+        diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow());
         diplomaCourse.setActive(true);
         diplomaCourseRepository.save(diplomaCourse);
         return new ResponseAPI(HttpStatus.CREATED, "create successfully");
@@ -61,6 +63,7 @@ public class DiplomaCourseService {
         diplomaCourse.setDipCourseId(request.getDipCourseId());
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
+        diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow());
         diplomaCourseRepository.save(diplomaCourse);
         return new ResponseAPI(HttpStatus.OK, "update successfully");
     }

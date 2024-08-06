@@ -23,5 +23,8 @@ public class DiplomaCourseRequest {
     @NotNull(message = "Credit can not be null or empty")
     private int dipCredit;
 
+    @NotNull(message = "course can not be null or empty")
+    private Integer uniId;
+
     private int dipGrade;
 }
