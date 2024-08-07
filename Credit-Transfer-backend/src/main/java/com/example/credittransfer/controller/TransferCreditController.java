@@ -5,19 +5,20 @@ import com.example.credittransfer.dto.response.DipCourseIdResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.exception.FileEmptyException;
 import com.example.credittransfer.exception.FileExtensionNotMatchException;
-import com.example.credittransfer.service.DiplomaCourseService;
 import com.example.credittransfer.service.OCRService;
-import com.example.credittransfer.service.PDFGeneratorService;
 import com.example.credittransfer.service.TransferCreditService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 

@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class OCRService {
-    private static final String UPLOAD_TEMP_DIR = "C:/uploads/temp/";
 
     private final DiplomaCourseService diplomaCourseService;
 
@@ -91,7 +90,8 @@ public class OCRService {
     }
 
     public File convertFile(MultipartFile multipartFile) throws IOException {
-        Path tempDirPath = Paths.get(UPLOAD_TEMP_DIR);
+        File resourceTempDir = new ClassPathResource("temp/").getFile();
+        Path tempDirPath = resourceTempDir.toPath();
         if (!Files.exists(tempDirPath)) {
             Files.createDirectories(tempDirPath);
         }
