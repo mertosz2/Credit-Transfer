@@ -63,7 +63,7 @@ public class TransferCreditController {
     }
 
     @GetMapping("/ttp")
-    public ResponseEntity<ResponseAPI> testNer() {
+    public ResponseEntity<List<TransferCreditResponse>> testNer() {
         List<TransferCreditRequest> mockData = List.of(
                 new TransferCreditRequest("30001-1055", 4),
                 new TransferCreditRequest("30204-2004", 3),
@@ -73,7 +73,8 @@ public class TransferCreditController {
                 new TransferCreditRequest("30000-1401", 4),
                 new TransferCreditRequest("31105-4820", 2.5),
                 new TransferCreditRequest("31105-4821", 2.5));
-        return ResponseEntity.status(OK).body(courseHistoryService.saveHistory(transferCreditService.getTransferableCourse(mockData)));
+      //  return ResponseEntity.status(OK).body(courseHistoryService.saveHistory(transferCreditService.getTransferableCourse(mockData)));
+        return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(mockData));
 
     }
 
