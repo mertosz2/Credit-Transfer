@@ -22,6 +22,7 @@ public class DiplomaCourse {
 
     private int dipCredit;
 
+    @JsonIgnore
     private boolean isActive;
 
     @ManyToOne
