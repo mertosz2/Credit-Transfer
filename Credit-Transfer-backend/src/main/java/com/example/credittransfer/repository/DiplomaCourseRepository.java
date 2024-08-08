@@ -32,11 +32,11 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
     @Query("select d from DiplomaCourse d where d.isActive = true")
     List<DiplomaCourse> findAll();
 
-    @Query("update DiplomaCourse d set d.isActive = false where d.id = :dipId and d.isActive = true ")
+    @Query("update DiplomaCourse d set d.isActive = false where d.dipId = :dipId and d.isActive = true ")
     @Modifying
     void deleteByDipId(Integer dipId);
 
-    @Query("select d from DiplomaCourse d where d.id = :dipId and d.isActive = true")
+    @Query("select d from DiplomaCourse d where d.dipId = :dipId and d.isActive = true")
     Optional<DiplomaCourse> findByDipId(Integer dipId);
 
 

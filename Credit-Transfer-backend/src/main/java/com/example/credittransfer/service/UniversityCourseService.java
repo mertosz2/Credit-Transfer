@@ -72,7 +72,7 @@ public class UniversityCourseService {
     public ResponseAPI deleteUniCourse(Integer uniId) {
         Optional<UniversityCourse> universityCourse = universityCourseRepository.findByUniId(uniId);
         if(universityCourse.isPresent()){
-            universityCourseRepository.deleteByUniId(universityCourse.get().getId());
+            universityCourseRepository.deleteByUniId(universityCourse.get().getUniId());
             return new ResponseAPI(HttpStatus.OK, "delete course successfully");
         } else {
             return new ResponseAPI(HttpStatus.BAD_REQUEST, "course not found with given id: " + uniId);

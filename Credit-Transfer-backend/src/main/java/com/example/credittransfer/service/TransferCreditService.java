@@ -35,7 +35,7 @@ public class TransferCreditService {
         // Iterate through each TransferCreditRequest
         for (TransferCreditRequest request : transferCreditRequestList) {
             DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
-            Integer uniCourseId = diplomaCourse.getUniversityCourse().getId();
+            Integer uniCourseId = diplomaCourse.getUniversityCourse().getUniId();
 
             // Add the request to the map based on the uniCourseId
             sameUniCourseId.computeIfAbsent(uniCourseId, k -> new ArrayList<>()).add(request);
@@ -95,7 +95,7 @@ public class TransferCreditService {
 
         for (TransferCreditRequest request : transferCreditRequestList) {
             DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(request.getDipCourseId());
-            int uniCourseId = diplomaCourse.getUniversityCourse().getId();
+            int uniCourseId = diplomaCourse.getUniversityCourse().getUniId();
 
             // Add the request to the map based on the uniCourseId
             sameUniCourseId.computeIfAbsent(uniCourseId, k -> new ArrayList<>()).add(request);
@@ -152,7 +152,7 @@ public class TransferCreditService {
 
     public DipCourseResponse mapToDipCourseResponse(DiplomaCourse diplomaCourse, double grade) {
         return DipCourseResponse.builder()
-                .id(diplomaCourse.getId())
+                .id(diplomaCourse.getDipId())
                 .dipCourseId(diplomaCourse.getDipCourseId())
                 .dipCourseName(diplomaCourse.getDipCourseName())
                 .dipCredit(diplomaCourse.getDipCredit())
