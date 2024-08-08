@@ -2,9 +2,11 @@ package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.DipCourseIdResponse;
+import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.exception.FileEmptyException;
 import com.example.credittransfer.exception.FileExtensionNotMatchException;
+import com.example.credittransfer.service.CourseHistoryService;
 import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.TransferCreditService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,10 +32,12 @@ public class TransferCreditController {
 
     private final TransferCreditService transferCreditService;
     private final OCRService ocrService;
+    private final CourseHistoryService courseHistoryService;
 
-    public TransferCreditController(TransferCreditService transferCreditService, OCRService ocrService) {
+    public TransferCreditController(TransferCreditService transferCreditService, OCRService ocrService, CourseHistoryService courseHistoryService) {
         this.transferCreditService = transferCreditService;
         this.ocrService = ocrService;
+        this.courseHistoryService = courseHistoryService;
     }
 
     @GetMapping("")
@@ -56,6 +60,21 @@ public class TransferCreditController {
         dipCourseIdResponse.setTransferCreditResponseList(transferCreditService.getTransferableCourse(transferCreditRequestList));
 
         return ResponseEntity.status(OK).body(dipCourseIdResponse);
+    }
+
+    @GetMapping("/ttp")
+    public ResponseEntity<ResponseAPI> testNer() {
+        List<TransferCreditRequest> mockData = List.of(
+                new TransferCreditRequest("30001-1055", 4),
+                new TransferCreditRequest("30204-2004", 3),
+                new TransferCreditRequest("30000-1101", 4),
+                new TransferCreditRequest("30000-9205", 4),
+                new TransferCreditRequest("30000-9201",2),
+                new TransferCreditRequest("30000-1401", 4),
+                new TransferCreditRequest("31105-4820", 2.5),
+                new TransferCreditRequest("31105-4821", 2.5));
+        return ResponseEntity.status(OK).body(courseHistoryService.createHistory(transferCreditService.getTransferableCourse(mockData)));
+
     }
 
     @GetMapping("/exportExcel")

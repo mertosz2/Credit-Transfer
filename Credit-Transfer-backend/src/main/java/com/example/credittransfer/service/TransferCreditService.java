@@ -4,6 +4,7 @@ import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.DipCourseResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
+import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
 import jakarta.servlet.http.HttpServletResponse;
@@ -62,7 +63,7 @@ public class TransferCreditService {
 
         // Process the duplicated requests
         transferCreditResponseList.addAll(processDuplicateRequest(duplicatedRequests));
-        transferCreditResponseList.sort(Comparator.comparing(TransferCreditResponse::getUniCourseId));
+        transferCreditResponseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
 
         return transferCreditResponseList;
     }
@@ -80,9 +81,7 @@ public class TransferCreditService {
         }
 
         transferCreditResponse.setDiplomaCourseList(diplomaCourseList);
-        transferCreditResponse.setUniCourseId(diplomaCourse.getUniversityCourse().getUniCourseId());
-        transferCreditResponse.setUniCourseName(diplomaCourse.getUniversityCourse().getUniCourseName());
-        transferCreditResponse.setUniCredit(diplomaCourse.getUniversityCourse().getUniCredit());
+        transferCreditResponse.setUniversityCourse(diplomaCourse.getUniversityCourse());
 
         return transferCreditResponse;
     }
@@ -108,8 +107,7 @@ public class TransferCreditService {
             List<DipCourseResponse> diplomaCourseList = new ArrayList<>();
             int totalDipCredit = 0;
             boolean transferable = true;
-            String uniCourseId = "";
-            String uniCourseName = "";
+            UniversityCourse universityCourse = new UniversityCourse();
             int uniCredit = 0;
 
             for (TransferCreditRequest request : requests) {
@@ -118,9 +116,7 @@ public class TransferCreditService {
                 if (request.getDipGrade() >= 2) {
                     totalDipCredit += diplomaCourse.getDipCredit();
                 }
-                uniCourseId = diplomaCourse.getUniversityCourse().getUniCourseId();
-                uniCourseName = diplomaCourse.getUniversityCourse().getUniCourseName();
-                uniCredit = diplomaCourse.getUniversityCourse().getUniCredit();
+                universityCourse = diplomaCourse.getUniversityCourse();
             }
 
             // Set transferable based on the totalDipCredit and uniCredit
@@ -130,9 +126,7 @@ public class TransferCreditService {
 
             TransferCreditResponse transferCreditResponse = new TransferCreditResponse();
             transferCreditResponse.setDiplomaCourseList(diplomaCourseList);
-            transferCreditResponse.setUniCourseId(uniCourseId);
-            transferCreditResponse.setUniCourseName(uniCourseName);
-            transferCreditResponse.setUniCredit(uniCredit);
+            transferCreditResponse.setUniversityCourse(universityCourse);
             transferCreditResponse.setTransferable(transferable);
             transferCreditResponseList.add(transferCreditResponse);
         }
@@ -164,7 +158,7 @@ public class TransferCreditService {
         List<TransferCreditResponse> responseList = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(TransferCreditResponse::isTransferable)
                 .toList());
-        responseList.sort(Comparator.comparing(TransferCreditResponse::getUniCourseId));
+        responseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
         return responseList;
     }
 
@@ -186,5 +180,13 @@ public class TransferCreditService {
                 "หน่วยกิต\nCredit"
         );
         exportExcelService.exportDataToExcel(response,heaerList, validateTransferableResponse(transferCreditResponseList));
+    }
+
+    public TransferCreditRequest mapToTransferCreditRequest(String dipCourseId, double grade){
+        TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
+        transferCreditRequest.setDipCourseId(dipCourseId);
+        transferCreditRequest.setDipGrade(grade);
+
+        return transferCreditRequest;
     }
 }

@@ -60,9 +60,9 @@ public class PDFGeneratorService {
                     table.addCell(new Paragraph(String.valueOf(dipCourse.getDipCredit()), font));
 
                     if (firstRow) {
-                        PdfPCell uniCourseIdCell = new PdfPCell(new Paragraph(response.getUniCourseId(), font));
-                        PdfPCell uniCourseNameCell = new PdfPCell(new Paragraph(response.getUniCourseName(), font));
-                        PdfPCell uniCreditCell = new PdfPCell(new Paragraph(String.valueOf(response.getUniCredit()), font));
+                        PdfPCell uniCourseIdCell = new PdfPCell(new Paragraph(response.getUniversityCourse().getUniCourseId(), font));
+                        PdfPCell uniCourseNameCell = new PdfPCell(new Paragraph(response.getUniversityCourse().getUniCourseName(), font));
+                        PdfPCell uniCreditCell = new PdfPCell(new Paragraph(String.valueOf(response.getUniversityCourse().getUniCredit()), font));
 
                         uniCourseIdCell.setRowspan(dipCourseListSize);
                         uniCourseNameCell.setRowspan(dipCourseListSize);
