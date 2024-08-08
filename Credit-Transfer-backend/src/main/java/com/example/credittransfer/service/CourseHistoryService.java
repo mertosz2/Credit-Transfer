@@ -6,6 +6,7 @@ import com.example.credittransfer.entity.*;
 import com.example.credittransfer.repository.CourseHistoryDetailRepository;
 import com.example.credittransfer.repository.CourseHistoryRepository;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
+import com.example.credittransfer.utility.Utility;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,14 +36,11 @@ public class CourseHistoryService {
         this.courseHistoryDetailRepository = courseHistoryDetailRepository;
     }
 
-    public ResponseAPI createHistory(List<TransferCreditResponse> transferCreditResponseList) {
-
+    public ResponseAPI saveHistory(List<TransferCreditResponse> transferCreditResponseList) {
         CourseHistory courseHistory = new CourseHistory();
         List<CourseHistoryDetail> courseHistoryDetailList = new ArrayList<>();
-        UserSecurity userSecurity = (UserSecurity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Users users = userSecurity.getUsers();
         courseHistory.setTimestamp(LocalDateTime.now());
-        courseHistory.setUsers(users);
+        courseHistory.setUsers(Utility.getUserPrincipal());
         for (TransferCreditResponse response : transferCreditResponseList) {
             for (DipCourseResponse dipCourseResponse : response.getDiplomaCourseList()) {
                 CourseHistoryDetail courseHistoryDetail = new CourseHistoryDetail();
@@ -50,7 +48,6 @@ public class CourseHistoryService {
                 courseHistoryDetail.setDiplomaCourse(diplomaCourseRepository.findByDipId(dipCourseResponse.getId()).orElseThrow());
                 courseHistoryDetail.setDipGrade(dipCourseResponse.getGrade());
                 courseHistoryDetailList.add(courseHistoryDetail);
-
             }
         }
         courseHistoryRepository.save(courseHistory);
@@ -60,10 +57,8 @@ public class CourseHistoryService {
     }
 
     public List<CourseHistoryResponse> getAllHistory() {
-        UserSecurity userSecurity = (UserSecurity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Users users = userSecurity.getUsers();
         List<CourseHistoryResponse> courseHistoryResponseList = new ArrayList<>();
-        List<CourseHistory> courseHistoryList = courseHistoryRepository.findByUsersId(users.getUsersId());
+        List<CourseHistory> courseHistoryList = courseHistoryRepository.findByUsersId(Utility.getUserPrincipal().getUsersId());
         for (CourseHistory courseHistory : courseHistoryList) {
 
             List<CourseHistoryDetail> courseHistoryDetailList = courseHistoryDetailRepository.findByChId(courseHistory.getChId());

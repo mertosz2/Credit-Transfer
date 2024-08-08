@@ -73,7 +73,7 @@ public class TransferCreditController {
                 new TransferCreditRequest("30000-1401", 4),
                 new TransferCreditRequest("31105-4820", 2.5),
                 new TransferCreditRequest("31105-4821", 2.5));
-        return ResponseEntity.status(OK).body(courseHistoryService.createHistory(transferCreditService.getTransferableCourse(mockData)));
+        return ResponseEntity.status(OK).body(courseHistoryService.saveHistory(transferCreditService.getTransferableCourse(mockData)));
 
     }
 
