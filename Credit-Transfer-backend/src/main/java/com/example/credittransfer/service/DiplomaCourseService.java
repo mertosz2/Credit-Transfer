@@ -96,7 +96,7 @@ public class DiplomaCourseService {
     public ResponseAPI deleteDipCourse(Integer dipId) {
         Optional<DiplomaCourse> diplomaCourse = diplomaCourseRepository.findByDipId(dipId);
         if(diplomaCourse.isPresent()){
-            diplomaCourseRepository.deleteByDipId(diplomaCourse.get().getId());
+            diplomaCourseRepository.deleteByDipId(diplomaCourse.get().getDipId());
             return new ResponseAPI(HttpStatus.OK, "delete course successfully");
         } else {
             return new ResponseAPI(HttpStatus.BAD_REQUEST, "course not found with given id: " + dipId);

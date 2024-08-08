@@ -16,7 +16,7 @@ public interface UniversityCourseRepository extends JpaRepository<UniversityCour
 //    @Query("select case when count(u) > 0 then true else false from UniversityCourse u where u.uniCourseId = :uniCourseId")
 //    boolean existsByUniCourseId(Integer uniCourseId);
 
-    @Query("select uc.id as id, uc.uniCourseId as value, concat(uc.uniCourseId,' - ', uc.uniCourseName) as label from UniversityCourse uc where uc.isActive = true ")
+    @Query("select uc.uniId as id, uc.uniCourseId as value, concat(uc.uniCourseId,' - ', uc.uniCourseName) as label from UniversityCourse uc where uc.isActive = true ")
     List<DropDown> getUniversityCoursesDropDown();
 
     @Query("select case when count(uc) > 0 then true else false end from UniversityCourse uc where uc.uniCourseId = :UniCourseId and uc.isActive = true")
@@ -25,11 +25,11 @@ public interface UniversityCourseRepository extends JpaRepository<UniversityCour
     @Query("select case when count(uc) > 0 then true else false end from UniversityCourse uc where uc.uniCourseName = :UniCourseName and uc.isActive = true")
     boolean existsByUniCourseName(String UniCourseName);
 
-    @Query("update UniversityCourse uc set uc.isActive = false where uc.id = :uniId")
+    @Query("update UniversityCourse uc set uc.isActive = false where uc.uniId = :uniId")
     @Modifying
     void deleteByUniId(Integer uniId);
 
-    @Query("select uc from UniversityCourse uc where uc.id = :uniId and uc.isActive = true")
+    @Query("select uc from UniversityCourse uc where uc.uniId = :uniId and uc.isActive = true")
     Optional<UniversityCourse> findByUniId(Integer uniId);
 
     @Query("select uc from UniversityCourse uc where uc.uniCourseId = :uniCourseId and uc.isActive = true")

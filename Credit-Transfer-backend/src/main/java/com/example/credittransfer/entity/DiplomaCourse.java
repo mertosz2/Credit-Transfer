@@ -14,7 +14,7 @@ public class DiplomaCourse {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int dipId;
 
     private String dipCourseId;
 
@@ -22,6 +22,7 @@ public class DiplomaCourse {
 
     private int dipCredit;
 
+    @JsonIgnore
     private boolean isActive;
 
     @ManyToOne

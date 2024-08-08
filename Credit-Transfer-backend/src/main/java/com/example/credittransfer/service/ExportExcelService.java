@@ -110,7 +110,7 @@ public class ExportExcelService {
             int endRow = 0;
             int endColumn = 0;
 
-            totalUniCredit = totalUniCredit + response.getUniCredit();
+            totalUniCredit = totalUniCredit + response.getUniversityCourse().getUniCredit();
             for (DipCourseResponse dipCourse : response.getDiplomaCourseList()) {
                 totalDipCredit = totalDipCredit + dipCourse.getDipCredit();
                 style = defaultStyle;
@@ -138,14 +138,14 @@ public class ExportExcelService {
                         style = mergeStyle;
                         merged = true;
                     }
-                    createCell(row, columnCount++, response.getUniCourseId(), style);
-                    createCell(row, columnCount++, response.getUniCourseName(), style);
+                    createCell(row, columnCount++, response.getUniversityCourse().getUniCourseId(), style);
+                    createCell(row, columnCount++, response.getUniversityCourse().getUniCourseName(), style);
 
                     if(merged) {
-                        createCell(row, columnCount++, response.getUniCredit(), numberMergeStyle);
+                        createCell(row, columnCount++, response.getUniversityCourse().getUniCredit(), numberMergeStyle);
                         merged = false;
                     } else {
-                        createCell(row, columnCount++, response.getUniCredit(), numberStyle);
+                        createCell(row, columnCount++, response.getUniversityCourse().getUniCredit(), numberStyle);
                     }
                     firstRow = false;
                 }
