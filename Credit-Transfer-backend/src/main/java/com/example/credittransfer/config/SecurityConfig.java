@@ -30,6 +30,7 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/api/transfer/ttp").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(authService)
