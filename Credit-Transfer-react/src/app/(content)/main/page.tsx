@@ -1,14 +1,20 @@
 "use client";
-import CreditTransferTable from "@/app/components/CreditTransferTable";
+import useGetCreditTransfer from "@/feature/CreditTransfer/hooks/useGetCreditTransfer";
+import { ICreditTransferResponse } from "@/feature/CreditTransfer/interface/CreditTransfer";
+;
 import { Box } from "@chakra-ui/react";
 import React from "react";
-export default function main() {
+
+export default function MainPage() {
+  
+  const { creditTransferData } = useGetCreditTransfer();
+  console.log(creditTransferData)
+
   return (
     <Box
       width="100%"
       height="100vh"
       background="radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%)"
-      paddingX="400px"
     >
       <Box display="flex" width="100%" height="100%" backgroundColor="white">
         <Box
@@ -17,6 +23,8 @@ export default function main() {
           padding="24px"
           width="20%"
           height="100%"
+          borderWidth="1px"
+          borderColor="black"
           alignItems="center"
           backgroundColor="yellow"
         >
@@ -30,7 +38,7 @@ export default function main() {
           flexDirection="column"
           width="100%"
           height="100%"
-          backgroundColor="pink"
+          backgroundColor="white"
         >
           <Box
             display="flex"
@@ -45,10 +53,34 @@ export default function main() {
           <Box
             marginTop="24px"
             display="flex"
-            alignItems="center"
             flexDirection="column"
+            padding="24px"
           >
-            <CreditTransferTable/>
+            {/* {creditTransferData?.diplomaCourseList?.length ? (
+              creditTransferData.diplomaCourseList.map(
+                (course: IDiplomaCourseList, courseIndex: number) => (
+                  <CreditTransferTable
+                    key={courseIndex}
+                    dipData={course}
+                    uniData={creditTransferData.universityCourse}
+                  />
+                )
+              )
+            ) : (
+              <Box>No data available</Box>
+            )} */}
+            {/* {creditTransferData?.map((course: ICreditTransferResponse, index:number)=>(
+              {course.}
+            )
+              return(
+                <Box display="flex" flexDirection="column" key={index}>
+                  <Box>{course.}</Box>
+                  <Box>{course.dipCourseName}</Box>
+                  <Box>{course.dipCredit}</Box>
+                  <Box>{course.grade}</Box>
+                </Box>
+              )
+            )} */}
           </Box>
         </Box>
       </Box>

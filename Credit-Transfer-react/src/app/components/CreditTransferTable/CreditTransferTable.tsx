@@ -1,61 +1,59 @@
-import { Box, Td, Tr, Table, Tbody, Thead } from "@chakra-ui/react";
-import React from "react";
+"use client";
+import {
+  IDiplomaCourseList,
+  IUniversityCourse,
+} from "@/feature/CreditTransfer/interface/CreditTransfer";
+import { Box, Table, Tbody, Thead, Tr } from "@chakra-ui/react";
 
-const CreditTransferTable = () => {
+interface IProps {
+  dipData: IDiplomaCourseList;
+  uniData: IUniversityCourse;
+}
+
+const CreditTransferTable = ({ dipData, uniData }: IProps) => {
+  console.log("dipData:", dipData);
+  console.log("uniData:", uniData);
+
   return (
-    <Table variant="simple">
-        <Thead display="flex" flexDirection="row" gap="16px" padding="24px">
-          <Tr>
-            <Box display="flex" flexDirection="column">
-              <Box>รหัสวิชา</Box>
-              <Box>Course Code</Box>
-           
-            </Box>
-          </Tr>
-          <Tr>
-            <Box display="flex" flexDirection="column">
-              <Box>วิชาที่ขอเทียบโอน</Box>
-              <Box>Course Transferred From</Box>
-           
-            </Box>
-          </Tr>
-          <Tr>
-            <Box display="flex" flexDirection="column">
-              <Box>เกรด</Box>
-              <Box>Grade</Box>
-           
-            </Box>
-          </Tr>
-          <Tr>
-            <Box display="flex" flexDirection="column">
-              <Box>หน่วยกิต</Box>
-              <Box>Credit</Box>
-           
-            </Box>
-          </Tr>
-          <Tr>
-            <Box display="flex" flexDirection="column">
-              <Box>รหัสวิชา</Box>
-              <Box>Course Code</Box>
-           
-            </Box>
-          </Tr>
-          <Tr>
-            <Box display="flex" flexDirection="column">
-              <Box>วิชาที่เทียบโอนหน่วยกิตได้</Box>
-              <Box>Course Transferred From</Box>
-           
-            </Box>
-          </Tr>
-          <Tr>
-            <Box display="flex" flexDirection="column">
-              <Box>หน่วยกิต</Box>
-              <Box>Credit</Box>
-           
-            </Box>
-          </Tr>
-          
-        </Thead>
+    <Table variant="simple" width="100%">
+      <Thead
+        display="flex"
+        width="100%"
+        borderWidth={1}
+        borderTopRadius={16}
+        borderColor="black"
+        paddingY="24px"
+      >
+        <Tr display="flex" width="100%">
+          <Box width="14.28%" textAlign="center">รหัสวิชา</Box>
+          <Box width="14.28%" textAlign="center">วิชาที่ขอเทียบโอน</Box>
+          <Box width="14.28%" textAlign="center">เกรด</Box>
+          <Box width="14.28%" textAlign="center">หน่วยกิต</Box>
+          <Box width="14.28%" textAlign="center">รหัสวิชา</Box>
+          <Box width="14.28%" textAlign="center">วิชาที่เทียบโอนหน่วยกิตได้</Box>
+          <Box width="14.28%" textAlign="center">หน่วยกิต</Box>
+        </Tr>
+      </Thead>
+
+      <Tbody
+        display="flex"
+        width="100%"
+        borderRightWidth={1}
+        borderLeftWidth={1}
+        borderBottomWidth={1}
+        borderColor="black"
+        paddingY="24px"
+      >
+        <Tr display="flex" width="100%">
+          <Box width="14.28%" textAlign="center">{dipData.dipCourseId}</Box>
+          <Box width="14.28%" textAlign="center">{dipData.dipCourseName}</Box>
+          <Box width="14.28%" textAlign="center">{dipData.dipCredit}</Box>
+          <Box width="14.28%" textAlign="center">{dipData.grade}</Box>
+          <Box width="14.28%" textAlign="center">{uniData.uniCourseId}</Box>
+          <Box width="14.28%" textAlign="center">{uniData.uniCourseName}</Box>
+          <Box width="14.28%" textAlign="center">{uniData.uniCredit}</Box>
+        </Tr>
+      </Tbody>
     </Table>
   );
 };
