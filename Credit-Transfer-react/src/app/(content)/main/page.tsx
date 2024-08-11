@@ -1,14 +1,46 @@
 "use client";
 import useGetCreditTransfer from "@/feature/CreditTransfer/hooks/useGetCreditTransfer";
-import { ICreditTransferResponse } from "@/feature/CreditTransfer/interface/CreditTransfer";
-;
-import { Box } from "@chakra-ui/react";
-import React from "react";
+import {
+  Box,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Thead,
+  Th,
+  Tr,
+  Input,
+} from "@chakra-ui/react";
+import React, { ChangeEvent, useState } from "react";
 
-export default function MainPage() {
-  
+export default function Main() {
   const { creditTransferData } = useGetCreditTransfer();
-  console.log(creditTransferData)
+  const [grades, setGrades] = useState<Record<string, string>>({});
+
+  const isValidNumberInput = (value: string): boolean => {
+    if (value === "") return true;
+    if (/^4(\.0)?$/.test(value)) {
+      return true;
+    }
+    if (/^[1-3](\.[05]?)?$/.test(value)) {
+      return true;
+    }
+    return false;
+  };
+
+  const handleGradeChange =
+    (itemIndex: number, courseIndex: number) =>
+    (e: ChangeEvent<HTMLInputElement>): void => {
+      const { value } = e.target;
+      const key = `${itemIndex}-${courseIndex}`; 
+
+      if (isValidNumberInput(value)) {
+        setGrades((prevGrades) => ({
+          ...prevGrades,
+          [key]: value,
+        }));
+      }
+    };
 
   return (
     <Box
@@ -56,31 +88,104 @@ export default function MainPage() {
             flexDirection="column"
             padding="24px"
           >
-            {/* {creditTransferData?.diplomaCourseList?.length ? (
-              creditTransferData.diplomaCourseList.map(
-                (course: IDiplomaCourseList, courseIndex: number) => (
-                  <CreditTransferTable
-                    key={courseIndex}
-                    dipData={course}
-                    uniData={creditTransferData.universityCourse}
-                  />
-                )
-              )
-            ) : (
-              <Box>No data available</Box>
-            )} */}
-            {/* {creditTransferData?.map((course: ICreditTransferResponse, index:number)=>(
-              {course.}
-            )
-              return(
-                <Box display="flex" flexDirection="column" key={index}>
-                  <Box>{course.}</Box>
-                  <Box>{course.dipCourseName}</Box>
-                  <Box>{course.dipCredit}</Box>
-                  <Box>{course.grade}</Box>
-                </Box>
-              )
-            )} */}
+            <TableContainer>
+              <Table
+                sx={{ tableLayout: "auto" }}
+                style={{
+                  borderWidth: 2,
+                  borderColor: "pink",
+                  borderRadius: 16,
+                }}
+              >
+                <Thead style={{ borderWidth: 1, borderColor: "black" }}>
+                  <Tr>
+                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                      <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>
+                    </Th>
+                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                      <Box whiteSpace="pre-wrap">
+                        วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
+                      </Box>
+                    </Th>
+                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                      <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>
+                    </Th>
+                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                      <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
+                    </Th>
+                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                      <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>
+                    </Th>
+                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                      <Box whiteSpace="pre-wrap">
+                        วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course
+                        Equivalents
+                      </Box>
+                    </Th>
+                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                      <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {creditTransferData?.map((item, itemIndex) => (
+                    <React.Fragment key={itemIndex}>
+                      {item.diplomaCourseList.map((course, courseIndex) => (
+                        <Tr key={course.dipCourseId}>
+                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
+                            {course.dipCourseId}
+                          </Td>
+                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
+                            {course.dipCourseName}
+                          </Td>
+                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
+                            <Input
+                              sx={{
+                                border: "none",
+                                width: "60px",
+                                height: "30px",
+                              }}
+                              value={
+                                grades[`${itemIndex}-${courseIndex}`] || ""
+                              }
+                              onChange={handleGradeChange(
+                                itemIndex,
+                                courseIndex
+                              )}
+                            />
+                          </Td>
+                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
+                            {course.dipCredit}
+                          </Td>
+                          {courseIndex === 0 && (
+                            <>
+                              <Td
+                                style={{ borderWidth: 1, borderColor: "black" }}
+                                rowSpan={item.diplomaCourseList.length}
+                              >
+                                {item.universityCourse.uniCourseId}
+                              </Td>
+                              <Td
+                                style={{ borderWidth: 1, borderColor: "black" }}
+                                rowSpan={item.diplomaCourseList.length}
+                              >
+                                {item.universityCourse.uniCourseName}
+                              </Td>
+                              <Td
+                                style={{ borderWidth: 1, borderColor: "black" }}
+                                rowSpan={item.diplomaCourseList.length}
+                              >
+                                {item.universityCourse.uniCredit}
+                              </Td>
+                            </>
+                          )}
+                        </Tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
           </Box>
         </Box>
       </Box>
