@@ -1,5 +1,12 @@
 "use client";
+import Button from "@/app/components/Button";
 import useGetCreditTransfer from "@/feature/CreditTransfer/hooks/useGetCreditTransfer";
+import { ICreditTransferResponse, IDiplomaCourseList } from "@/feature/CreditTransfer/interface/CreditTransfer";
+import useGetDipCourseById from "@/feature/getDipCourseById/hooks/useGetDipCourseById";
+import useCreditTransferStore, {
+  selectOnSetCreditTransferData,
+  selectOnSetUniversityCourseData,
+} from "@/stores/creditTransferStore";
 import {
   Box,
   Table,
@@ -15,7 +22,12 @@ import React, { ChangeEvent, useState } from "react";
 
 export default function Main() {
   const { creditTransferData } = useGetCreditTransfer();
+  const { onUpdateDipCourse } = useGetDipCourseById();
   const [grades, setGrades] = useState<Record<string, string>>({});
+  const [dipCourse, setDipCourse] = useState("");
+  const OnsetDipData = useCreditTransferStore(selectOnSetCreditTransferData);
+  const OnsetUniData = useCreditTransferStore(selectOnSetUniversityCourseData);
+ 
 
   const isValidNumberInput = (value: string): boolean => {
     if (value === "") return true;
@@ -27,12 +39,12 @@ export default function Main() {
     }
     return false;
   };
-
+console.log(creditTransferData)
   const handleGradeChange =
     (itemIndex: number, courseIndex: number) =>
     (e: ChangeEvent<HTMLInputElement>): void => {
       const { value } = e.target;
-      const key = `${itemIndex}-${courseIndex}`; 
+      const key = `${itemIndex}-${courseIndex}`;
 
       if (isValidNumberInput(value)) {
         setGrades((prevGrades) => ({
@@ -42,6 +54,23 @@ export default function Main() {
       }
     };
 
+  const handleDipCourseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDipCourse(e.target.value); // อัปเดตค่า state เมื่อมีการเปลี่ยนแปลงใน input
+  };
+
+  const handleSubmit = async () => {
+    
+    if (dipCourse) {
+      try {
+        const newDipCourse = await onUpdateDipCourse(dipCourse);
+        const newArray = creditTransferData ? [...creditTransferData, ...newDipCourse] : [...newDipCourse];
+        console.log(newDipCourse)
+
+      } catch (error) {
+        console.error("Failed to update DipCourse:", error);
+      }
+    }
+  };
   return (
     <Box
       width="100%"
@@ -128,9 +157,10 @@ export default function Main() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {creditTransferData?.map((item, itemIndex) => (
+                  {newArray?.map((item, itemIndex) => (
                     <React.Fragment key={itemIndex}>
                       {item.diplomaCourseList.map((course, courseIndex) => (
+                        
                         <Tr key={course.dipCourseId}>
                           <Td style={{ borderWidth: 1, borderColor: "black" }}>
                             {course.dipCourseId}
@@ -184,6 +214,18 @@ export default function Main() {
                     </React.Fragment>
                   ))}
                 </Tbody>
+                <Tr>
+        <Td colSpan={4}>
+          <Input
+            value={dipCourse}
+            onChange={handleDipCourseChange}
+            placeholder="Enter Dip Course ID"
+          />
+        </Td>
+        <Td>
+          <Button label={"Submit"} onClick={handleSubmit} />
+        </Td>
+      </Tr>
               </Table>
             </TableContainer>
           </Box>

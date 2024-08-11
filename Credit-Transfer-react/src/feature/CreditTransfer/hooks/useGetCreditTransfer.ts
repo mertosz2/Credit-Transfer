@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCreditTransferData } from "../services/CreditTransfer.service";
+import { getCreditTransferData } from "../services/creditTransfer.service";
 import { useToast } from "@chakra-ui/react";
 
+
 const useGetCreditTransfer = () => {
+  
   const toast = useToast();
   const {data: creditTransferData} = useQuery({
     queryKey: ["getCreditTransferData"],
     queryFn: async () => {
+      
       try {
         return await getCreditTransferData();
       } catch (error) {
