@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/transfer/ttp").permitAll()
                         .requestMatchers("/api/transfer/exportExcel").permitAll()
                         .requestMatchers("api/transfer/import/").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .userDetailsService(authService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
