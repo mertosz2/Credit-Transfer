@@ -1,7 +1,9 @@
 package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
+import com.example.credittransfer.dto.response.DipCourseResponse;
 import com.example.credittransfer.dto.response.ResponseAPI;
+import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.exception.ExistByCourseIdException;
 import com.example.credittransfer.exception.ExistByCourseNameException;
@@ -13,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,10 +25,12 @@ public class DiplomaCourseService {
 
     private final DiplomaCourseRepository diplomaCourseRepository;
     private final UniversityCourseRepository universityCourseRepository;
+    private final TransferCreditService transferCreditService;
 
-    public DiplomaCourseService(DiplomaCourseRepository diplomaCourseRepository, UniversityCourseRepository universityCourseRepository) {
+    public DiplomaCourseService(DiplomaCourseRepository diplomaCourseRepository, UniversityCourseRepository universityCourseRepository, TransferCreditService transferCreditService) {
         this.diplomaCourseRepository = diplomaCourseRepository;
         this.universityCourseRepository = universityCourseRepository;
+        this.transferCreditService = transferCreditService;
     }
 
     public ResponseAPI createCourse(DiplomaCourseRequest request) {
@@ -107,12 +112,20 @@ public class DiplomaCourseService {
         return diplomaCourseRepository.findByDipId(dipId).orElseThrow();
     }
 
-    public DiplomaCourse findByDipCourseId(String dipCourseId) {
+    public TransferCreditResponse findByDipCourseId(String dipCourseId) {
         DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(dipCourseId);
         if(Objects.isNull(diplomaCourse)) {
             throw new NotFoundDiplomaCourseException(dipCourseId);
-        }
-        return diplomaCourse;
+        } else {
+            List<DipCourseResponse> dipCourseResponseList = new ArrayList<>();
+            dipCourseResponseList.add(transferCreditService.mapToDipCourseResponse(diplomaCourse, 0));
 
+            TransferCreditResponse transferCreditResponse = new TransferCreditResponse();
+            transferCreditResponse.setTransferable(false);
+            transferCreditResponse.setDiplomaCourseList(dipCourseResponseList);
+            transferCreditResponse.setUniversityCourse(diplomaCourse.getUniversityCourse());
+            return transferCreditResponse;
+        }
     }
+
 }
