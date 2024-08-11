@@ -48,7 +48,7 @@ public class TransferCreditController {
         return ResponseEntity.status(OK).body(transferCreditService.getAllTransferCourse());
     }
 
-    @GetMapping("/testimp/")
+    @GetMapping("/import/")
     public ResponseEntity<DipCourseIdResponse> testImportTranscript(@RequestParam("file") MultipartFile multipartFile) throws IOException {
         if(!ocrService.isValidFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()))) {
             throw new FileExtensionNotMatchException(multipartFile.getOriginalFilename());

@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/login").permitAll()
                         .requestMatchers("/api/transfer/ttp").permitAll()
                         .requestMatchers("/api/transfer/exportExcel").permitAll()
+                        .requestMatchers("api/transfer/import/").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(authService)
