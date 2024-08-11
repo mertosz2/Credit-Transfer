@@ -2,6 +2,7 @@ package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
+import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.service.DiplomaCourseService;
 import jakarta.validation.Valid;
@@ -55,7 +56,7 @@ public class DiplomaCourseController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<DiplomaCourse> findByDipCourseId(@RequestParam String dipCourseId) {
+    public ResponseEntity<TransferCreditResponse> findByDipCourseId(@RequestParam String dipCourseId) {
         return ResponseEntity.status(OK).body(diplomaCourseService.findByDipCourseId(dipCourseId));
 
     }
