@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/login").permitAll()
                         .requestMatchers("/api/transfer/ttp").permitAll()
+                        .requestMatchers("/api/transfer/exportExcel").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(authService)
