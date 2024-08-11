@@ -13,10 +13,7 @@ import com.example.credittransfer.service.TransferCreditService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -99,6 +96,12 @@ public class TransferCreditController {
         List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
         transferCreditService.exportExcel(response, mockResponseList);
 
+    }
+
+    @GetMapping("/transfer-check")
+    public ResponseEntity<List<TransferCreditResponse>> testTransferCheck(@RequestBody List<TransferCreditResponse> responseList) {
+        List<TransferCreditRequest> transferCreditRequestList = transferCreditService.mapToTransferCreditRequestByTCRList(responseList);
+        return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
     }
 
 
