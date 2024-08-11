@@ -190,4 +190,17 @@ public class TransferCreditService {
 
         return transferCreditRequest;
     }
+
+    public List<TransferCreditRequest> mapToTransferCreditRequestByTCRList(List<TransferCreditResponse> transferCreditResponseList) {
+        List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>();
+        for (TransferCreditResponse request : transferCreditResponseList) {
+            for(DipCourseResponse dipCourseResponse :request.getDiplomaCourseList()) {
+                TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
+                transferCreditRequest.setDiplomaCourse(diplomaCourseRepository.findById(dipCourseResponse.getId()).orElseThrow());
+                transferCreditRequest.setDipGrade(dipCourseResponse.getGrade());
+                transferCreditRequestList.add(transferCreditRequest);
+            }
+        }
+        return  transferCreditRequestList;
+    }
 }
