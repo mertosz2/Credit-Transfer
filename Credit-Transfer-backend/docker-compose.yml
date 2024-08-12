@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  credit-transfer-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/credit-transfer
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+    networks:
+      - credit-transfer-network
+
+networks:
+  credit-transfer-network:
+    driver: bridge
