@@ -1,17 +1,16 @@
 import { useToast } from "@chakra-ui/react"
-import { useMutation } from "@tanstack/react-query"
-import { getDipcourseById } from "../services/getDipCourseById.service"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { UploadFileCreditTransfer } from "../services/UploadFileCreditTransfer.service"
 
-const useGetDipCourseById = () =>{
-
+const useGetUploadFileCreditTransfer = () =>{
     const toast = useToast()
-    const {mutateAsync: onUpdateDipCourse}=useMutation({
-        mutationKey: ["getDipCourseById"],
-        mutationFn: getDipcourseById,
+    const {mutateAsync: onUploadFile , isPending}= useMutation({
+        mutationKey: ["UploadFIleCreditTransfer"],
+        mutationFn: UploadFileCreditTransfer,
         retry:false,
         onSuccess: () => {
             toast({
-                title: "DipCourse updated",
+                title: "Import File Success",
                 status: "success",
                 isClosable: true
             })
@@ -27,9 +26,8 @@ const useGetDipCourseById = () =>{
                 })
               }
         }
-
     })
-    return {onUpdateDipCourse}
+    return {onUploadFile,isPending}
 }
 
-export default useGetDipCourseById
+export default useGetUploadFileCreditTransfer

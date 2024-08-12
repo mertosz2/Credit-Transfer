@@ -1,8 +1,13 @@
 "use client";
 import Button from "@/app/components/Button";
 import useGetCreditTransfer from "@/feature/CreditTransfer/hooks/useGetCreditTransfer";
-import { ICreditTransferResponse, IDiplomaCourseList } from "@/feature/CreditTransfer/interface/CreditTransfer";
+import {
+  ICreditTransferResponse,
+  IDiplomaCourseList,
+} from "@/feature/CreditTransfer/interface/CreditTransfer";
 import useGetDipCourseById from "@/feature/getDipCourseById/hooks/useGetDipCourseById";
+import useGetUploadFileCreditTransfer from "@/feature/UploadFileCreditTransfer/hooks/useGetUploadFileCreditTransfer";
+import { IUploadFileResponse } from "@/feature/UploadFileCreditTransfer/interface/UploadFileCreditTransfer";
 import useCreditTransferStore, {
   selectOnSetCreditTransferData,
   selectOnSetUniversityCourseData,
@@ -17,17 +22,32 @@ import {
   Th,
   Tr,
   Input,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  useDisclosure,
+  ModalFooter,
+  Tfoot,
 } from "@chakra-ui/react";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 
 export default function Main() {
-  const { creditTransferData } = useGetCreditTransfer();
   const { onUpdateDipCourse } = useGetDipCourseById();
+  const { onUploadFile, isPending } = useGetUploadFileCreditTransfer();
   const [grades, setGrades] = useState<Record<string, string>>({});
   const [dipCourse, setDipCourse] = useState("");
-  const OnsetDipData = useCreditTransferStore(selectOnSetCreditTransferData);
-  const OnsetUniData = useCreditTransferStore(selectOnSetUniversityCourseData);
- 
+
+  const [file, setFile] = useState<File | undefined>(undefined);
+  const [uploadFileData, setUploadFileData] = useState<
+    IUploadFileResponse | undefined
+  >(undefined);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [modalData, setModalData] = useState<
+    { founded: string[]; notFounded: string[] } | undefined
+  >(undefined);
+  const [displayData, setDisplayData] = useState<ICreditTransferResponse[]>([]);
 
   const isValidNumberInput = (value: string): boolean => {
     if (value === "") return true;
@@ -39,7 +59,6 @@ export default function Main() {
     }
     return false;
   };
-console.log(creditTransferData)
   const handleGradeChange =
     (itemIndex: number, courseIndex: number) =>
     (e: ChangeEvent<HTMLInputElement>): void => {
@@ -55,19 +74,56 @@ console.log(creditTransferData)
     };
 
   const handleDipCourseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDipCourse(e.target.value); // อัปเดตค่า state เมื่อมีการเปลี่ยนแปลงใน input
+    setDipCourse(e.target.value);
   };
 
   const handleSubmit = async () => {
-    
     if (dipCourse) {
       try {
         const newDipCourse = await onUpdateDipCourse(dipCourse);
-        const newArray = creditTransferData ? [...creditTransferData, ...newDipCourse] : [...newDipCourse];
-        console.log(newDipCourse)
 
+        // Ensure transferCreditResponseList is always an array
+        const transferCreditResponseList = displayData || [];
+
+        // Add newDipCourse to the existing list
+        const newArray = [...transferCreditResponseList, newDipCourse];
+
+        setDisplayData(newArray);
+
+        console.log(newArray);
       } catch (error) {
         console.error("Failed to update DipCourse:", error);
+      }
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    } else {
+      setFile(undefined);
+    }
+  };
+  const handleFileSubmit = async () => {
+    if (file) {
+      try {
+        const newFile = await onUploadFile(file);
+        console.log("list of", newFile.transferCreditResponseList);
+        if (newFile) {
+          const newIm = newFile.transferCreditResponseList;
+          const transferCreditResponseList = displayData || [];
+
+          const newArray = [...transferCreditResponseList, ...newIm];
+
+          setDisplayData(newArray);
+          setModalData({
+            founded: newFile.foundedDipCourseIdList,
+            notFounded: newFile.notFoundedDipCourseIdList,
+          });
+          onOpen();
+        }
+      } catch (error) {
+        console.error("Failed to upload file:", error);
       }
     }
   };
@@ -111,13 +167,25 @@ console.log(creditTransferData)
             <Box>asdasd</Box>
             <Box>asdasd</Box>
           </Box>
+
           <Box
             marginTop="24px"
             display="flex"
             flexDirection="column"
             padding="24px"
           >
-            <TableContainer>
+            <Box display="flex"  flexDirection="column" gap="24px">
+
+            <Input type="file" onChange={handleFileChange} display="flex" alignItems="center"  />
+              <Button
+                label="Upload"
+                onClick={handleFileSubmit}
+                isDisabled={isPending} // Disable button while uploading
+              />
+              {isPending && <Box>Uploading...</Box>}
+            </Box>
+            
+            <TableContainer marginTop="24px">
               <Table
                 sx={{ tableLayout: "auto" }}
                 style={{
@@ -157,10 +225,9 @@ console.log(creditTransferData)
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {newArray?.map((item, itemIndex) => (
+                  {displayData.map((item, itemIndex) => (
                     <React.Fragment key={itemIndex}>
                       {item.diplomaCourseList.map((course, courseIndex) => (
-                        
                         <Tr key={course.dipCourseId}>
                           <Td style={{ borderWidth: 1, borderColor: "black" }}>
                             {course.dipCourseId}
@@ -190,19 +257,28 @@ console.log(creditTransferData)
                           {courseIndex === 0 && (
                             <>
                               <Td
-                                style={{ borderWidth: 1, borderColor: "black" }}
+                                style={{
+                                  borderWidth: 1,
+                                  borderColor: "black",
+                                }}
                                 rowSpan={item.diplomaCourseList.length}
                               >
                                 {item.universityCourse.uniCourseId}
                               </Td>
                               <Td
-                                style={{ borderWidth: 1, borderColor: "black" }}
+                                style={{
+                                  borderWidth: 1,
+                                  borderColor: "black",
+                                }}
                                 rowSpan={item.diplomaCourseList.length}
                               >
                                 {item.universityCourse.uniCourseName}
                               </Td>
                               <Td
-                                style={{ borderWidth: 1, borderColor: "black" }}
+                                style={{
+                                  borderWidth: 1,
+                                  borderColor: "black",
+                                }}
                                 rowSpan={item.diplomaCourseList.length}
                               >
                                 {item.universityCourse.uniCredit}
@@ -214,23 +290,57 @@ console.log(creditTransferData)
                     </React.Fragment>
                   ))}
                 </Tbody>
-                <Tr>
-        <Td colSpan={4}>
-          <Input
-            value={dipCourse}
-            onChange={handleDipCourseChange}
-            placeholder="Enter Dip Course ID"
-          />
-        </Td>
-        <Td>
-          <Button label={"Submit"} onClick={handleSubmit} />
-        </Td>
-      </Tr>
+                <Tfoot>
+                  <Tr>
+                    <Td colSpan={4}>
+                      <Input
+                        value={dipCourse}
+                        onChange={handleDipCourseChange}
+                        placeholder="Enter Dip Course ID"
+                      />
+                    </Td>
+                    <Td>
+                      <Button label="Submit" onClick={handleSubmit} />
+                    </Td>
+                  </Tr>
+                </Tfoot>
               </Table>
             </TableContainer>
           </Box>
         </Box>
       </Box>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Upload Results</ModalHeader>
+          <ModalBody>
+            <Box mb={4}>
+              <strong>Founded Courses:</strong>
+              <ul>
+                {modalData?.founded.map((courseId, index) => (
+                  <li key={index}>{courseId}</li>
+                ))}
+              </ul>
+            </Box>
+            <Box>
+              <strong>Not Founded Courses:</strong>
+              <ul>
+                {modalData?.notFounded.map((courseId, index) => (
+                  <li key={index}>{courseId}</li>
+                ))}
+              </ul>
+            </Box>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={onClose}
+              label={"close"}
+            ></Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }
