@@ -1,5 +1,5 @@
 "use client";
-import Button from "@/app/components/Button";
+import Button from "@/components/Button";
 import useGetCreditTransfer from "@/feature/CreditTransfer/hooks/useGetCreditTransfer";
 import {
   ICreditTransferResponse,
@@ -30,7 +30,16 @@ import {
   useDisclosure,
   ModalFooter,
   Tfoot,
+  useToast,
 } from "@chakra-ui/react";
+import {
+  useReactTable,
+  flexRender,
+  getCoreRowModel,
+  ColumnDef,
+  SortingState,
+  getSortedRowModel
+} from "@tanstack/react-table";
 import React, { ChangeEvent, useEffect, useState } from "react";
 
 export default function Main() {
@@ -38,11 +47,10 @@ export default function Main() {
   const { onUploadFile, isPending } = useGetUploadFileCreditTransfer();
   const [grades, setGrades] = useState<Record<string, string>>({});
   const [dipCourse, setDipCourse] = useState("");
+  const toast = useToast();
 
   const [file, setFile] = useState<File | undefined>(undefined);
-  const [uploadFileData, setUploadFileData] = useState<
-    IUploadFileResponse | undefined
-  >(undefined);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modalData, setModalData] = useState<
     { founded: string[]; notFounded: string[] } | undefined
@@ -59,6 +67,7 @@ export default function Main() {
     }
     return false;
   };
+
   const handleGradeChange =
     (itemIndex: number, courseIndex: number) =>
     (e: ChangeEvent<HTMLInputElement>): void => {
@@ -80,13 +89,57 @@ export default function Main() {
   const handleSubmit = async () => {
     if (dipCourse) {
       try {
-        const newDipCourse = await onUpdateDipCourse(dipCourse);
-
-        // Ensure transferCreditResponseList is always an array
         const transferCreditResponseList = displayData || [];
 
-        // Add newDipCourse to the existing list
-        const newArray = [...transferCreditResponseList, newDipCourse];
+        const isDipCourseExists = transferCreditResponseList.some((item) =>
+          item.diplomaCourseList.some(
+            (course) => course.dipCourseId === dipCourse
+          )
+        );
+
+        if (isDipCourseExists) {
+          toast({
+            title: "DipCourse already exists in the list.",
+            status: "error",
+            isClosable: true,
+          });
+          return;
+        }
+
+        const newDipCourse = await onUpdateDipCourse(dipCourse);
+
+        const existingIndex = transferCreditResponseList.findIndex(
+          (item) =>
+            item.universityCourse.uniCourseId ===
+            newDipCourse.universityCourse.uniCourseId
+        );
+
+        let newArray;
+
+        if (existingIndex > -1) {
+          const mergedDiplomaCourseList = [
+            ...transferCreditResponseList[existingIndex].diplomaCourseList,
+            ...newDipCourse.diplomaCourseList,
+          ];
+
+          const uniqueDiplomaCourseList = mergedDiplomaCourseList.filter(
+            (course, index, self) =>
+              index === self.findIndex((c) => c.id === course.id)
+          );
+
+          const updatedItem = {
+            ...transferCreditResponseList[existingIndex],
+            diplomaCourseList: uniqueDiplomaCourseList,
+          };
+
+          newArray = [
+            ...transferCreditResponseList.slice(0, existingIndex),
+            updatedItem,
+            ...transferCreditResponseList.slice(existingIndex + 1),
+          ];
+        } else {
+          newArray = [...transferCreditResponseList, newDipCourse];
+        }
 
         setDisplayData(newArray);
 
@@ -99,11 +152,34 @@ export default function Main() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      const fileSizeInMB = selectedFile.size / 1024 / 1024; // Convert bytes to MB
+      const allowedFileTypes = ["image/png", "image/jpeg", "application/pdf"];
+
+      if (allowedFileTypes.includes(selectedFile.type)) {
+        if (fileSizeInMB <= 10) {
+          setFile(selectedFile);
+        } else {
+          toast({
+            title: "File size should not exceed 10 MB.",
+            status: "error",
+            isClosable: true,
+          });
+          setFile(undefined);
+        }
+      } else {
+        toast({
+          title: "Only PNG, JPG, and PDF files are allowed.",
+          status: "error",
+          isClosable: true,
+        });
+        setFile(undefined);
+      }
     } else {
       setFile(undefined);
     }
   };
+
   const handleFileSubmit = async () => {
     if (file) {
       try {
@@ -127,37 +203,76 @@ export default function Main() {
       }
     }
   };
+  const columns = React.useMemo<ColumnDef<ICreditTransferResponse>[]>(
+    () => [
+      {
+        header: "รหัสวิชา\nCourse Code",
+        accessorKey: "diplomaCourseList[0].dipCourseId",
+        cell: (info) => info.getValue(),
+      },
+      {
+        header: "วิชาที่ขอเทียบโอน\nCourse Transferred From",
+        accessorKey: "diplomaCourseList[0].dipCourseName",
+        cell: (info) => info.getValue(),
+      },
+      {
+        header: "เกรด\nGrade",
+        accessorKey: "diplomaCourseList[0].grade",
+        cell: (info) => {
+          const { row } = info;
+          const itemIndex = row.index;
+          const courseIndex = 0;
+          const key = `${itemIndex}-${courseIndex}`;
+          return (
+            <Input
+              sx={{
+                border: "none",
+                width: "60px",
+                height: "30px",
+              }}
+              value={grades[key] || ""}
+              onChange={handleGradeChange(itemIndex, courseIndex)}
+            />
+          );
+        },
+      },
+      {
+        header: "หน่วยกิต\nCredit",
+        accessorKey: "diplomaCourseList[0].dipCredit",
+        cell: (info) => info.getValue(),
+      },
+      {
+        header: "รหัสวิชา\nCourse Code",
+        accessorKey: "universityCourse.uniCourseId",
+        cell: (info) => info.getValue(),
+      },
+      {
+        header: "วิชาที่เทียบโอนหน่วยกิตได้\nTransferred Course Equivalents",
+        accessorKey: "universityCourse.uniCourseName",
+        cell: (info) => info.getValue(),
+      },
+      {
+        header: "หน่วยกิต\nCredit",
+        accessorKey: "universityCourse.uniCredit",
+        cell: (info) => info.getValue(),
+      },
+    ],
+    [grades, handleGradeChange]
+  );
   return (
     <Box
-      width="100%"
       height="100vh"
-      background="radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%)"
+      // background="radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%)"
     >
-      <Box display="flex" width="100%" height="100%" backgroundColor="white">
-        <Box
-          display="flex"
-          flexDirection="column"
-          padding="24px"
-          width="20%"
-          height="100%"
-          borderWidth="1px"
-          borderColor="black"
-          alignItems="center"
-          backgroundColor="yellow"
-        >
-          <Box>asdasd</Box>
-          <Box>asdasd</Box>
-          <Box>asdasd</Box>
-          <Box>asdasd</Box>
-        </Box>
+      <Box display="flex" height="100%">
         <Box
           display="flex"
           flexDirection="column"
           width="100%"
           height="100%"
-          backgroundColor="white"
+          // backgroundColor="white"
         >
-          <Box
+          {/* <Box
             display="flex"
             alignItems="center"
             backgroundColor="blue"
@@ -166,60 +281,68 @@ export default function Main() {
             <Box>asdasd</Box>
             <Box>asdasd</Box>
             <Box>asdasd</Box>
-          </Box>
+          </Box> */}
 
           <Box
             marginTop="24px"
             display="flex"
             flexDirection="column"
             padding="24px"
+            alignItems="center"
+            width="100%"
           >
-            <Box display="flex"  flexDirection="column" gap="24px">
-
-            <Input type="file" onChange={handleFileChange} display="flex" alignItems="center"  />
+            <Box display="flex" flexDirection="column" gap="24px">
+              <Input
+                type="file"
+                onChange={handleFileChange}
+                display="flex"
+                alignItems="center"
+              />
               <Button
                 label="Upload"
                 onClick={handleFileSubmit}
-                isDisabled={isPending} // Disable button while uploading
+                isLoading={isPending}
               />
               {isPending && <Box>Uploading...</Box>}
             </Box>
-            
-            <TableContainer marginTop="24px">
-              <Table
-                sx={{ tableLayout: "auto" }}
-                style={{
-                  borderWidth: 2,
-                  borderColor: "pink",
-                  borderRadius: 16,
-                }}
-              >
-                <Thead style={{ borderWidth: 1, borderColor: "black" }}>
+
+            <TableContainer
+              marginTop="24px"
+              sx={{ tableLayout: "auto" }}
+              style={{
+                borderWidth: 1,
+                borderColor: "pink",
+                borderRadius: 16,
+                maxWidth: "100%",
+              }}
+            >
+              <Table size="sm">
+                <Thead bgColor="#D7D7D7">
                   <Tr>
-                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                    <Th paddingY="20px">
                       <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>
                     </Th>
-                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                    <Th paddingY="20px">
                       <Box whiteSpace="pre-wrap">
                         วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
                       </Box>
                     </Th>
-                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                    <Th paddingY="20px">
                       <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>
                     </Th>
-                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                    <Th paddingY="20px">
                       <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
                     </Th>
-                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                    <Th paddingY="20px">
                       <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>
                     </Th>
-                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                    <Th>
                       <Box whiteSpace="pre-wrap">
                         วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course
                         Equivalents
                       </Box>
                     </Th>
-                    <Th style={{ borderWidth: 1, borderColor: "black" }}>
+                    <Th paddingY="20px">
                       <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
                     </Th>
                   </Tr>
@@ -228,14 +351,15 @@ export default function Main() {
                   {displayData.map((item, itemIndex) => (
                     <React.Fragment key={itemIndex}>
                       {item.diplomaCourseList.map((course, courseIndex) => (
-                        <Tr key={course.dipCourseId}>
-                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
-                            {course.dipCourseId}
-                          </Td>
-                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
-                            {course.dipCourseName}
-                          </Td>
-                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
+                        <Tr
+                          key={course.dipCourseId}
+                          borderBottom="gray"
+                          borderWidth="2px"
+                          // bgColor={item.transferable ? "white" : "red"}
+                        >
+                          <Td>{course.dipCourseId}</Td>
+                          <Td>{course.dipCourseName}</Td>
+                          <Td>
                             <Input
                               sx={{
                                 border: "none",
@@ -251,36 +375,16 @@ export default function Main() {
                               )}
                             />
                           </Td>
-                          <Td style={{ borderWidth: 1, borderColor: "black" }}>
-                            {course.dipCredit}
-                          </Td>
+                          <Td>{course.dipCredit}</Td>
                           {courseIndex === 0 && (
                             <>
-                              <Td
-                                style={{
-                                  borderWidth: 1,
-                                  borderColor: "black",
-                                }}
-                                rowSpan={item.diplomaCourseList.length}
-                              >
+                              <Td rowSpan={item.diplomaCourseList.length}>
                                 {item.universityCourse.uniCourseId}
                               </Td>
-                              <Td
-                                style={{
-                                  borderWidth: 1,
-                                  borderColor: "black",
-                                }}
-                                rowSpan={item.diplomaCourseList.length}
-                              >
+                              <Td rowSpan={item.diplomaCourseList.length}>
                                 {item.universityCourse.uniCourseName}
                               </Td>
-                              <Td
-                                style={{
-                                  borderWidth: 1,
-                                  borderColor: "black",
-                                }}
-                                rowSpan={item.diplomaCourseList.length}
-                              >
+                              <Td rowSpan={item.diplomaCourseList.length}>
                                 {item.universityCourse.uniCredit}
                               </Td>
                             </>

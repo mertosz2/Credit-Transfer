@@ -1,7 +1,7 @@
 "use client"
 import { Box } from "@chakra-ui/react";
-import TextField from "./components/TextField";
-import Button from "./components/Button";
+import TextField from "../components/TextField";
+import Button from "../components/Button";
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
