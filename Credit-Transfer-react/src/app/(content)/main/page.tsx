@@ -32,14 +32,6 @@ import {
   Tfoot,
   useToast,
 } from "@chakra-ui/react";
-import {
-  useReactTable,
-  flexRender,
-  getCoreRowModel,
-  ColumnDef,
-  SortingState,
-  getSortedRowModel
-} from "@tanstack/react-table";
 import React, { ChangeEvent, useEffect, useState } from "react";
 
 export default function Main() {
@@ -203,62 +195,7 @@ export default function Main() {
       }
     }
   };
-  const columns = React.useMemo<ColumnDef<ICreditTransferResponse>[]>(
-    () => [
-      {
-        header: "รหัสวิชา\nCourse Code",
-        accessorKey: "diplomaCourseList[0].dipCourseId",
-        cell: (info) => info.getValue(),
-      },
-      {
-        header: "วิชาที่ขอเทียบโอน\nCourse Transferred From",
-        accessorKey: "diplomaCourseList[0].dipCourseName",
-        cell: (info) => info.getValue(),
-      },
-      {
-        header: "เกรด\nGrade",
-        accessorKey: "diplomaCourseList[0].grade",
-        cell: (info) => {
-          const { row } = info;
-          const itemIndex = row.index;
-          const courseIndex = 0;
-          const key = `${itemIndex}-${courseIndex}`;
-          return (
-            <Input
-              sx={{
-                border: "none",
-                width: "60px",
-                height: "30px",
-              }}
-              value={grades[key] || ""}
-              onChange={handleGradeChange(itemIndex, courseIndex)}
-            />
-          );
-        },
-      },
-      {
-        header: "หน่วยกิต\nCredit",
-        accessorKey: "diplomaCourseList[0].dipCredit",
-        cell: (info) => info.getValue(),
-      },
-      {
-        header: "รหัสวิชา\nCourse Code",
-        accessorKey: "universityCourse.uniCourseId",
-        cell: (info) => info.getValue(),
-      },
-      {
-        header: "วิชาที่เทียบโอนหน่วยกิตได้\nTransferred Course Equivalents",
-        accessorKey: "universityCourse.uniCourseName",
-        cell: (info) => info.getValue(),
-      },
-      {
-        header: "หน่วยกิต\nCredit",
-        accessorKey: "universityCourse.uniCredit",
-        cell: (info) => info.getValue(),
-      },
-    ],
-    [grades, handleGradeChange]
-  );
+  
   return (
     <Box
       height="100vh"
