@@ -1,5 +1,4 @@
 import services from "@/config/axiosConfig";
-import { IGetDipCourseById } from "../interface/getDipCourseById";
 import { ICreditTransferResponse } from "@/feature/CreditTransfer/interface/CreditTransfer";
 
 export const getDipcourseById = async (dipCourseId: string) => {

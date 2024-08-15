@@ -33,13 +33,17 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { ChangeEvent, useEffect, useState } from "react";
+import { Icon } from "@chakra-ui/react";
+import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import useTransferable from "@/feature/CreditTransfer/hooks/useTransferable";
 
 export default function Main() {
   const { onUpdateDipCourse } = useGetDipCourseById();
   const { onUploadFile, isPending } = useGetUploadFileCreditTransfer();
-  const [grades, setGrades] = useState<Record<string, string>>({});
+  const [grades, setGrades] = useState<Record<string, number>>({});
   const [dipCourse, setDipCourse] = useState("");
   const toast = useToast();
+  const {onTransferable} =useTransferable()
 
   const [file, setFile] = useState<File | undefined>(undefined);
 
@@ -60,23 +64,40 @@ export default function Main() {
     return false;
   };
 
-  const handleGradeChange =
-    (itemIndex: number, courseIndex: number) =>
-    (e: ChangeEvent<HTMLInputElement>): void => {
-      const { value } = e.target;
-      const key = `${itemIndex}-${courseIndex}`;
-
-      if (isValidNumberInput(value)) {
-        setGrades((prevGrades) => ({
-          ...prevGrades,
-          [key]: value,
-        }));
-      }
-    };
-
+  const updateGradesInDisplayData = () => {
+    setDisplayData((prevDisplayData) => 
+      prevDisplayData.map((item, itemIndex) => {
+        return {
+          ...item,
+          diplomaCourseList: item.diplomaCourseList.map((course, courseIndex) => {
+            const key = `${itemIndex}-${courseIndex}`;
+            const grade = grades[key] !== undefined ? grades[key] : 0; // ใช้ค่า number ที่มีจุดทศนิยม หรือค่าเริ่มต้นเป็น 0
+            return {
+              ...course,
+              grade // เพิ่มเกรดที่กรอกไป
+            };
+          })
+        };
+      })
+    );
+  };
+  const handleGradeChange = (itemIndex: number, courseIndex: number) => (e: ChangeEvent<HTMLInputElement>): void => {
+    const { value } = e.target;
+    const key = `${itemIndex}-${courseIndex}`;
+  
+    if (isValidNumberInput(value)) {
+      // แปลงค่าเป็น number ก่อนอัปเดต state
+      setGrades((prevGrades) => {
+        const updatedGrades = { ...prevGrades, [key]: parseFloat(value) || 0 };
+        updateGradesInDisplayData(); // เรียกใช้เพื่อรวมเกรดใน displayData
+        return updatedGrades;
+      });
+    }
+  };
   const handleDipCourseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDipCourse(e.target.value);
   };
+
 
   const handleSubmit = async () => {
     if (dipCourse) {
@@ -135,7 +156,7 @@ export default function Main() {
 
         setDisplayData(newArray);
 
-        console.log(newArray);
+        console.log("Updated Display Data:", newArray);
       } catch (error) {
         console.error("Failed to update DipCourse:", error);
       }
@@ -196,6 +217,73 @@ export default function Main() {
     }
   };
   
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof ICreditTransferResponse | string | null;
+    direction: "ascending" | "descending";
+  } | null>(null);
+
+  // ฟังก์ชันสำหรับจัดการการเรียงลำดับ
+  const handleSort = (key: keyof ICreditTransferResponse | string) => {
+    let direction: "ascending" | "descending" = "ascending";
+
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "ascending"
+    ) {
+      direction = "descending";
+    }
+
+    const sortedData = [...displayData].sort((a, b) => {
+      const aValue = Array.isArray(a)
+        ? getNestedValue(a[0], key)
+        : getNestedValue(a, key);
+      const bValue = Array.isArray(b)
+        ? getNestedValue(b[0], key)
+        : getNestedValue(b, key);
+
+      const aNum = isNaN(Number(aValue)) ? aValue : Number(aValue);
+      const bNum = isNaN(Number(bValue)) ? bValue : Number(bValue);
+
+      if (aNum < bNum) {
+        return direction === "ascending" ? -1 : 1;
+      }
+      if (aNum > bNum) {
+        return direction === "ascending" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setDisplayData(sortedData);
+    setSortConfig({ key, direction });
+  };
+
+  // ฟังก์ชันสำหรับดึงค่า nested key
+  const getNestedValue = (obj: any, path: string) => {
+    const pathParts = path.split(".");
+    let value = obj;
+
+    for (const part of pathParts) {
+      if (Array.isArray(value)) {
+        // Handle array case
+        value = value.map((item) => item[part]);
+        if (value.length > 0) {
+          value = value[0]; // Take the first item in the array
+        } else {
+          value = undefined;
+        }
+      } else {
+        value = value ? value[part] : undefined;
+      }
+    }
+
+    // Remove hyphens
+    return typeof value === "string" ? value.replace(/-/g, "") : value;
+  };
+  const onSubmitCreditTransferData =async () =>{
+ const creditTransferData = await onTransferable(displayData)
+ console.log(creditTransferData)
+  }
   return (
     <Box
       height="100vh"
@@ -256,31 +344,140 @@ export default function Main() {
               <Table size="sm">
                 <Thead bgColor="#D7D7D7">
                   <Tr>
-                    <Th paddingY="20px">
-                      <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>
-                    </Th>
-                    <Th paddingY="20px">
-                      <Box whiteSpace="pre-wrap">
-                        วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
+                    <Th
+                      onClick={() =>
+                        handleSort("diplomaCourseList.dipCourseId")
+                      }
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Box whiteSpace="pre-wrap">
+                          รหัสวิชา{"\n"}Course Code
+                        </Box>
+                        {sortConfig?.key ===
+                          "diplomaCourseList.dipCourseId" && (
+                          <Icon
+                            as={
+                              sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                            ml={2}
+                          />
+                        )}
                       </Box>
                     </Th>
-                    <Th paddingY="20px">
-                      <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>
-                    </Th>
-                    <Th paddingY="20px">
-                      <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
-                    </Th>
-                    <Th paddingY="20px">
-                      <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>
-                    </Th>
-                    <Th>
-                      <Box whiteSpace="pre-wrap">
-                        วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course
-                        Equivalents
+                    <Th
+                      onClick={() =>
+                        handleSort("universityCourse.uniCourseName")
+                      }
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Box whiteSpace="pre-wrap">
+                          วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
+                        </Box>
+                        {sortConfig?.key ===
+                          "universityCourse.uniCourseName" && (
+                          <Icon
+                            as={
+                              sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                            ml={2}
+                          />
+                        )}
                       </Box>
                     </Th>
-                    <Th paddingY="20px">
-                      <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
+                    <Th onClick={() => handleSort("grades")}>
+                      <Box display="flex" alignItems="center">
+                        <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>
+                        {sortConfig?.key === "grades" && (
+                          <Icon
+                            as={
+                              sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                            ml={2}
+                          />
+                        )}
+                      </Box>
+                    </Th>
+                    <Th
+                      onClick={() => handleSort("diplomaCourseList.dipCredit")}
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
+                        {sortConfig?.key === "diplomaCourseList.dipCredit" && (
+                          <Icon
+                            as={
+                              sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                            ml={2}
+                          />
+                        )}
+                      </Box>
+                    </Th>
+                    <Th
+                      onClick={() => handleSort("universityCourse.uniCourseId")}
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Box whiteSpace="pre-wrap">
+                          รหัสวิชา{"\n"}Course Code
+                        </Box>
+                        {sortConfig?.key === "universityCourse.uniCourseId" && (
+                          <Icon
+                            as={
+                              sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                            ml={2}
+                          />
+                        )}
+                      </Box>
+                    </Th>
+                    <Th
+                      onClick={() =>
+                        handleSort("universityCourse.uniCourseName")
+                      }
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Box whiteSpace="pre-wrap">
+                          วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course
+                          Equivalents
+                        </Box>
+                        {sortConfig?.key ===
+                          "universityCourse.uniCourseName" && (
+                          <Icon
+                            as={
+                              sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                            ml={2}
+                          />
+                        )}
+                      </Box>
+                    </Th>
+                    <Th
+                      onClick={() => handleSort("universityCourse.uniCredit")}
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
+                        {sortConfig?.key === "universityCourse.uniCredit" && (
+                          <Icon
+                            as={
+                              sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                            ml={2}
+                          />
+                        )}
+                      </Box>
                     </Th>
                   </Tr>
                 </Thead>
@@ -292,12 +489,12 @@ export default function Main() {
                           key={course.dipCourseId}
                           borderBottom="gray"
                           borderWidth="2px"
-                          // bgColor={item.transferable ? "white" : "red"}
                         >
                           <Td>{course.dipCourseId}</Td>
                           <Td>{course.dipCourseName}</Td>
                           <Td>
-                            <Input
+                            <Input type="number"
+                            step="0.1"
                               sx={{
                                 border: "none",
                                 width: "60px",
@@ -382,6 +579,8 @@ export default function Main() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <Button label="Summ" onClick={onSubmitCreditTransferData}></Button>
     </Box>
   );
 }
+//onClick={()=>{console.log(displayData)}}

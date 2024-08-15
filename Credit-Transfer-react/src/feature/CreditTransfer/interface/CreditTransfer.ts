@@ -22,3 +22,4 @@ export interface IUniversityCourse {
 export interface ICreditResponseList {
   list: ICreditTransferResponse[];
 }
+
