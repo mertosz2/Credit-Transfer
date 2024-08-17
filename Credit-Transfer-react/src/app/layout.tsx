@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
 import { Box } from "@chakra-ui/react";
+import ImportButton from "@/components/ImportButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,7 +36,6 @@ export default function RootLayout({
               backgroundColor="#000080"
               textColor="white"
             >
-              <Box>asdasd</Box>
               <Box>asdasd</Box>
               <Box>asdasd</Box>
               <Box>asdasd</Box>

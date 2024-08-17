@@ -1,4 +1,6 @@
 export interface ICreditTransferResponse {
+  dipCourseId: any;
+  uniCredit: number;
   diplomaCourseList: IDiplomaCourseList[];
   universityCourse: IUniversityCourse;
   transferable: boolean;

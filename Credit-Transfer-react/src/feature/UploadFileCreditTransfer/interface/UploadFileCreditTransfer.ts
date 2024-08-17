@@ -7,4 +7,5 @@ export interface IUploadFileResponse {
   totalNotFounded: number;
   transferCreditResponseList: ICreditTransferResponse[];
   total: number;
+  duplicates?: string[]; 
 }

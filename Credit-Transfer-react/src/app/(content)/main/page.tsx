@@ -1,17 +1,12 @@
-"use client";
-import Button from "@/components/Button";
-import useGetCreditTransfer from "@/feature/CreditTransfer/hooks/useGetCreditTransfer";
+"use client"
+import Button from "@/components/Button"
 import {
   ICreditTransferResponse,
   IDiplomaCourseList,
-} from "@/feature/CreditTransfer/interface/CreditTransfer";
-import useGetDipCourseById from "@/feature/getDipCourseById/hooks/useGetDipCourseById";
-import useGetUploadFileCreditTransfer from "@/feature/UploadFileCreditTransfer/hooks/useGetUploadFileCreditTransfer";
-import { IUploadFileResponse } from "@/feature/UploadFileCreditTransfer/interface/UploadFileCreditTransfer";
-import useCreditTransferStore, {
-  selectOnSetCreditTransferData,
-  selectOnSetUniversityCourseData,
-} from "@/stores/creditTransferStore";
+  IUniversityCourse
+} from "@/feature/CreditTransfer/interface/CreditTransfer"
+import useGetDipCourseById from "@/feature/getDipCourseById/hooks/useGetDipCourseById"
+import useGetUploadFileCreditTransfer from "@/feature/UploadFileCreditTransfer/hooks/useGetUploadFileCreditTransfer"
 import {
   Box,
   Table,
@@ -31,325 +26,462 @@ import {
   ModalFooter,
   Tfoot,
   useToast,
-} from "@chakra-ui/react";
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { Icon } from "@chakra-ui/react";
-import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import useTransferable from "@/feature/CreditTransfer/hooks/useTransferable";
+  Icon
+} from "@chakra-ui/react"
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react"
+import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons"
+import useTransferable from "@/feature/CreditTransfer/hooks/useTransferable"
+import { RiAddFill, RiCheckLine, RiErrorWarningFill } from "@remixicon/react"
 
 export default function Main() {
-  const { onUpdateDipCourse } = useGetDipCourseById();
-  const { onUploadFile, isPending } = useGetUploadFileCreditTransfer();
-  const [grades, setGrades] = useState<Record<string, number>>({});
-  const [dipCourse, setDipCourse] = useState("");
-  const toast = useToast();
-  const {onTransferable} =useTransferable()
+  const { onUpdateDipCourse } = useGetDipCourseById()
+  const { onUploadFile, isPending } = useGetUploadFileCreditTransfer()
+  const [grades, setGrades] = useState<Record<string, number>>({})
+  const [dipCourse, setDipCourse] = useState("")
+  const toast = useToast()
+  const { onTransferable } = useTransferable()
 
-  const [file, setFile] = useState<File | undefined>(undefined);
+  const [file, setFile] = useState<File | undefined>(undefined)
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const {
+    isOpen: FileImport,
+    onOpen: OpenFileImport,
+    onClose: CloseFileImport
+  } = useDisclosure()
+  const {
+    isOpen: AddCoure,
+    onOpen: OpenAddCourse,
+    onClose: CloseAddCourse
+  } = useDisclosure()
   const [modalData, setModalData] = useState<
-    { founded: string[]; notFounded: string[] } | undefined
-  >(undefined);
-  const [displayData, setDisplayData] = useState<ICreditTransferResponse[]>([]);
+    | {
+        founded: string[]
+        notFounded: string[]
+        duplicates?: string[]
+      }
+    | undefined
+  >(undefined)
+  const [displayData, setDisplayData] = useState<ICreditTransferResponse[]>([])
 
   const isValidNumberInput = (value: string): boolean => {
-    if (value === "") return true;
+    if (value === "") return true
     if (/^4(\.0)?$/.test(value)) {
-      return true;
+      return true
     }
     if (/^[1-3](\.[05]?)?$/.test(value)) {
-      return true;
+      return true
     }
-    return false;
-  };
+    return false
+  }
 
-  const updateGradesInDisplayData = () => {
-    setDisplayData((prevDisplayData) => 
-      prevDisplayData.map((item, itemIndex) => {
-        return {
-          ...item,
-          diplomaCourseList: item.diplomaCourseList.map((course, courseIndex) => {
-            const key = `${itemIndex}-${courseIndex}`;
-            const grade = grades[key] !== undefined ? grades[key] : 0; // ใช้ค่า number ที่มีจุดทศนิยม หรือค่าเริ่มต้นเป็น 0
-            return {
-              ...course,
-              grade // เพิ่มเกรดที่กรอกไป
-            };
-          })
-        };
-      })
-    );
-  };
-  const handleGradeChange = (itemIndex: number, courseIndex: number) => (e: ChangeEvent<HTMLInputElement>): void => {
-    const { value } = e.target;
-    const key = `${itemIndex}-${courseIndex}`;
-  
-    if (isValidNumberInput(value)) {
-      // แปลงค่าเป็น number ก่อนอัปเดต state
-      setGrades((prevGrades) => {
-        const updatedGrades = { ...prevGrades, [key]: parseFloat(value) || 0 };
-        updateGradesInDisplayData(); // เรียกใช้เพื่อรวมเกรดใน displayData
-        return updatedGrades;
-      });
+  const calculateTransferable = (
+    diplomaCourseList: IDiplomaCourseList[],
+    universityCourse: IUniversityCourse
+  ): boolean => {
+    // ตรวจสอบว่ามีหลักสูตรมากกว่าหรือเท่ากับ 2 รายการ
+    if (diplomaCourseList.length >= 2) {
+      // ตรวจสอบว่าเกรดทั้งหมดใน diplomaCourseList >= 2 หรือไม่
+      const allGradesValid = diplomaCourseList.every(
+        (course) => course.grade >= 2
+      )
+
+      if (allGradesValid) {
+        // รวมค่า dipCredit ใน diplomaCourseList
+        const totalDipCredit = diplomaCourseList.reduce(
+          (total, course) => total + course.dipCredit,
+          0
+        )
+
+        // เปรียบเทียบ totalDipCredit กับ uniCredit
+        return totalDipCredit >= universityCourse.uniCredit
+      } else {
+        return false
+      }
+    } else {
+      // ถ้า diplomaCourseList.length < 2 ให้ตรวจสอบ dipCredit และ grade แต่ละรายการ
+      return diplomaCourseList.some(
+        (course) =>
+          course.dipCredit >= universityCourse.uniCredit && course.grade >= 2
+      )
     }
-  };
+  }
+
+  const recheckGrade = useCallback(() => {
+    const updatedData = displayData.map((item) => ({
+      ...item,
+      transferable: calculateTransferable(
+        item.diplomaCourseList,
+        item.universityCourse
+      )
+    }))
+    setDisplayData(updatedData)
+  }, [displayData])
+
+  useEffect(() => {
+    recheckGrade()
+  }, [recheckGrade])
+
+  const updateGradesInDisplayData = useCallback(() => {
+    setDisplayData((prevDisplayData) =>
+      prevDisplayData.map((item, itemIndex) => ({
+        ...item,
+        diplomaCourseList: item.diplomaCourseList.map((course, courseIndex) => {
+          const key = `${itemIndex}-${courseIndex}`
+          const grade = grades[key] !== undefined ? grades[key] : 0
+          return {
+            ...course,
+            grade
+          }
+        }),
+        transferable: calculateTransferable(
+          item.diplomaCourseList,
+          item.universityCourse
+        )
+      }))
+    )
+  }, [grades])
+
+  useEffect(() => {
+    updateGradesInDisplayData()
+  }, [grades, updateGradesInDisplayData])
+
+  const handleGradeChange =
+    (itemIndex: number, courseIndex: number) =>
+    (e: ChangeEvent<HTMLInputElement>): void => {
+      const { value } = e.target
+      const key = `${itemIndex}-${courseIndex}`
+
+      if (isValidNumberInput(value)) {
+        // แปลงค่าเป็น number ก่อนอัปเดต state
+        setGrades((prevGrades) => {
+          const updatedGrades = {
+            ...prevGrades,
+            [key]: parseFloat(value) || 0
+          }
+          updateGradesInDisplayData() // เรียกใช้เพื่อรวมเกรดใน displayData
+          return updatedGrades
+        })
+      }
+    }
   const handleDipCourseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDipCourse(e.target.value);
-  };
-
+    setDipCourse(e.target.value)
+  }
 
   const handleSubmit = async () => {
     if (dipCourse) {
       try {
-        const transferCreditResponseList = displayData || [];
+        const transferCreditResponseList = displayData || []
 
         const isDipCourseExists = transferCreditResponseList.some((item) =>
           item.diplomaCourseList.some(
             (course) => course.dipCourseId === dipCourse
           )
-        );
+        )
 
         if (isDipCourseExists) {
           toast({
             title: "DipCourse already exists in the list.",
             status: "error",
-            isClosable: true,
-          });
-          return;
+            isClosable: true
+          })
+          return
         }
 
-        const newDipCourse = await onUpdateDipCourse(dipCourse);
+        const newDipCourse = await onUpdateDipCourse(dipCourse)
 
         const existingIndex = transferCreditResponseList.findIndex(
           (item) =>
             item.universityCourse.uniCourseId ===
             newDipCourse.universityCourse.uniCourseId
-        );
+        )
 
-        let newArray;
+        let newArray
 
         if (existingIndex > -1) {
           const mergedDiplomaCourseList = [
             ...transferCreditResponseList[existingIndex].diplomaCourseList,
-            ...newDipCourse.diplomaCourseList,
-          ];
+            ...newDipCourse.diplomaCourseList
+          ]
 
           const uniqueDiplomaCourseList = mergedDiplomaCourseList.filter(
             (course, index, self) =>
               index === self.findIndex((c) => c.id === course.id)
-          );
+          )
 
           const updatedItem = {
             ...transferCreditResponseList[existingIndex],
-            diplomaCourseList: uniqueDiplomaCourseList,
-          };
+            diplomaCourseList: uniqueDiplomaCourseList
+          }
 
           newArray = [
             ...transferCreditResponseList.slice(0, existingIndex),
             updatedItem,
-            ...transferCreditResponseList.slice(existingIndex + 1),
-          ];
+            ...transferCreditResponseList.slice(existingIndex + 1)
+          ]
         } else {
-          newArray = [...transferCreditResponseList, newDipCourse];
+          newArray = [...transferCreditResponseList, newDipCourse]
         }
-
-        setDisplayData(newArray);
-
-        console.log("Updated Display Data:", newArray);
+        CloseAddCourse()
+        setDisplayData(newArray)
+        console.log("Updated Display Data:", newArray)
       } catch (error) {
-        console.error("Failed to update DipCourse:", error);
+        console.error("Failed to update DipCourse:", error)
       }
     }
-  };
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
-      const fileSizeInMB = selectedFile.size / 1024 / 1024; // Convert bytes to MB
-      const allowedFileTypes = ["image/png", "image/jpeg", "application/pdf"];
+      const selectedFile = e.target.files[0]
+      const fileSizeInMB = selectedFile.size / 1024 / 1024 // Convert bytes to MB
+      const allowedFileTypes = ["image/png", "image/jpeg", "application/pdf"]
 
       if (allowedFileTypes.includes(selectedFile.type)) {
         if (fileSizeInMB <= 10) {
-          setFile(selectedFile);
+          setFile(selectedFile)
         } else {
           toast({
             title: "File size should not exceed 10 MB.",
             status: "error",
-            isClosable: true,
-          });
-          setFile(undefined);
+            isClosable: true
+          })
+          setFile(undefined)
         }
       } else {
         toast({
           title: "Only PNG, JPG, and PDF files are allowed.",
           status: "error",
-          isClosable: true,
-        });
-        setFile(undefined);
+          isClosable: true
+        })
+        setFile(undefined)
       }
     } else {
-      setFile(undefined);
+      setFile(undefined)
     }
-  };
+  }
 
   const handleFileSubmit = async () => {
     if (file) {
       try {
-        const newFile = await onUploadFile(file);
-        console.log("list of", newFile.transferCreditResponseList);
+        const newFile = await onUploadFile(file)
+        console.log("list of", newFile.transferCreditResponseList)
+
         if (newFile) {
-          const newIm = newFile.transferCreditResponseList;
-          const transferCreditResponseList = displayData || [];
+          const newIm = newFile.transferCreditResponseList
+          const transferCreditResponseList = displayData || []
 
-          const newArray = [...transferCreditResponseList, ...newIm];
+          // สร้าง Set ของ dipCourseId ที่มีอยู่ใน displayData
+          const existingIds = new Set(
+            transferCreditResponseList.flatMap((item) =>
+              item.diplomaCourseList.map((course) => course.dipCourseId)
+            )
+          )
 
-          setDisplayData(newArray);
+          // หาข้อมูลใหม่ที่ไม่มีใน existingIds
+          const uniqueNewItems = newIm.filter(
+            (item) =>
+              !item.diplomaCourseList.some((course) =>
+                existingIds.has(course.dipCourseId)
+              )
+          )
+
+          // คำนวณ dipCourseId ที่ซ้ำ
+          const duplicateIds = new Set<string>()
+
+          newIm.forEach((item) =>
+            item.diplomaCourseList.forEach((course) => {
+              if (existingIds.has(course.dipCourseId)) {
+                duplicateIds.add(course.dipCourseId)
+              }
+            })
+          )
+
+          const duplicateIdsArray = Array.from(duplicateIds)
+
+          // อัปเดต displayData และ modalData
+          const newArray = [...transferCreditResponseList, ...uniqueNewItems]
+          setDisplayData(newArray)
           setModalData({
             founded: newFile.foundedDipCourseIdList,
             notFounded: newFile.notFoundedDipCourseIdList,
-          });
-          onOpen();
+            duplicates: duplicateIdsArray // แสดงข้อมูลซ้ำใน modal
+          })
+
+          // เปิด modal สำหรับการแสดงผล
+          if (displayData.length > 0) {
+            onOpen()
+          } else {
+            onOpen()
+          }
+
+          CloseFileImport()
         }
       } catch (error) {
-        console.error("Failed to upload file:", error);
+        console.error("Failed to upload file:", error)
       }
     }
-  };
-  
+  }
+
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof ICreditTransferResponse | string | null;
-    direction: "ascending" | "descending";
-  } | null>(null);
+    key: keyof ICreditTransferResponse | string | null
+    direction: "ascending" | "descending"
+  } | null>(null)
+
+  const getNestedValue = (obj: any, path: string) => {
+    const pathParts = path.split(".")
+    let value = obj
+
+    for (const part of pathParts) {
+      if (Array.isArray(value)) {
+        value = value.map((item) => item[part])
+        if (value.length > 0) {
+          value = value[0] // Take the first item in the array
+        } else {
+          value = undefined
+        }
+      } else {
+        value = value ? value[part] : undefined
+      }
+    }
+
+    return typeof value === "string" ? value.replace(/-/g, "") : value
+  }
 
   // ฟังก์ชันสำหรับจัดการการเรียงลำดับ
   const handleSort = (key: keyof ICreditTransferResponse | string) => {
-    let direction: "ascending" | "descending" = "ascending";
+    let direction: "ascending" | "descending" = "ascending"
 
     if (
       sortConfig &&
       sortConfig.key === key &&
       sortConfig.direction === "ascending"
     ) {
-      direction = "descending";
+      direction = "descending"
     }
 
-    const sortedData = [...displayData].sort((a, b) => {
-      const aValue = Array.isArray(a)
-        ? getNestedValue(a[0], key)
-        : getNestedValue(a, key);
-      const bValue = Array.isArray(b)
-        ? getNestedValue(b[0], key)
-        : getNestedValue(b, key);
+    console.log("Sorting by:", key, direction)
 
-      const aNum = isNaN(Number(aValue)) ? aValue : Number(aValue);
-      const bNum = isNaN(Number(bValue)) ? bValue : Number(bValue);
+    const tempData = displayData
+    const sortedData = [...tempData].sort((a, b) => {
+      const aValue = getNestedValue(a, key)
+      const bValue = getNestedValue(b, key)
+
+      const aNum =
+        typeof aValue === "number"
+          ? aValue
+          : isNaN(Number(aValue))
+            ? 0
+            : Number(aValue)
+      const bNum =
+        typeof bValue === "number"
+          ? bValue
+          : isNaN(Number(bValue))
+            ? 0
+            : Number(bValue)
 
       if (aNum < bNum) {
-        return direction === "ascending" ? -1 : 1;
+        return direction === "ascending" ? -1 : 1
       }
       if (aNum > bNum) {
-        return direction === "ascending" ? 1 : -1;
+        return direction === "ascending" ? 1 : -1
       }
-      return 0;
-    });
+      return 0
+    })
 
-    setDisplayData(sortedData);
-    setSortConfig({ key, direction });
-  };
-
-  // ฟังก์ชันสำหรับดึงค่า nested key
-  const getNestedValue = (obj: any, path: string) => {
-    const pathParts = path.split(".");
-    let value = obj;
-
-    for (const part of pathParts) {
-      if (Array.isArray(value)) {
-        // Handle array case
-        value = value.map((item) => item[part]);
-        if (value.length > 0) {
-          value = value[0]; // Take the first item in the array
-        } else {
-          value = undefined;
-        }
-      } else {
-        value = value ? value[part] : undefined;
-      }
-    }
-
-    // Remove hyphens
-    return typeof value === "string" ? value.replace(/-/g, "") : value;
-  };
-  const onSubmitCreditTransferData =async () =>{
- const creditTransferData = await onTransferable(displayData)
- console.log(creditTransferData)
+    console.log(sortedData)
+    setDisplayData(sortedData)
+    setSortConfig({ key, direction })
   }
+  // ฟังก์ชันสำหรับดึงค่า nested key
+
+  const onSubmitCreditTransferData = async () => {
+    const creditTransferData = await onTransferable(displayData)
+    console.log(creditTransferData)
+  }
+
+  const clearData = () => {
+    console.log("Clearing data...")
+
+    setDisplayData([])
+    updateGradesInDisplayData()
+  }
+  //เคลีย data ตอนกรอกเกรดไม่ให้วนซ้ำ
+  //function sort
   return (
-    <Box
-      height="100vh"
-      // background="radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%)"
-    >
-      <Box display="flex" height="100%">
+    <Box height="100%">
+      <Box
+        display="flex"
+        height="100%"
+      >
         <Box
           display="flex"
           flexDirection="column"
           width="100%"
           height="100%"
-          // backgroundColor="white"
         >
-          {/* <Box
-            display="flex"
-            alignItems="center"
-            backgroundColor="blue"
-            flexDirection="column"
-          >
-            <Box>asdasd</Box>
-            <Box>asdasd</Box>
-            <Box>asdasd</Box>
-          </Box> */}
-
           <Box
-            marginTop="24px"
             display="flex"
             flexDirection="column"
-            padding="24px"
-            alignItems="center"
-            width="100%"
+            marginTop="60px"
+            gap="24px"
+            paddingRight="120px"
+            paddingLeft="240px"
           >
-            <Box display="flex" flexDirection="column" gap="24px">
-              <Input
-                type="file"
-                onChange={handleFileChange}
-                display="flex"
-                alignItems="center"
+            <Box
+              display="flex"
+              flexDirection="row"
+              gap="24px"
+              alignSelf="flex-end"
+            >
+              <Button
+                label="ดาวน์โหลด"
+                backgroundColor={
+                  displayData && displayData.length > 0 ? "#0C388E" : ""
+                }
+                color={
+                  displayData && displayData.length > 0 ? "white" : "black"
+                }
+                paddingY="14px"
+                paddingX="46px"
+                borderRadius="8px"
+                isDisabled={
+                  displayData && displayData.length > 0 ? false : true
+                }
               />
               <Button
-                label="Upload"
-                onClick={handleFileSubmit}
-                isLoading={isPending}
+                label="อัพโหลดทรานสคริป"
+                backgroundColor="#2E99FC"
+                color="#FFFFFF"
+                paddingY="14px"
+                paddingX="79px"
+                borderRadius="8px"
+                onClick={OpenFileImport}
               />
-              {isPending && <Box>Uploading...</Box>}
             </Box>
 
             <TableContainer
-              marginTop="24px"
               sx={{ tableLayout: "auto" }}
               style={{
                 borderWidth: 1,
-                borderColor: "pink",
+                borderColor: "black",
                 borderRadius: 16,
-                maxWidth: "100%",
+                maxWidth: "100%"
               }}
             >
               <Table size="sm">
                 <Thead bgColor="#D7D7D7">
                   <Tr>
                     <Th
+                      padding="16px"
                       onClick={() =>
                         handleSort("diplomaCourseList.dipCourseId")
                       }
                     >
-                      <Box display="flex" alignItems="center">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
                         <Box whiteSpace="pre-wrap">
                           รหัสวิชา{"\n"}Course Code
                         </Box>
@@ -371,7 +503,10 @@ export default function Main() {
                         handleSort("universityCourse.uniCourseName")
                       }
                     >
-                      <Box display="flex" alignItems="center">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
                         <Box whiteSpace="pre-wrap">
                           วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
                         </Box>
@@ -388,10 +523,13 @@ export default function Main() {
                         )}
                       </Box>
                     </Th>
-                    <Th onClick={() => handleSort("grades")}>
-                      <Box display="flex" alignItems="center">
+                    <Th onClick={() => handleSort("diplomaCourseList.grade")}>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
                         <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>
-                        {sortConfig?.key === "grades" && (
+                        {sortConfig?.key === "diplomaCourseList.grade" && (
                           <Icon
                             as={
                               sortConfig.direction === "ascending"
@@ -406,7 +544,10 @@ export default function Main() {
                     <Th
                       onClick={() => handleSort("diplomaCourseList.dipCredit")}
                     >
-                      <Box display="flex" alignItems="center">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
                         <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
                         {sortConfig?.key === "diplomaCourseList.dipCredit" && (
                           <Icon
@@ -423,7 +564,10 @@ export default function Main() {
                     <Th
                       onClick={() => handleSort("universityCourse.uniCourseId")}
                     >
-                      <Box display="flex" alignItems="center">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
                         <Box whiteSpace="pre-wrap">
                           รหัสวิชา{"\n"}Course Code
                         </Box>
@@ -444,7 +588,10 @@ export default function Main() {
                         handleSort("universityCourse.uniCourseName")
                       }
                     >
-                      <Box display="flex" alignItems="center">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
                         <Box whiteSpace="pre-wrap">
                           วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course
                           Equivalents
@@ -465,7 +612,10 @@ export default function Main() {
                     <Th
                       onClick={() => handleSort("universityCourse.uniCredit")}
                     >
-                      <Box display="flex" alignItems="center">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
                         <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
                         {sortConfig?.key === "universityCourse.uniCredit" && (
                           <Icon
@@ -479,6 +629,14 @@ export default function Main() {
                         )}
                       </Box>
                     </Th>
+                    <Th>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                      >
+                        <Box whiteSpace="pre-wrap">สถานะ{"\n"}Status</Box>
+                      </Box>
+                    </Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -489,16 +647,20 @@ export default function Main() {
                           key={course.dipCourseId}
                           borderBottom="gray"
                           borderWidth="2px"
+                          backgroundColor={
+                            itemIndex % 2 === 0 ? "#F5F5F5" : "transparent"
+                          }
                         >
                           <Td>{course.dipCourseId}</Td>
                           <Td>{course.dipCourseName}</Td>
                           <Td>
-                            <Input type="number"
-                            step="0.1"
+                            <Input
+                              type="number"
+                              step="0.1"
                               sx={{
                                 border: "none",
                                 width: "60px",
-                                height: "30px",
+                                height: "30px"
                               }}
                               value={
                                 grades[`${itemIndex}-${courseIndex}`] || ""
@@ -521,6 +683,13 @@ export default function Main() {
                               <Td rowSpan={item.diplomaCourseList.length}>
                                 {item.universityCourse.uniCredit}
                               </Td>
+                              <Td rowSpan={item.diplomaCourseList.length}>
+                                {item.transferable === true ? (
+                                  <RiCheckLine color="green" />
+                                ) : (
+                                  <RiErrorWarningFill color="red" />
+                                )}
+                              </Td>
                             </>
                           )}
                         </Tr>
@@ -528,26 +697,60 @@ export default function Main() {
                     </React.Fragment>
                   ))}
                 </Tbody>
-                <Tfoot>
-                  <Tr>
-                    <Td colSpan={4}>
-                      <Input
-                        value={dipCourse}
-                        onChange={handleDipCourseChange}
-                        placeholder="Enter Dip Course ID"
-                      />
-                    </Td>
-                    <Td>
-                      <Button label="Submit" onClick={handleSubmit} />
-                    </Td>
-                  </Tr>
-                </Tfoot>
+                <Tfoot
+                  display="flex"
+                  padding="8px"
+                ></Tfoot>
               </Table>
             </TableContainer>
+            <Box
+              borderRadius="16px"
+              display="flex"
+              width="100%"
+              padding="16px"
+              borderWidth={2}
+              borderStyle="dashed"
+              justifyContent="center"
+            >
+              <Box
+                as="button"
+                onClick={OpenAddCourse}
+                display="flex"
+                width="30px"
+                height="30px"
+                borderRadius="16px"
+                backgroundColor="#2ABE0D"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <RiAddFill color="#FFFFFF" />
+              </Box>
+            </Box>
+            <Box
+              display="flex"
+              alignSelf="flex-end"
+            >
+              <Button
+                label="ถัดไป"
+                paddingY="14px"
+                paddingX="62px"
+                borderRadius="6px"
+                onClick={onSubmitCreditTransferData}
+                isDisabled={
+                  displayData && displayData.length > 0 ? false : true
+                }
+                backgroundColor={
+                  displayData && displayData.length > 0 ? "#2ABE0D" : ""
+                }
+              />
+            </Box>
           </Box>
         </Box>
       </Box>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Upload Results</ModalHeader>
@@ -560,7 +763,7 @@ export default function Main() {
                 ))}
               </ul>
             </Box>
-            <Box>
+            <Box mb={4}>
               <strong>Not Founded Courses:</strong>
               <ul>
                 {modalData?.notFounded.map((courseId, index) => (
@@ -568,19 +771,173 @@ export default function Main() {
                 ))}
               </ul>
             </Box>
+            {modalData?.duplicates && modalData.duplicates.length > 0 && (
+              <Box>
+                <strong>Duplicate Courses:</strong>
+                <ul>
+                  {modalData.duplicates.map((courseId, index) => (
+                    <li key={index}>{courseId}</li>
+                  ))}
+                </ul>
+              </Box>
+            )}
           </ModalBody>
           <ModalFooter>
             <Button
+              label="close"
               colorScheme="blue"
               mr={3}
               onClick={onClose}
-              label={"close"}
-            ></Button>
+            />
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Button label="Summ" onClick={onSubmitCreditTransferData}></Button>
+      <Button
+        label="Summ"
+        onClick={clearData}
+      ></Button>
+      <Modal
+        isOpen={FileImport}
+        onClose={onClose}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>อัพโหลดทรานสคริป</ModalHeader>
+          <ModalBody>
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              padding="4px"
+            />
+          </ModalBody>
+
+          <ModalFooter
+            display="flex"
+            padding="24px"
+            justifyContent="space-between"
+            gap="16px"
+          >
+            <Button
+              label="อัพโหลด"
+              width="100%"
+              onClick={handleFileSubmit}
+              isLoading={isPending}
+              borderWidth={file === undefined ? 1 : 0}
+              borderColor={file === undefined ? "black" : "transparent"}
+              isDisabled={file === undefined ? true : false}
+              backgroundColor={file === undefined ? "transparent" : "#2ABE0D"}
+              color={file === undefined ? "black" : "white"}
+            />
+            <Button
+              label="ยกเลิก"
+              width="100%"
+              onClick={CloseFileImport}
+              backgroundColor="red"
+              color="white"
+            />
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={AddCoure}
+        onClose={CloseAddCourse}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>เพิ่มรหัสวิชา</ModalHeader>
+          <ModalBody>
+            <Box
+              display="flex"
+              gap="4px"
+              flexDirection="column"
+            >
+              <Box>{`รหัสวิชา (CourseCode)`}</Box>
+              <Input
+                onChange={handleDipCourseChange}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                padding="4px"
+              />
+            </Box>
+          </ModalBody>
+
+          <ModalFooter
+            display="flex"
+            padding="24px"
+            justifyContent="space-between"
+            gap="16px"
+          >
+            <Button
+              label="เพิ่ม"
+              width="100%"
+              onClick={handleSubmit}
+              isLoading={isPending}
+              isDisabled={dipCourse === "" ? true : false}
+              borderWidth={dipCourse === "" ? 1 : 0}
+              borderColor={dipCourse === "" ? "black" : "transparent"}
+              backgroundColor={dipCourse === "" ? "transparent" : "#2ABE0D"}
+              color={dipCourse === "" ? "black" : "white"}
+            />
+            <Button
+              label="ยกเลิก"
+              width="100%"
+              onClick={CloseAddCourse}
+              backgroundColor="red"
+              color="white"
+            />
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal
+        isOpen={FileImport}
+        onClose={onClose}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>อัพโหลดทรานสคริป</ModalHeader>
+          <ModalBody>
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              padding="4px"
+            />
+          </ModalBody>
+
+          <ModalFooter
+            display="flex"
+            padding="24px"
+            justifyContent="space-between"
+            gap="16px"
+          >
+            <Button
+              label="อัพโหลด"
+              width="100%"
+              onClick={handleFileSubmit}
+              isLoading={isPending}
+              borderWidth={file === undefined ? 1 : 0}
+              borderColor={file === undefined ? "black" : "transparent"}
+              isDisabled={file === undefined ? true : false}
+              backgroundColor={file === undefined ? "transparent" : "#2ABE0D"}
+              color={file === undefined ? "black" : "white"}
+            />
+            <Button
+              label="ยกเลิก"
+              width="100%"
+              onClick={CloseFileImport}
+              backgroundColor="red"
+              color="white"
+            />
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
-  );
+  )
 }
-//onClick={()=>{console.log(displayData)}}
