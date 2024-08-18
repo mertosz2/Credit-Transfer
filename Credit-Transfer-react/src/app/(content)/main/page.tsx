@@ -59,6 +59,9 @@ export default function Main() {
         founded: string[]
         notFounded: string[]
         duplicates?: string[]
+        totalfound: number
+        totalnotfound: number
+        totalcourse: number
       }
     | undefined
   >(undefined)
@@ -265,6 +268,7 @@ export default function Main() {
     if (file) {
       try {
         const newFile = await onUploadFile(file)
+
         console.log("list of", newFile.transferCreditResponseList)
 
         if (newFile) {
@@ -305,7 +309,10 @@ export default function Main() {
           setModalData({
             founded: newFile.foundedDipCourseIdList,
             notFounded: newFile.notFoundedDipCourseIdList,
-            duplicates: duplicateIdsArray // แสดงข้อมูลซ้ำใน modal
+            duplicates: duplicateIdsArray, // แสดงข้อมูลซ้ำใน modal
+            totalfound: newFile.totalFounded,
+            totalnotfound: newFile.totalNotFounded,
+            totalcourse: newFile.total
           })
 
           // เปิด modal สำหรับการแสดงผล
@@ -408,6 +415,7 @@ export default function Main() {
   }
   //เคลีย data ตอนกรอกเกรดไม่ให้วนซ้ำ
   //function sort
+
   return (
     <Box height="100%">
       <Box
@@ -435,21 +443,6 @@ export default function Main() {
               alignSelf="flex-end"
             >
               <Button
-                label="ดาวน์โหลด"
-                backgroundColor={
-                  displayData && displayData.length > 0 ? "#0C388E" : ""
-                }
-                color={
-                  displayData && displayData.length > 0 ? "white" : "black"
-                }
-                paddingY="14px"
-                paddingX="46px"
-                borderRadius="8px"
-                isDisabled={
-                  displayData && displayData.length > 0 ? false : true
-                }
-              />
-              <Button
                 label="อัพโหลดทรานสคริป"
                 backgroundColor="#2E99FC"
                 color="#FFFFFF"
@@ -465,8 +458,7 @@ export default function Main() {
               style={{
                 borderWidth: 1,
                 borderColor: "black",
-                borderRadius: 16,
-                maxWidth: "100%"
+                borderRadius: 16
               }}
             >
               <Table size="sm">
@@ -639,6 +631,7 @@ export default function Main() {
                     </Th>
                   </Tr>
                 </Thead>
+
                 <Tbody>
                   {displayData.map((item, itemIndex) => (
                     <React.Fragment key={itemIndex}>
@@ -752,24 +745,67 @@ export default function Main() {
         onClose={onClose}
       >
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Upload Results</ModalHeader>
+        <ModalContent padding="12px">
+          <ModalHeader>ผลลัพธ์</ModalHeader>
           <ModalBody>
-            <Box mb={4}>
-              <strong>Founded Courses:</strong>
-              <ul>
+            <Box
+              mb={4}
+              display="flex"
+              gap="16px"
+              flexDirection="column"
+            >
+              <Box fontWeight={700}>รหัสวิชาที่มีในระบบ</Box>
+              <Box
+                display="flex"
+                flexWrap="wrap"
+                gap="8px"
+              >
                 {modalData?.founded.map((courseId, index) => (
-                  <li key={index}>{courseId}</li>
+                  <Box key={index}>{`"${courseId}"${" "}`}</Box>
                 ))}
-              </ul>
+              </Box>
+
+              <Box>รหัสวิชาที่เจอในระบบ {modalData?.totalfound} วิชา</Box>
+              <Box
+                width="100%"
+                height="1px"
+                backgroundColor="black"
+              ></Box>
             </Box>
-            <Box mb={4}>
-              <strong>Not Founded Courses:</strong>
-              <ul>
+            <Box
+              mb={4}
+              display="flex"
+              gap="16px"
+              flexDirection="column"
+            >
+              <Box fontWeight={700}>รหัสวิชาที่ไม่มีในระบบ</Box>
+              <Box
+                display="flex"
+                flexWrap="wrap"
+                gap="8px"
+              >
                 {modalData?.notFounded.map((courseId, index) => (
-                  <li key={index}>{courseId}</li>
+                  <Box key={index}>{`"${courseId}"${" "}`}</Box>
                 ))}
-              </ul>
+              </Box>
+
+              <Box>รหัสวิชาที่ไม่เจอในระบบ {modalData?.totalnotfound} วิชา</Box>
+              <Box
+                width="100%"
+                height="1px"
+                backgroundColor="black"
+              ></Box>
+              <Box>
+                พบรหัสวิชาในใบทรานสคริปทั้งหมด {modalData?.totalcourse} วิชา
+              </Box>
+              <Box
+                color="red"
+                fontSize="14px"
+                textAlign="center"
+              >
+                *โปรดตรวจสอบว่ารหัสวิชาครบถ้วนตามใบทรานสคริปหรือไม่
+                หากไม่พบท่านสามารถทำการเพิ่มรหัสวิชาลงไปเองได้*
+              </Box>
             </Box>
             {modalData?.duplicates && modalData.duplicates.length > 0 && (
               <Box>
@@ -784,18 +820,18 @@ export default function Main() {
           </ModalBody>
           <ModalFooter>
             <Button
-              label="close"
-              colorScheme="blue"
-              mr={3}
+              paddingY="14px"
+              paddingX="24px"
+              label="Close"
+              borderRadius="8px"
+              color="white"
+              backgroundColor="#FF4E4E"
               onClick={onClose}
             />
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Button
-        label="Summ"
-        onClick={clearData}
-      ></Button>
+
       <Modal
         isOpen={FileImport}
         onClose={onClose}
