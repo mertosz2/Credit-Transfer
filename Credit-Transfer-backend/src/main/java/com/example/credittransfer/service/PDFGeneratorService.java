@@ -37,12 +37,12 @@ public class PDFGeneratorService {
             table.setWidthPercentage(100);
 
             // กำหนดความกว้างของแต่ละคอลัมน์
-            float[] columnWidths = {2f, 7f, 1f, 1.3f, 1.5f, 7f, 1.3f};
+            float[] columnWidths = {2f, 7f, 1f, 1.3f, 2f, 7f, 1.3f};
             table.setWidths(columnWidths);
 
 
             table.addCell(new Paragraph("รหัสวิชา \nCourse Code", font));
-            table.addCell(new Paragraph("วิชาที่ขอเทียบโอนจาก \nCourse transferred from\n สถานบัน (institute)\n คณะ (School of)", font));
+            table.addCell(new Paragraph("วิชาที่ขอเทียบโอน \nCourse transferred from", font));
             table.addCell(new Paragraph("เกรด \nGrade", font));
             table.addCell(new Paragraph("หน่วยกิต \nCredit", font));
             table.addCell(new Paragraph("รหัสวิชา \nCourse Code", font));

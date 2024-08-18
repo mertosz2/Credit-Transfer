@@ -2,6 +2,7 @@ package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.DipCourseResponse;
+import com.example.credittransfer.dto.response.ReportCourseResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.entity.UniversityCourse;
@@ -170,7 +171,7 @@ public class TransferCreditService {
 
     }
 
-    public void exportExcel(HttpServletResponse response, List<TransferCreditResponse> transferCreditResponseList) throws IOException {
+    public void exportExcel(HttpServletResponse response, ReportCourseResponse reportCourseResponse) throws IOException {
         List<String> heaerList = List.of(
                 "รหัสวิชา\nCourse Code",
                 "วิชาที่ขอเทียบโอน\nCourse transferred from",
@@ -180,7 +181,7 @@ public class TransferCreditService {
                 "วิชาที่เทียบโอนหน่วยกิตได้\nTransferred Course Equivalents",
                 "หน่วยกิต\nCredit"
         );
-        exportExcelService.exportDataToExcel(response,heaerList, validateTransferableResponse(transferCreditResponseList));
+        exportExcelService.exportDataToExcel(response,heaerList, reportCourseResponse);
     }
 
     public TransferCreditRequest mapToTransferCreditRequest(DiplomaCourse diplomaCourse, double grade){
@@ -203,4 +204,71 @@ public class TransferCreditService {
         }
         return  transferCreditRequestList;
     }
+
+    public ReportCourseResponse getReport(List<TransferCreditResponse> transferCreditResponseList) {
+        ReportCourseResponse reportCourseResponse = new ReportCourseResponse();
+        List<TransferCreditResponse> firstSection = transferCreditResponseList.stream()
+                .filter(transferCreditResponse ->
+                        Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "11100"))
+                .toList();
+        transferCreditResponseList.removeIf(transferCreditResponse ->
+                Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "11100")
+        );
+
+        List<TransferCreditResponse> secondSection = transferCreditResponseList.stream()
+                .filter(transferCreditResponse ->
+                        Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "11200"))
+                .toList();
+
+
+        List<TransferCreditResponse> thirdSection = transferCreditResponseList.stream()
+                .filter(transferCreditResponse ->
+                        Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "12300"))
+                .toList();
+
+        reportCourseResponse.setFirstSectionList(firstSection);
+        reportCourseResponse.setSecondSectionList(secondSection);
+        reportCourseResponse.setThirdSectionList(thirdSection);
+
+        return reportCourseResponse;
+    }
+
+    public List<TransferCreditResponse> sortData(List<TransferCreditResponse> transferCreditResponseList, String key, boolean ascending) {
+        switch (key) {
+            case "dipCourseId":
+                transferCreditResponseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getDiplomaCourseList().getFirst().getDipCourseId()));
+                break;
+            case "dipCourseName":
+                transferCreditResponseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getDiplomaCourseList().getFirst().getDipCourseName()));
+
+                break;
+            case "dipCredit":
+                transferCreditResponseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getDiplomaCourseList().getFirst().getDipCredit()));
+
+                break;
+            case "grade":
+                transferCreditResponseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getDiplomaCourseList().getFirst().getGrade()));
+
+                break;
+            case "uniCourseId":
+                transferCreditResponseList.sort(Comparator.comparing(response -> response.getUniversityCourse().getUniCourseId()));
+                break;
+            case "uniCourseName":
+                transferCreditResponseList.sort(Comparator.comparing(response -> response.getUniversityCourse().getUniCourseName()));
+                break;
+            case "uniCredit":
+                transferCreditResponseList.sort(Comparator.comparing(response -> response.getUniversityCourse().getUniCredit()));
+
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid key: " + key);
+        }
+
+        if (!ascending) {
+            transferCreditResponseList.reversed();
+        }
+
+        return transferCreditResponseList;
+    }
+
 }
