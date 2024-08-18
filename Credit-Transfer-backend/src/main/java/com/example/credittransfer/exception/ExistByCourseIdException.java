@@ -2,6 +2,6 @@ package com.example.credittransfer.exception;
 
 public class ExistByCourseIdException extends RuntimeException{
     public ExistByCourseIdException(String msg){
-        super("course code already exist : " + msg);
+        super("รหัสวิชานี้มีอยู่ในระบบอยู่แล้ว : " + msg);
     }
 }

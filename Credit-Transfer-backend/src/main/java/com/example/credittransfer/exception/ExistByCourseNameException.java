@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class ExistByCourseNameException extends RuntimeException{
     public ExistByCourseNameException(String msg){
-        super("course name already exist : " + msg);
+        super("ชื่อวิชานี้มีอยู่ในระบบอยู่แล้ว : " + msg);
     }
 }
