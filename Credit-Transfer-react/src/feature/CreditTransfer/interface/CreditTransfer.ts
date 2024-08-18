@@ -21,6 +21,9 @@ export interface IUniversityCourse {
   uniCredit: number
 }
 
+export interface IKey extends IDiplomaCourseList, IUniversityCourse {}
+export type TKey = keyof IKey
+
 export interface ICreditResponseList {
   list: ICreditTransferResponse[]
 }
@@ -31,4 +34,10 @@ export interface IFlatDiplomaCourseList extends IDiplomaCourseList {
   originalIndex?: number
   isFirstInGroup?: boolean
   groupSize?: number
+}
+
+export interface ISortArgs {
+  data: ICreditTransferResponse[]
+  key: TKey
+  direction: boolean
 }

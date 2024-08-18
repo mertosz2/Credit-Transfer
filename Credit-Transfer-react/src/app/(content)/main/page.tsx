@@ -367,36 +367,8 @@ export default function Main() {
       direction = "descending"
     }
 
-    console.log("Sorting by:", key, direction)
+    // function api
 
-    const tempData = displayData
-    const sortedData = [...tempData].sort((a, b) => {
-      const aValue = getNestedValue(a, key)
-      const bValue = getNestedValue(b, key)
-
-      const aNum =
-        typeof aValue === "number"
-          ? aValue
-          : isNaN(Number(aValue))
-            ? 0
-            : Number(aValue)
-      const bNum =
-        typeof bValue === "number"
-          ? bValue
-          : isNaN(Number(bValue))
-            ? 0
-            : Number(bValue)
-
-      if (aNum < bNum) {
-        return direction === "ascending" ? -1 : 1
-      }
-      if (aNum > bNum) {
-        return direction === "ascending" ? 1 : -1
-      }
-      return 0
-    })
-
-    console.log(sortedData)
     setDisplayData(sortedData)
     setSortConfig({ key, direction })
   }

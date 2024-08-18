@@ -4,7 +4,8 @@ import {
   ICreditTransferResponse,
   IDiplomaCourseList,
   IUniversityCourse,
-  IFlatDiplomaCourseList
+  IFlatDiplomaCourseList,
+  TKey
 } from "@/feature/CreditTransfer/interface/CreditTransfer"
 import useGetDipCourseById from "@/feature/getDipCourseById/hooks/useGetDipCourseById"
 import useGetUploadFileCreditTransfer from "@/feature/UploadFileCreditTransfer/hooks/useGetUploadFileCreditTransfer"
@@ -26,7 +27,8 @@ import {
   useDisclosure,
   ModalFooter,
   Tfoot,
-  useToast
+  useToast,
+  Icon
 } from "@chakra-ui/react"
 import React, { ChangeEvent, useCallback, useEffect, useState } from "react"
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons"
@@ -40,6 +42,9 @@ import {
   useReactTable,
   SortingState
 } from "@tanstack/react-table"
+import useSortData from "@/feature/CreditTransfer/hooks/useSortData"
+import { flattenData } from "@/util/flatData"
+import { isValidNumberInput } from "@/util/string"
 
 export default function Main() {
   const { onUpdateDipCourse } = useGetDipCourseById()
@@ -75,36 +80,9 @@ export default function Main() {
     | undefined
   >(undefined)
 
-  const [sorting, setSorting] = useState<SortingState>([])
-
   const [displayData, setDisplayData] = useState<ICreditTransferResponse[]>([])
   const [flatData, setFlatData] = useState<IFlatDiplomaCourseList[]>([])
-
-  const flattenData = (data: ICreditTransferResponse[]) => {
-    return data.reduce((acc: IFlatDiplomaCourseList[], item) => {
-      item.diplomaCourseList.forEach((course, index) => {
-        acc.push({
-          ...course,
-          universityCourse: item.universityCourse,
-          transferable: item.transferable,
-          isFirstInGroup: index === 0, // mark first item in each group
-          groupSize: item.diplomaCourseList.length // size of the group
-        })
-      })
-      return acc
-    }, [])
-  }
-
-  const isValidNumberInput = (value: string): boolean => {
-    if (value === "") return true
-    if (/^4(\.0)?$/.test(value)) {
-      return true
-    }
-    if (/^[1-3](\.[05]?)?$/.test(value)) {
-      return true
-    }
-    return false
-  }
+  const { onSortData } = useSortData()
 
   const calculateTransferable = (
     diplomaCourseList: IDiplomaCourseList[],
@@ -194,7 +172,7 @@ export default function Main() {
         }
         CloseAddCourse()
         setDisplayData(newArray)
-        setFlatData(flattenData(displayData))
+        setFlatData(flattenData(newArray))
         console.log("Updated Display Data:", newArray)
       } catch (error) {
         console.error("Failed to update DipCourse:", error)
@@ -274,7 +252,7 @@ export default function Main() {
           // อัปเดต displayData และ modalData
           const newArray = [...transferCreditResponseList, ...uniqueNewItems]
           setDisplayData(newArray)
-          setFlatData(flattenData(displayData))
+          setFlatData(flattenData(newArray))
           setModalData({
             founded: newFile.foundedDipCourseIdList,
             notFounded: newFile.notFoundedDipCourseIdList,
@@ -315,14 +293,88 @@ export default function Main() {
     setDipCourse(e.target.value)
   }
 
-  const handleGradeChange = (value: string, rowIndex: number) => {
-    const newGrade = Number(value)
-    if (!isNaN(newGrade) && isValidNumberInput(value)) {
-      const updatedData = [...flatData]
-      updatedData[rowIndex].grade = newGrade
-      updatedData[rowIndex].transferable = newGrade >= 2 ? true : false
-      setFlatData(updatedData)
+  const handleGradeChange = useCallback(
+    (newGrade: number, rowIndex: number) => {
+      // Update the flatData with the new grade
+      const updatedFlatData = [...flatData]
+
+      if (!isValidNumberInput(String(newGrade))) {
+        return
+      }
+
+      updatedFlatData[rowIndex] = {
+        ...updatedFlatData[rowIndex],
+        grade: newGrade
+      }
+
+      // Find the group in displayData corresponding to the modified course
+      const { universityCourse, dipCourseId } = updatedFlatData[rowIndex]
+      const existingGroupIndex = displayData.findIndex(
+        (item) =>
+          item.universityCourse.uniCourseId === universityCourse.uniCourseId &&
+          item.diplomaCourseList.some(
+            (course) => course.dipCourseId === dipCourseId
+          )
+      )
+
+      if (existingGroupIndex !== -1) {
+        const updatedDiplomaCourseList = displayData[
+          existingGroupIndex
+        ].diplomaCourseList.map((course) =>
+          course.dipCourseId === dipCourseId
+            ? { ...course, grade: newGrade }
+            : course
+        )
+
+        // Recalculate the transferable status for the group
+        const newTransferable = calculateTransferable(
+          updatedDiplomaCourseList,
+          universityCourse
+        )
+
+        // Update the displayData with the new transferable status
+        const updatedDisplayData = [...displayData]
+        updatedDisplayData[existingGroupIndex] = {
+          ...updatedDisplayData[existingGroupIndex],
+          diplomaCourseList: updatedDiplomaCourseList,
+          transferable: newTransferable
+        }
+
+        // Update the state
+        setFlatData(updatedFlatData)
+        setDisplayData(updatedDisplayData)
+      }
+    },
+    [displayData, flatData]
+  )
+
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof ICreditTransferResponse | string | null
+    direction: "ascending" | "descending"
+  } | null>(null)
+
+  const handleSort = async (key: TKey) => {
+    let direction: "ascending" | "descending" = "ascending"
+
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "ascending"
+    ) {
+      direction = "descending"
     }
+
+    // function api
+    if (sortConfig) {
+      const sortedData = await onSortData({
+        data: displayData,
+        key: key,
+        direction: sortConfig.direction === "ascending"
+      })
+      setDisplayData(sortedData)
+      setFlatData(flattenData(sortedData))
+    }
+    setSortConfig({ key, direction })
   }
 
   const columnHelper = createColumnHelper<IFlatDiplomaCourseList>()
@@ -330,13 +382,11 @@ export default function Main() {
   const columns = [
     columnHelper.accessor("dipCourseId", {
       header: "Course Code",
-      cell: (info) => info.getValue(),
-      enableSorting: true
+      cell: (info) => info.getValue()
     }),
     columnHelper.accessor("dipCourseName", {
       header: "Course Transferred From",
-      cell: (info) => info.getValue(),
-      enableSorting: true
+      cell: (info) => info.getValue()
     }),
     columnHelper.accessor("grade", {
       header: "Grade",
@@ -345,36 +395,33 @@ export default function Main() {
           type="number"
           step="0.5"
           value={info.getValue() || 0}
-          onChange={(e) => handleGradeChange(e.target.value, info.row.index)}
+          onChange={(e) =>
+            handleGradeChange(Number(e.target.value), info.row.index)
+          }
         />
-      ),
-      enableSorting: true
+      )
     }),
     columnHelper.accessor("dipCredit", {
       header: "Credit",
-      cell: (info) => info.getValue(),
-      enableSorting: true
+      cell: (info) => info.getValue()
     }),
     columnHelper.accessor("universityCourse.uniCourseId", {
       header: "University Course Code",
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
-      },
-      enableSorting: true
+      }
     }),
     columnHelper.accessor("universityCourse.uniCourseName", {
       header: "Transferred Course Equivalents",
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
-      },
-      enableSorting: true
+      }
     }),
     columnHelper.accessor("universityCourse.uniCredit", {
       header: "University Credit",
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
-      },
-      enableSorting: true
+      }
     }),
     columnHelper.accessor("transferable", {
       header: "Status",
@@ -386,18 +433,14 @@ export default function Main() {
             <RiErrorWarningFill color="red" />
           )
         ) : null
-      },
-      enableSorting: true
+      }
     })
   ]
 
   const table = useReactTable({
     data: flatData,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    state: { sorting },
-    onSortingChange: setSorting
+    getCoreRowModel: getCoreRowModel()
   })
 
   return (
@@ -450,24 +493,26 @@ export default function Main() {
                   {table.getHeaderGroups().map((headerGroup) => (
                     <Tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {
-                        const sortingState = header.column.getIsSorted()
-                        const sortingIndicator =
-                          sortingState === "asc"
-                            ? " 🔼"
-                            : sortingState === "desc"
-                              ? " 🔽"
-                              : null
-
                         return (
                           <Th
+                            padding="16px"
+                            cursor="pointer"
                             key={header.id}
-                            onClick={header.column.getToggleSortingHandler()}
+                            onClick={() => handleSort(header.column.id as TKey)}
                           >
                             {flexRender(
                               header.column.columnDef.header,
                               header.getContext()
                             )}
-                            {sortingIndicator}
+                            <Icon
+                              as={
+                                sortConfig &&
+                                sortConfig.direction === "ascending"
+                                  ? ChevronUpIcon
+                                  : ChevronDownIcon
+                              }
+                              ml={2}
+                            />
                           </Th>
                         )
                       })}
@@ -478,6 +523,8 @@ export default function Main() {
                 <Tbody>
                   {flatData &&
                     flatData.length > 0 &&
+                    displayData &&
+                    displayData.length > 0 &&
                     table.getRowModel().rows.map((row) => (
                       <Tr key={row.id}>
                         {row.getVisibleCells().map((cell, cellIndex) => {
