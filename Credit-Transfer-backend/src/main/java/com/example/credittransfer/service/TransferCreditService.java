@@ -265,7 +265,7 @@ public class TransferCreditService {
         }
 
         if (!ascending) {
-            transferCreditResponseList.reversed();
+            Collections.reverse(transferCreditResponseList);
         }
 
         return transferCreditResponseList;
