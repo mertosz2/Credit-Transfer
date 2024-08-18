@@ -25,4 +25,9 @@ public class UniversityCourse {
     @JsonIgnore
     private boolean isActive;
 
+    @ManyToOne
+    @JoinColumn(name = "cc_id")
+    @JsonIgnore
+    private CourseCategory courseCategory;
+
 }

@@ -12,9 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -29,25 +27,25 @@ public class OCRService {
         this.diplomaCourseService = diplomaCourseService;
     }
 
-//    public List<String> getCourseId() throws IOException {
-//        Tesseract tesseract = new Tesseract();
-//        String fileName = "ใบเกรด 2.pdf";
-//        File pdfFile = new ClassPathResource("templates/" + fileName).getFile();
-//
-//        File file = new ClassPathResource("templates/" + fileName).getFile();
-//        String text ="";
-//        try {
-//            tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
-//            text = tesseract.doOCR(file);
-//        } catch (
-//                TesseractException e) {
-//            e.printStackTrace();
-//        }
-//        List<String> filter = filterData(text);
-//
-//        return Collections.singletonList(diplomaCourseService.validateDipCourseId(filter));
-//
-//    }
+    public String getCourseId() throws IOException {
+        Tesseract tesseract = new Tesseract();
+        String fileName = "transfer_credit (1).pdf";
+        File pdfFile = new ClassPathResource("templates/" + fileName).getFile();
+
+
+        String text ="";
+        try {
+            tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
+            text = tesseract.doOCR(pdfFile);
+        } catch (
+                TesseractException e) {
+            e.printStackTrace();
+        }
+
+
+        return text;
+
+    }
 
     public DipCourseIdResponse getCourseIdByImport(File file) throws IOException {
         Tesseract tesseract = new Tesseract();
