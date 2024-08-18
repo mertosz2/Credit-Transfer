@@ -160,7 +160,7 @@ public class TransferCreditController {
     }
 
     @PostMapping("/sort")
-    public ResponseEntity<List<TransferCreditResponse>> sortData(@RequestBody List<TransferCreditResponse> responseList,@RequestParam("key") String key, boolean ascending ) {
+    public ResponseEntity<List<TransferCreditResponse>> sortData(@RequestBody List<TransferCreditResponse> responseList,@RequestParam("key") String key, @RequestParam("direction") boolean ascending ) {
         return ResponseEntity.status(OK).body(transferCreditService.sortData(responseList, key, ascending));
     }
 }
