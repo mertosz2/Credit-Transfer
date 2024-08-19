@@ -1,14 +1,14 @@
 "use client"
-import { Box } from "@chakra-ui/react";
-import TextField from "../components/TextField";
-import Button from "../components/Button";
-import { useRouter } from 'next/navigation';
+import { Box } from "@chakra-ui/react"
+import TextField from "../components/TextField"
+import Button from "../components/Button"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
-  const router = useRouter();
+  const router = useRouter()
   const handleLogin = () => {
-    router.push('/main'); 
-  };
+    router.push("/main")
+  }
   return (
     <Box
       display="flex"
@@ -45,13 +45,14 @@ export default function Home() {
           gap="24px"
           alignItems="center"
         >
-          <TextField 
-          placeholder="รหัสนักศึกษา"/>
+          <TextField placeholder="รหัสนักศึกษา" />
           <TextField placeholder="รหัสผ่าน" />
-          <Button label="เข้าสู่ระบบ"
-          onClick={handleLogin}></Button>
+          <Button
+            label="เข้าสู่ระบบ"
+            onClick={handleLogin}
+          ></Button>
         </Box>
       </Box>
     </Box>
-  );
+  )
 }

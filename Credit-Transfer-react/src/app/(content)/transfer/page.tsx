@@ -49,12 +49,18 @@ import {
 import useSortData from "@/feature/CreditTransfer/hooks/useSortData"
 import { flattenData } from "@/util/flatData"
 import { getStringAfterUnderscore, isValidNumberInput } from "@/util/string"
+import { useRouter } from "next/navigation"
+import useCreditTransferStore, {
+  selectOnSetCreditTransferData
+} from "@/stores/creditTransferStore"
 
 export default function Main() {
+  const setData = useCreditTransferStore(selectOnSetCreditTransferData)
   const { onUpdateDipCourse } = useGetDipCourseById()
   const { onUploadFile, isPending } = useGetUploadFileCreditTransfer()
   const [dipCourse, setDipCourse] = useState("")
   const toast = useToast()
+  const router = useRouter()
   const { onTransferable } = useTransferable()
 
   const [file, setFile] = useState<File | undefined>(undefined)
@@ -305,6 +311,9 @@ export default function Main() {
 
   const onSubmitCreditTransferData = async () => {
     const creditTransferData = await onTransferable(displayData)
+    setData(creditTransferData)
+    router.push("/reportcredittransfer")
+
     console.log(creditTransferData)
   }
 
@@ -409,11 +418,15 @@ export default function Main() {
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("dipCourseName", {
-      header: "Course Transferred From",
+      header: () => (
+        <Box whiteSpace="pre-wrap">
+          วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
+        </Box>
+      ),
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("grade", {
-      header: "Grade",
+      header: () => <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>,
       cell: (info) => (
         <Input
           width="60px"
@@ -427,29 +440,33 @@ export default function Main() {
       )
     }),
     columnHelper.accessor("dipCredit", {
-      header: "Credit",
+      header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("universityCourse.uniCourseId", {
-      header: "University Course Code",
+      header: () => <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
     columnHelper.accessor("universityCourse.uniCourseName", {
-      header: "Transferred Course Equivalents",
+      header: () => (
+        <Box whiteSpace="pre-wrap">
+          วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course Equivalents
+        </Box>
+      ),
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
     columnHelper.accessor("universityCourse.uniCredit", {
-      header: "University Credit",
+      header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
     columnHelper.accessor("transferable", {
-      header: "Status",
+      header: () => <Box whiteSpace="pre-wrap">สถานะ{"\n"}Status</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? (
           info.getValue() ? (
@@ -508,7 +525,6 @@ export default function Main() {
                             ? ChevronUpIcon
                             : ChevronDownIcon
                         }
-                        ml={2}
                       />
                     </Th>
                   )

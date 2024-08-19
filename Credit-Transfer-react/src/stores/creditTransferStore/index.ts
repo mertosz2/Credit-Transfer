@@ -1,54 +1,49 @@
 import {
+  ICreditTransferResponse,
   IDiplomaCourseList,
-  IUniversityCourse,
-} from "@/feature/CreditTransfer/interface/CreditTransfer";
-import { encryptedStorage } from "@/util/encryptedStorage";
-import create from "zustand";
-import { devtools, persist } from "zustand/middleware";
+  IFlatDiplomaCourseList,
+  IUniversityCourse
+} from "@/feature/CreditTransfer/interface/CreditTransfer"
+import { encryptedStorage } from "@/util/encryptedStorage"
+import create from "zustand"
+import { devtools, persist } from "zustand/middleware"
 
-// ...import statements
 interface State {
-    dipCourseData: IDiplomaCourseList[];
-    uniCourseData : IUniversityCourse
+  data: IFlatDiplomaCourseList[]
 }
 
 interface Actions {
-    onSetCreditTransferData: (data: IDiplomaCourseList[]) => void;
-    onSetUniversityCourseData: (data: IUniversityCourse) => void;
+  onSetCreditTransferData: (data: IFlatDiplomaCourseList[]) => void
 }
 
+// Combine state and actions into the store interface
 interface ICreditTransferStore extends State, Actions {}
 
 const initialState: State = {
-    dipCourseData: [],
-    uniCourseData:{
-        uniId:0,
-        uniCourseId:"",
-        uniCourseName:"",
-        uniCredit:0
-        
-    }
-};
+  data: []
+}
 
+// Create the Zustand store
 const useCreditTransferStore = create<ICreditTransferStore>()(
-    devtools(
-        persist(
-            (set) => ({
-                ...initialState,
-                onSetCreditTransferData: (newData) => set({ dipCourseData: newData }),
-                onSetUniversityCourseData: (newData) => set({ uniCourseData: newData }),
-            }),
-            {
-                name: "dipcoursedata-store",
-                storage: encryptedStorage,
-            }
-        )
+  devtools(
+    persist(
+      (set) => ({
+        ...initialState,
+        onSetCreditTransferData: (_data) =>
+          set(() => ({ data: _data }), false, "CreditTransfer/OnsetData")
+      }),
+      {
+        name: "credit-transfer-store", // Changed name to be more descriptive
+        storage: encryptedStorage
+      }
     )
-);
+  )
+)
 
-export const selectOnSetCreditTransferData = (state: ICreditTransferStore) => state.onSetCreditTransferData;
-export const selectOnSetUniversityCourseData = (state: ICreditTransferStore) => state.onSetUniversityCourseData;
+// Export selectors
+export const selectOnSetCreditTransferData = (state: ICreditTransferStore) =>
+  state.onSetCreditTransferData
 
-
-export default useCreditTransferStore;
-
+export const selectCreditTransferData = (state: ICreditTransferStore) =>
+  state.data
+export default useCreditTransferStore
