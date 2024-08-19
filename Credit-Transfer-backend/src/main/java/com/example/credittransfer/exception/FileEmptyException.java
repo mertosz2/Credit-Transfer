@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class FileEmptyException extends RuntimeException {
     public FileEmptyException() {
-        super("File is empty");
+        super("ไฟล์ว่างเปล่า");
     }
 }

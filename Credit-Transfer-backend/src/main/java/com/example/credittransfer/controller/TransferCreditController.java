@@ -151,12 +151,17 @@ public class TransferCreditController {
                 new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1101"), 4),
                 new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9205"), 4),
                 new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9201"), 2),
-                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1201"), 2),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1201"), 1),
                 new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1207"), 4));
 
         List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
         return ResponseEntity.status(OK).body(transferCreditService.getReport(mockResponseList));
 
+    }
+
+    @PostMapping("/report")
+    public ResponseEntity<ReportCourseResponse> getReport(@RequestBody List<TransferCreditResponse> responseList) {
+        return ResponseEntity.status(OK).body(transferCreditService.getReport(responseList));
     }
 
     @PostMapping("/sort")

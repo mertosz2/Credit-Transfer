@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class NotFoundDiplomaCourseException extends RuntimeException {
     public NotFoundDiplomaCourseException(String msg) {
-        super("Not found diploma course with given course code: " + msg + " or this course does not register in the system yet.");
+        super("ไม่พบรหัสวิชานี้: " + msg + " หรือว่ารหัสวิชานี้ยังไม่ได้ลงทะเบียนกับระบบ.");
     }
 
 }
