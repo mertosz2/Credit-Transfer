@@ -128,7 +128,7 @@ export default function Main() {
     []
   )
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (dipCourse) {
       try {
         const transferCreditResponseList = displayData || []
@@ -190,8 +190,12 @@ export default function Main() {
         console.error("Failed to update DipCourse:", error)
       }
     }
-  }
+  }, [CloseAddCourse, dipCourse, displayData, onUpdateDipCourse, toast])
 
+  // Example of useEffect to watch the displayData and update flatData accordingly
+  useEffect(() => {
+    setFlatData(flattenData(displayData))
+  }, [displayData, setFlatData])
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0]
@@ -358,7 +362,6 @@ export default function Main() {
             universityCourse
           )
         }
-
         setFlatData(updatedFlatData)
         setDisplayData(updatedDisplayData)
       }
