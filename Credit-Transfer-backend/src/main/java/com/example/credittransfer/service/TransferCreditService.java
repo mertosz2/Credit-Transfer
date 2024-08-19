@@ -206,6 +206,7 @@ public class TransferCreditService {
     }
 
     public ReportCourseResponse getReport(List<TransferCreditResponse> transferCreditResponseList) {
+        transferCreditResponseList = validateTransferableResponse(transferCreditResponseList);
         ReportCourseResponse reportCourseResponse = new ReportCourseResponse();
         List<TransferCreditResponse> firstSection = transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
