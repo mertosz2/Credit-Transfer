@@ -3,7 +3,9 @@ import Button from "@/components/Button"
 import {
   ICreditTransferResponse,
   IDiplomaCourseList,
-  IUniversityCourse
+  IUniversityCourse,
+  IFlatDiplomaCourseList,
+  TKey
 } from "@/feature/CreditTransfer/interface/CreditTransfer"
 import useGetDipCourseById from "@/feature/getDipCourseById/hooks/useGetDipCourseById"
 import useGetUploadFileCreditTransfer from "@/feature/UploadFileCreditTransfer/hooks/useGetUploadFileCreditTransfer"
@@ -28,15 +30,29 @@ import {
   useToast,
   Icon
 } from "@chakra-ui/react"
-import React, { ChangeEvent, useCallback, useEffect, useState } from "react"
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react"
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons"
 import useTransferable from "@/feature/CreditTransfer/hooks/useTransferable"
 import { RiAddFill, RiCheckLine, RiErrorWarningFill } from "@remixicon/react"
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable
+} from "@tanstack/react-table"
+import useSortData from "@/feature/CreditTransfer/hooks/useSortData"
+import { flattenData } from "@/util/flatData"
+import { getStringAfterUnderscore, isValidNumberInput } from "@/util/string"
 
 export default function Main() {
   const { onUpdateDipCourse } = useGetDipCourseById()
   const { onUploadFile, isPending } = useGetUploadFileCreditTransfer()
-  const [grades, setGrades] = useState<Record<string, number>>({})
   const [dipCourse, setDipCourse] = useState("")
   const toast = useToast()
   const { onTransferable } = useTransferable()
@@ -54,6 +70,7 @@ export default function Main() {
     onOpen: OpenAddCourse,
     onClose: CloseAddCourse
   } = useDisclosure()
+
   const [modalData, setModalData] = useState<
     | {
         founded: string[]
@@ -62,114 +79,54 @@ export default function Main() {
         totalfound: number
         totalnotfound: number
         totalcourse: number
+        uniqueNewItems?: string[]
       }
     | undefined
   >(undefined)
+
   const [displayData, setDisplayData] = useState<ICreditTransferResponse[]>([])
+  const [flatData, setFlatData] = useState<IFlatDiplomaCourseList[]>([])
+  const { onSortData } = useSortData()
 
-  const isValidNumberInput = (value: string): boolean => {
-    if (value === "") return true
-    if (/^4(\.0)?$/.test(value)) {
-      return true
-    }
-    if (/^[1-3](\.[05]?)?$/.test(value)) {
-      return true
-    }
-    return false
-  }
-
-  const calculateTransferable = (
-    diplomaCourseList: IDiplomaCourseList[],
-    universityCourse: IUniversityCourse
-  ): boolean => {
-    // ตรวจสอบว่ามีหลักสูตรมากกว่าหรือเท่ากับ 2 รายการ
-    if (diplomaCourseList.length >= 2) {
-      // ตรวจสอบว่าเกรดทั้งหมดใน diplomaCourseList >= 2 หรือไม่
-      const allGradesValid = diplomaCourseList.every(
-        (course) => course.grade >= 2
-      )
-
-      if (allGradesValid) {
-        // รวมค่า dipCredit ใน diplomaCourseList
-        const totalDipCredit = diplomaCourseList.reduce(
-          (total, course) => total + course.dipCredit,
-          0
+  const calculateTransferable = useCallback(
+    (
+      diplomaCourseList: IDiplomaCourseList[],
+      universityCourse: IUniversityCourse
+    ): boolean => {
+      // ตรวจสอบว่ามีหลักสูตรมากกว่าหรือเท่ากับ 2 รายการ
+      if (diplomaCourseList.length >= 2) {
+        console.log("ตรวจสอบว่ามีหลักสูตรมากกว่าหรือเท่ากับ 2 รายการ")
+        // ตรวจสอบว่าเกรดทั้งหมดใน diplomaCourseList >= 2 หรือไม่
+        const allGradesValid = diplomaCourseList.every(
+          (course) => course.grade >= 2
         )
 
-        // เปรียบเทียบ totalDipCredit กับ uniCredit
-        return totalDipCredit >= universityCourse.uniCredit
+        if (allGradesValid) {
+          // รวมค่า dipCredit ใน diplomaCourseList
+          const totalDipCredit = diplomaCourseList.reduce(
+            (total, course) => total + course.dipCredit,
+            0
+          )
+
+          // เปรียบเทียบ totalDipCredit กับ uniCredit
+          console.log("เปรียบเทียบ totalDipCredit กับ uniCredit")
+          return totalDipCredit >= universityCourse.uniCredit
+        } else {
+          return false
+        }
       } else {
-        return false
-      }
-    } else {
-      // ถ้า diplomaCourseList.length < 2 ให้ตรวจสอบ dipCredit และ grade แต่ละรายการ
-      return diplomaCourseList.some(
-        (course) =>
-          course.dipCredit >= universityCourse.uniCredit && course.grade >= 2
-      )
-    }
-  }
-
-  const recheckGrade = useCallback(() => {
-    const updatedData = displayData.map((item) => ({
-      ...item,
-      transferable: calculateTransferable(
-        item.diplomaCourseList,
-        item.universityCourse
-      )
-    }))
-    setDisplayData(updatedData)
-  }, [displayData])
-
-  useEffect(() => {
-    recheckGrade()
-  }, [recheckGrade])
-
-  const updateGradesInDisplayData = useCallback(() => {
-    setDisplayData((prevDisplayData) =>
-      prevDisplayData.map((item, itemIndex) => ({
-        ...item,
-        diplomaCourseList: item.diplomaCourseList.map((course, courseIndex) => {
-          const key = `${itemIndex}-${courseIndex}`
-          const grade = grades[key] !== undefined ? grades[key] : 0
-          return {
-            ...course,
-            grade
-          }
-        }),
-        transferable: calculateTransferable(
-          item.diplomaCourseList,
-          item.universityCourse
+        // ถ้า diplomaCourseList.length < 2 ให้ตรวจสอบ dipCredit และ grade แต่ละรายการ
+        console.log(
+          "ถ้า diplomaCourseList.length < 2 ให้ตรวจสอบ dipCredit และ grade แต่ละรายการ"
         )
-      }))
-    )
-  }, [grades])
-
-  useEffect(() => {
-    updateGradesInDisplayData()
-  }, [grades, updateGradesInDisplayData])
-
-  const handleGradeChange =
-    (itemIndex: number, courseIndex: number) =>
-    (e: ChangeEvent<HTMLInputElement>): void => {
-      const { value } = e.target
-      const key = `${itemIndex}-${courseIndex}`
-
-      if (isValidNumberInput(value)) {
-        // แปลงค่าเป็น number ก่อนอัปเดต state
-        setGrades((prevGrades) => {
-          const updatedGrades = {
-            ...prevGrades,
-            [key]: parseFloat(value) || 0
-          }
-          updateGradesInDisplayData() // เรียกใช้เพื่อรวมเกรดใน displayData
-          return updatedGrades
-        })
+        return diplomaCourseList.some(
+          (course) =>
+            course.dipCredit >= universityCourse.uniCredit && course.grade >= 2
+        )
       }
-    }
-  const handleDipCourseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDipCourse(e.target.value)
-  }
+    },
+    []
+  )
 
   const handleSubmit = async () => {
     if (dipCourse) {
@@ -227,6 +184,7 @@ export default function Main() {
         }
         CloseAddCourse()
         setDisplayData(newArray)
+        setFlatData(flattenData(newArray))
         console.log("Updated Display Data:", newArray)
       } catch (error) {
         console.error("Failed to update DipCourse:", error)
@@ -281,6 +239,7 @@ export default function Main() {
               item.diplomaCourseList.map((course) => course.dipCourseId)
             )
           )
+          const uniqueIds = new Set<string>()
 
           // หาข้อมูลใหม่ที่ไม่มีใน existingIds
           const uniqueNewItems = newIm.filter(
@@ -289,6 +248,13 @@ export default function Main() {
                 existingIds.has(course.dipCourseId)
               )
           )
+          if (transferCreditResponseList.length > 0) {
+            uniqueNewItems.map((item) =>
+              item.diplomaCourseList.map((course) =>
+                uniqueIds.add(course.dipCourseId)
+              )
+            )
+          }
 
           // คำนวณ dipCourseId ที่ซ้ำ
           const duplicateIds = new Set<string>()
@@ -302,14 +268,17 @@ export default function Main() {
           )
 
           const duplicateIdsArray = Array.from(duplicateIds)
+          const uniqueNewItemsArray = Array.from(uniqueIds)
 
           // อัปเดต displayData และ modalData
           const newArray = [...transferCreditResponseList, ...uniqueNewItems]
           setDisplayData(newArray)
+          setFlatData(flattenData(newArray))
           setModalData({
             founded: newFile.foundedDipCourseIdList,
             notFounded: newFile.notFoundedDipCourseIdList,
             duplicates: duplicateIdsArray, // แสดงข้อมูลซ้ำใน modal
+            uniqueNewItems: uniqueNewItemsArray,
             totalfound: newFile.totalFounded,
             totalnotfound: newFile.totalNotFounded,
             totalcourse: newFile.total
@@ -330,50 +299,6 @@ export default function Main() {
     }
   }
 
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof ICreditTransferResponse | string | null
-    direction: "ascending" | "descending"
-  } | null>(null)
-
-  const getNestedValue = (obj: any, path: string) => {
-    const pathParts = path.split(".")
-    let value = obj
-
-    for (const part of pathParts) {
-      if (Array.isArray(value)) {
-        value = value.map((item) => item[part])
-        if (value.length > 0) {
-          value = value[0] // Take the first item in the array
-        } else {
-          value = undefined
-        }
-      } else {
-        value = value ? value[part] : undefined
-      }
-    }
-
-    return typeof value === "string" ? value.replace(/-/g, "") : value
-  }
-
-  // ฟังก์ชันสำหรับจัดการการเรียงลำดับ
-  const handleSort = (key: keyof ICreditTransferResponse | string) => {
-    let direction: "ascending" | "descending" = "ascending"
-
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "ascending"
-    ) {
-      direction = "descending"
-    }
-
-    // function api
-
-    setDisplayData(sortedData)
-    setSortConfig({ key, direction })
-  }
-  // ฟังก์ชันสำหรับดึงค่า nested key
-
   const onSubmitCreditTransferData = async () => {
     const creditTransferData = await onTransferable(displayData)
     console.log(creditTransferData)
@@ -383,10 +308,251 @@ export default function Main() {
     console.log("Clearing data...")
 
     setDisplayData([])
-    updateGradesInDisplayData()
+    setFlatData([])
   }
-  //เคลีย data ตอนกรอกเกรดไม่ให้วนซ้ำ
-  //function sort
+
+  const handleDipCourseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDipCourse(e.target.value)
+  }
+
+  const handleGradeChange = useCallback(
+    async (newGrade: number, rowIndex: number) => {
+      if (!isValidNumberInput(String(newGrade))) {
+        return
+      }
+
+      const { universityCourse, dipCourseId } = flatData[rowIndex]
+      const existingGroupIndex = displayData.findIndex(
+        (item) =>
+          item.universityCourse.uniCourseId === universityCourse.uniCourseId &&
+          item.diplomaCourseList.some(
+            (course) => course.dipCourseId === dipCourseId
+          )
+      )
+
+      if (existingGroupIndex !== -1) {
+        const updatedDiplomaCourseList = displayData[
+          existingGroupIndex
+        ].diplomaCourseList.map((course) =>
+          course.dipCourseId === dipCourseId
+            ? { ...course, grade: newGrade }
+            : course
+        )
+
+        const updatedDisplayData = [...displayData]
+        updatedDisplayData[existingGroupIndex] = {
+          ...updatedDisplayData[existingGroupIndex],
+          diplomaCourseList: updatedDiplomaCourseList,
+          transferable: calculateTransferable(
+            updatedDiplomaCourseList,
+            universityCourse
+          )
+        }
+
+        const updatedFlatData = [...flatData]
+        updatedFlatData[rowIndex] = {
+          ...updatedFlatData[rowIndex],
+          grade: newGrade,
+          transferable: calculateTransferable(
+            updatedDiplomaCourseList,
+            universityCourse
+          )
+        }
+
+        setFlatData(updatedFlatData)
+        setDisplayData(updatedDisplayData)
+      }
+    },
+    [calculateTransferable, displayData, flatData]
+  )
+
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof ICreditTransferResponse | string | null
+    direction: "ascending" | "descending"
+  } | null>(null)
+
+  const handleSort = useCallback(
+    async (key: TKey) => {
+      let direction: "ascending" | "descending" = "ascending"
+
+      if (
+        sortConfig &&
+        sortConfig.key === key &&
+        sortConfig.direction === "ascending"
+      ) {
+        direction = "descending"
+      }
+
+      // function api
+      if (sortConfig) {
+        const sortedData = await onSortData({
+          data: displayData,
+          key: key,
+          direction: sortConfig.direction === "ascending"
+        })
+        setDisplayData(sortedData)
+        setFlatData(flattenData(sortedData))
+      }
+      setSortConfig({ key, direction })
+    },
+    [displayData, onSortData, sortConfig]
+  )
+
+  const columnHelper = createColumnHelper<IFlatDiplomaCourseList>()
+
+  const columns = [
+    columnHelper.accessor("dipCourseId", {
+      header: () => <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>,
+      cell: (info) => info.getValue()
+    }),
+    columnHelper.accessor("dipCourseName", {
+      header: "Course Transferred From",
+      cell: (info) => info.getValue()
+    }),
+    columnHelper.accessor("grade", {
+      header: "Grade",
+      cell: (info) => (
+        <Input
+          width="60px"
+          type="number"
+          step="0.5"
+          value={info.getValue() || 0}
+          onChange={(e) =>
+            handleGradeChange(Number(e.target.value), info.row.index)
+          }
+        />
+      )
+    }),
+    columnHelper.accessor("dipCredit", {
+      header: "Credit",
+      cell: (info) => info.getValue()
+    }),
+    columnHelper.accessor("universityCourse.uniCourseId", {
+      header: "University Course Code",
+      cell: (info) => {
+        return info.row.original.isFirstInGroup ? info.getValue() : null
+      }
+    }),
+    columnHelper.accessor("universityCourse.uniCourseName", {
+      header: "Transferred Course Equivalents",
+      cell: (info) => {
+        return info.row.original.isFirstInGroup ? info.getValue() : null
+      }
+    }),
+    columnHelper.accessor("universityCourse.uniCredit", {
+      header: "University Credit",
+      cell: (info) => {
+        return info.row.original.isFirstInGroup ? info.getValue() : null
+      }
+    }),
+    columnHelper.accessor("transferable", {
+      header: "Status",
+      cell: (info) => {
+        return info.row.original.isFirstInGroup ? (
+          info.getValue() ? (
+            <RiCheckLine color="green" />
+          ) : (
+            <RiErrorWarningFill color="red" />
+          )
+        ) : null
+      }
+    })
+  ]
+
+  const table = useReactTable({
+    data: flatData,
+    columns,
+    getCoreRowModel: getCoreRowModel()
+  })
+
+  const renderTable = useMemo(() => {
+    return (
+      <TableContainer
+        sx={{ tableLayout: "auto" }}
+        style={{
+          borderWidth: 1,
+          borderColor: "black",
+          borderRadius: 16
+        }}
+      >
+        <Table size="sm">
+          <Thead bgColor="#D7D7D7">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <Tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <Th
+                      padding="16px"
+                      cursor="pointer"
+                      key={header.id}
+                      onClick={() =>
+                        handleSort(
+                          header.column.id.includes("_")
+                            ? (getStringAfterUnderscore(
+                                header.column.id
+                              ) as TKey)
+                            : (header.column.id as TKey)
+                        )
+                      }
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                      <Icon
+                        as={
+                          sortConfig && sortConfig.direction === "ascending"
+                            ? ChevronUpIcon
+                            : ChevronDownIcon
+                        }
+                        ml={2}
+                      />
+                    </Th>
+                  )
+                })}
+              </Tr>
+            ))}
+          </Thead>
+
+          <Tbody>
+            {flatData &&
+              flatData.length > 0 &&
+              displayData &&
+              displayData.length > 0 &&
+              table.getRowModel().rows.map((row) => (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell, cellIndex) => {
+                    // Apply colspan to universityCourse columns
+                    if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                      return null
+                    }
+                    return (
+                      <Td
+                        key={cell.id}
+                        rowSpan={
+                          row.original.isFirstInGroup && cellIndex >= 4
+                            ? row.original.groupSize
+                            : 1
+                        }
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </Td>
+                    )
+                  })}
+                </Tr>
+              ))}
+          </Tbody>
+          <Tfoot
+            display="flex"
+            padding="8px"
+          ></Tfoot>
+        </Table>
+      </TableContainer>
+    )
+  }, [displayData, flatData, handleSort, sortConfig, table])
 
   return (
     <Box height="100%">
@@ -424,250 +590,8 @@ export default function Main() {
                 onClick={OpenFileImport}
               />
             </Box>
-
-            <TableContainer
-              sx={{ tableLayout: "auto" }}
-              style={{
-                borderWidth: 1,
-                borderColor: "black",
-                borderRadius: 16
-              }}
-            >
-              <Table size="sm">
-                <Thead bgColor="#D7D7D7">
-                  <Tr>
-                    <Th
-                      padding="16px"
-                      onClick={() =>
-                        handleSort("diplomaCourseList.dipCourseId")
-                      }
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">
-                          รหัสวิชา{"\n"}Course Code
-                        </Box>
-                        {sortConfig?.key ===
-                          "diplomaCourseList.dipCourseId" && (
-                          <Icon
-                            as={
-                              sortConfig.direction === "ascending"
-                                ? ChevronUpIcon
-                                : ChevronDownIcon
-                            }
-                            ml={2}
-                          />
-                        )}
-                      </Box>
-                    </Th>
-                    <Th
-                      onClick={() =>
-                        handleSort("universityCourse.uniCourseName")
-                      }
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">
-                          วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
-                        </Box>
-                        {sortConfig?.key ===
-                          "universityCourse.uniCourseName" && (
-                          <Icon
-                            as={
-                              sortConfig.direction === "ascending"
-                                ? ChevronUpIcon
-                                : ChevronDownIcon
-                            }
-                            ml={2}
-                          />
-                        )}
-                      </Box>
-                    </Th>
-                    <Th onClick={() => handleSort("diplomaCourseList.grade")}>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>
-                        {sortConfig?.key === "diplomaCourseList.grade" && (
-                          <Icon
-                            as={
-                              sortConfig.direction === "ascending"
-                                ? ChevronUpIcon
-                                : ChevronDownIcon
-                            }
-                            ml={2}
-                          />
-                        )}
-                      </Box>
-                    </Th>
-                    <Th
-                      onClick={() => handleSort("diplomaCourseList.dipCredit")}
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
-                        {sortConfig?.key === "diplomaCourseList.dipCredit" && (
-                          <Icon
-                            as={
-                              sortConfig.direction === "ascending"
-                                ? ChevronUpIcon
-                                : ChevronDownIcon
-                            }
-                            ml={2}
-                          />
-                        )}
-                      </Box>
-                    </Th>
-                    <Th
-                      onClick={() => handleSort("universityCourse.uniCourseId")}
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">
-                          รหัสวิชา{"\n"}Course Code
-                        </Box>
-                        {sortConfig?.key === "universityCourse.uniCourseId" && (
-                          <Icon
-                            as={
-                              sortConfig.direction === "ascending"
-                                ? ChevronUpIcon
-                                : ChevronDownIcon
-                            }
-                            ml={2}
-                          />
-                        )}
-                      </Box>
-                    </Th>
-                    <Th
-                      onClick={() =>
-                        handleSort("universityCourse.uniCourseName")
-                      }
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">
-                          วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course
-                          Equivalents
-                        </Box>
-                        {sortConfig?.key ===
-                          "universityCourse.uniCourseName" && (
-                          <Icon
-                            as={
-                              sortConfig.direction === "ascending"
-                                ? ChevronUpIcon
-                                : ChevronDownIcon
-                            }
-                            ml={2}
-                          />
-                        )}
-                      </Box>
-                    </Th>
-                    <Th
-                      onClick={() => handleSort("universityCourse.uniCredit")}
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>
-                        {sortConfig?.key === "universityCourse.uniCredit" && (
-                          <Icon
-                            as={
-                              sortConfig.direction === "ascending"
-                                ? ChevronUpIcon
-                                : ChevronDownIcon
-                            }
-                            ml={2}
-                          />
-                        )}
-                      </Box>
-                    </Th>
-                    <Th>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box whiteSpace="pre-wrap">สถานะ{"\n"}Status</Box>
-                      </Box>
-                    </Th>
-                  </Tr>
-                </Thead>
-
-                <Tbody>
-                  {displayData.map((item, itemIndex) => (
-                    <React.Fragment key={itemIndex}>
-                      {item.diplomaCourseList.map((course, courseIndex) => (
-                        <Tr
-                          key={course.dipCourseId}
-                          borderBottom="gray"
-                          borderWidth="2px"
-                          backgroundColor={
-                            itemIndex % 2 === 0 ? "#F5F5F5" : "transparent"
-                          }
-                        >
-                          <Td>{course.dipCourseId}</Td>
-                          <Td>{course.dipCourseName}</Td>
-                          <Td>
-                            <Input
-                              type="number"
-                              step="0.1"
-                              sx={{
-                                border: "none",
-                                width: "60px",
-                                height: "30px"
-                              }}
-                              value={
-                                grades[`${itemIndex}-${courseIndex}`] || ""
-                              }
-                              onChange={handleGradeChange(
-                                itemIndex,
-                                courseIndex
-                              )}
-                            />
-                          </Td>
-                          <Td>{course.dipCredit}</Td>
-                          {courseIndex === 0 && (
-                            <>
-                              <Td rowSpan={item.diplomaCourseList.length}>
-                                {item.universityCourse.uniCourseId}
-                              </Td>
-                              <Td rowSpan={item.diplomaCourseList.length}>
-                                {item.universityCourse.uniCourseName}
-                              </Td>
-                              <Td rowSpan={item.diplomaCourseList.length}>
-                                {item.universityCourse.uniCredit}
-                              </Td>
-                              <Td rowSpan={item.diplomaCourseList.length}>
-                                {item.transferable === true ? (
-                                  <RiCheckLine color="green" />
-                                ) : (
-                                  <RiErrorWarningFill color="red" />
-                                )}
-                              </Td>
-                            </>
-                          )}
-                        </Tr>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </Tbody>
-                <Tfoot
-                  display="flex"
-                  padding="8px"
-                ></Tfoot>
-              </Table>
-            </TableContainer>
+            {/* Table */}
+            {renderTable}
             <Box
               borderRadius="16px"
               display="flex"
@@ -700,6 +624,9 @@ export default function Main() {
                 paddingY="14px"
                 paddingX="62px"
                 borderRadius="6px"
+                color={
+                  displayData && displayData.length > 0 ? "white" : "black"
+                }
                 onClick={onSubmitCreditTransferData}
                 isDisabled={
                   displayData && displayData.length > 0 ? false : true
@@ -767,6 +694,37 @@ export default function Main() {
                 height="1px"
                 backgroundColor="black"
               ></Box>
+            </Box>
+            {modalData?.uniqueNewItems &&
+              modalData.uniqueNewItems.length > 0 && (
+                <Box
+                  mb={4}
+                  display="flex"
+                  gap="16px"
+                  flexDirection="column"
+                >
+                  <Box fontWeight={700}>รหัสวิชาที่เพิ่ม</Box>
+                  <Box
+                    display="flex"
+                    flexWrap="wrap"
+                    gap="8px"
+                  >
+                    {modalData?.uniqueNewItems.map((courseId, index) => (
+                      <Box key={index}>{`"${courseId}"${" "}`}</Box>
+                    ))}
+                  </Box>
+                  <Box
+                    width="100%"
+                    height="1px"
+                    backgroundColor="black"
+                  ></Box>
+                </Box>
+              )}
+            <Box
+              display="flex"
+              gap="16px"
+              flexDirection="column"
+            >
               <Box>
                 พบรหัสวิชาในใบทรานสคริปทั้งหมด {modalData?.totalcourse} วิชา
               </Box>
@@ -779,16 +737,6 @@ export default function Main() {
                 หากไม่พบท่านสามารถทำการเพิ่มรหัสวิชาลงไปเองได้*
               </Box>
             </Box>
-            {modalData?.duplicates && modalData.duplicates.length > 0 && (
-              <Box>
-                <strong>Duplicate Courses:</strong>
-                <ul>
-                  {modalData.duplicates.map((courseId, index) => (
-                    <li key={index}>{courseId}</li>
-                  ))}
-                </ul>
-              </Box>
-            )}
           </ModalBody>
           <ModalFooter>
             <Button
@@ -863,12 +811,10 @@ export default function Main() {
               gap="4px"
               flexDirection="column"
             >
-              <Box>{`รหัสวิชา (CourseCode)`}</Box>
+              <Box>{`รหัสวิชา (Course Code)`}</Box>
               <Input
                 onChange={handleDipCourseChange}
                 display="flex"
-                alignItems="center"
-                justifyContent="center"
                 padding="4px"
               />
             </Box>

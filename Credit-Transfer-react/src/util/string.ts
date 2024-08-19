@@ -8,3 +8,8 @@ export const isValidNumberInput = (value: string): boolean => {
   }
   return false
 }
+
+export const getStringAfterUnderscore = (str: string) => {
+  const parts = str.split("_")
+  return parts.length > 1 ? parts.slice(1).join("_") : ""
+}
