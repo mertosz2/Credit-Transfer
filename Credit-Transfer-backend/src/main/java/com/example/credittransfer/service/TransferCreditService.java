@@ -160,7 +160,7 @@ public class TransferCreditService {
         List<TransferCreditResponse> responseList = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(TransferCreditResponse::isTransferable)
                 .toList());
-        responseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+//        responseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
         return responseList;
     }
 
@@ -205,26 +205,24 @@ public class TransferCreditService {
         return  transferCreditRequestList;
     }
 
-    public ReportCourseResponse getReport(List<TransferCreditResponse> transferCreditResponseList) {
-        transferCreditResponseList = validateTransferableResponse(transferCreditResponseList);
+    public ReportCourseResponse getReport(List<TransferCreditResponse> responseList) {
+        List<TransferCreditResponse> transferCreditResponseList = validateTransferableResponse(responseList);
         ReportCourseResponse reportCourseResponse = new ReportCourseResponse();
+
         List<TransferCreditResponse> firstSection = transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
-                        Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "11100"))
+                        Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11100"))
                 .toList();
-        transferCreditResponseList.removeIf(transferCreditResponse ->
-                Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "11100")
-        );
 
         List<TransferCreditResponse> secondSection = transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
-                        Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "11200"))
+                        Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11200"))
                 .toList();
 
 
         List<TransferCreditResponse> thirdSection = transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
-                        Objects.equals(transferCreditResponse.getUniversityCourse().getCourseCategory().getCourseCategoryCode(), "12300"))
+                        Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "12300"))
                 .toList();
 
         reportCourseResponse.setFirstSectionList(firstSection);

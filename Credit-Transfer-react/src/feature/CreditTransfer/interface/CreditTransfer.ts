@@ -41,3 +41,9 @@ export interface ISortArgs {
   key: TKey
   direction: boolean
 }
+
+export interface IDataSection extends IFlatDiplomaCourseList {
+  firstSectionList: ICreditTransferResponse[]
+  secondSectionList: ICreditTransferResponse[]
+  thirdSectionList: ICreditTransferResponse[]
+}

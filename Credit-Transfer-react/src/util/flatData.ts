@@ -46,3 +46,18 @@ export const flattenData = (data: ICreditTransferResponse[]) => {
     return acc
   }, [])
 }
+export const flattenData2 = (data: ICreditTransferResponse[] | undefined) => {
+  return data?.reduce((acc: IFlatDiplomaCourseList[] , item) => {
+    item.diplomaCourseList.forEach((course, index) => {
+      acc.push({
+        ...course,
+        universityCourse: item.universityCourse,
+        transferable: item.transferable,
+        isFirstInGroup: index === 0, // mark first item in each group
+        groupSize: item.diplomaCourseList.length // size of the group
+      })
+    })
+    return acc
+  }, [])
+}
+

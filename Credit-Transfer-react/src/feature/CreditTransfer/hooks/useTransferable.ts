@@ -10,13 +10,6 @@ const useTransferable = () => {
     mutationKey: ["getTransferable"],
     mutationFn: getTransferable,
     retry: false,
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        status: "success",
-        isClosable: true
-      })
-    },
 
     onError: (e) => {
       if (e) {

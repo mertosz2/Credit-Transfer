@@ -35,6 +35,9 @@ public interface UniversityCourseRepository extends JpaRepository<UniversityCour
     @Query("select uc from UniversityCourse uc where uc.uniCourseId = :uniCourseId and uc.isActive = true")
     Optional<UniversityCourse> findByUniCourseId(String uniCourseId);
 
+    @Query("select uc from UniversityCourse uc where uc.uniId = :id and uc.isActive = true")
+    UniversityCourse findByUId(Integer id);
+
 
 
 

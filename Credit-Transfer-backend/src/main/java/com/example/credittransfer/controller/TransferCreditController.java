@@ -101,14 +101,13 @@ public class TransferCreditController {
 
     }
 
-    @GetMapping("/exportExcel")
-    public void exportExcel(HttpServletResponse response, @RequestBody List<TransferCreditRequest> transferCreditRequestList) throws IOException {
+    @PostMapping("/exportExcel")
+    public void exportExcel(HttpServletResponse response, @RequestBody List<TransferCreditResponse> transferCreditResponseList) throws IOException {
         response.setContentType("application/octet-stream");
         String headerKey = "Content-Disposition";
         String headerValue = "attachment; filename=credit-transfer.xlsx";
         response.setHeader(headerKey, headerValue);
-        List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(transferCreditRequestList);
-        transferCreditService.exportExcel(response, transferCreditService.getReport(mockResponseList));
+        transferCreditService.exportExcel(response, transferCreditService.getReport(transferCreditResponseList));
     }
 
     @GetMapping("/transfer-check")
@@ -145,13 +144,13 @@ public class TransferCreditController {
     @GetMapping("/spa")
     public ResponseEntity<ReportCourseResponse> testR() {
         List<TransferCreditRequest> mockData = List.of(
-                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30001-1055"), 4),
-                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-2003"), 2),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1201"), 4),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30001-1055"), 2),
                 new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30204-2004"), 3),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30204-2001"), 4),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-2003"), 4),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1401"), 2),
                 new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1101"), 4),
-                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9205"), 4),
-                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9201"), 2),
-                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1201"), 1),
                 new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1207"), 4));
 
         List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);

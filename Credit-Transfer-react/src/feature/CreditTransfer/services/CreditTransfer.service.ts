@@ -1,5 +1,9 @@
 import services from "@/config/axiosConfig"
-import { ICreditTransferResponse, ISortArgs } from "../interface/CreditTransfer"
+import {
+  ICreditTransferResponse,
+  IDataSection,
+  ISortArgs
+} from "../interface/CreditTransfer"
 
 export const getCreditTransferData = async (): Promise<
   ICreditTransferResponse[]
@@ -10,8 +14,8 @@ export const getCreditTransferData = async (): Promise<
 }
 
 export const getTransferable = async (data: ICreditTransferResponse[]) => {
-  const response = await services.post<ICreditTransferResponse[]>(
-    `/api/transfer/transfer-check`,
+  const response = await services.post<IDataSection>(
+    `/api/transfer/report`,
     data
   )
   return response.data

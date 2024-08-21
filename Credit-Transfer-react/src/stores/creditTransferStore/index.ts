@@ -1,5 +1,6 @@
 import {
   ICreditTransferResponse,
+  IDataSection,
   IDiplomaCourseList,
   IFlatDiplomaCourseList,
   IUniversityCourse
@@ -9,18 +10,34 @@ import create from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
 interface State {
-  data: IFlatDiplomaCourseList[]
+  data: IDataSection | null
 }
 
 interface Actions {
-  onSetCreditTransferData: (data: IFlatDiplomaCourseList[]) => void
+  onSetCreditTransferData: (data: IDataSection) => void
 }
 
 // Combine state and actions into the store interface
 interface ICreditTransferStore extends State, Actions {}
 
 const initialState: State = {
-  data: []
+  data: {
+    firstSectionList: [],
+    secondSectionList: [],
+    thirdSectionList: [],
+    dipCourseId: "", // from IFlatDiplomaCourseList
+    universityCourse: {
+      uniId: 0,
+      uniCourseId: "",
+      uniCourseName: "",
+      uniCredit: 0
+    }, // from ICreditTransferResponse
+    transferable: false, // from ICreditTransferResponse
+    id: 0,
+    dipCourseName: "", // Make sure to initialize this if it exists in IFlatDiplomaCourseList
+    dipCredit: 0, // Make sure to initialize this if it exists in IFlatDiplomaCourseList
+    grade: 0 // Make sure to initialize this if it exists in IFlatDiplomaCourseList
+  }
 }
 
 // Create the Zustand store

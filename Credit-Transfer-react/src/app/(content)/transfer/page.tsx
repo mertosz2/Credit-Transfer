@@ -213,7 +213,7 @@ export default function Main() {
           setFile(selectedFile)
         } else {
           toast({
-            title: "File size should not exceed 10 MB.",
+            title: "ขนาดไฟล์ไม่ควรเกิน 10 MB.",
             status: "error",
             isClosable: true
           })
@@ -221,7 +221,7 @@ export default function Main() {
         }
       } else {
         toast({
-          title: "Only PNG, JPG, and PDF files are allowed.",
+          title: "เฉพาะไฟล์ PNG, JPG, หรือ PDF ที่ได้รับอนุญาต.",
           status: "error",
           isClosable: true
         })
