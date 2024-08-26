@@ -57,8 +57,9 @@ public class TransferCreditController {
         }
         File file = ocrService.convertFile(multipartFile);
         DipCourseIdResponse dipCourseIdResponse = ocrService.getCourseIdByImport(file);
+        List<TransferCreditRequest> transferCreditRequestList = ocrService.getCourse(file);
         file.delete();
-        List<TransferCreditRequest> transferCreditRequestList = transferCreditService.mapToTransferCreditRequest(dipCourseIdResponse.getFoundedDipCourseIdList());
+
         dipCourseIdResponse.setTransferCreditResponseList(transferCreditService.getTransferableCourse(transferCreditRequestList));
 
         return ResponseEntity.status(OK).body(dipCourseIdResponse);
@@ -116,31 +117,6 @@ public class TransferCreditController {
         return ResponseEntity.status(OK).body(transferCreditService.getTransferableCourse(transferCreditRequestList));
     }
 
-//    @GetMapping("/getT")
-//    public void testG(HttpServletResponse response) {
-//        List<TransferCreditRequest> mockData = List.of(
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30001-1055"), 4),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-2003"), 2),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30204-2004"), 3),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1101"), 4),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9205"), 4),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9201"), 2),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1401"), 4));
-//
-//        List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
-//
-//        try {
-//            response.setContentType("application/pdf");
-//
-//            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"transfer_credit.pdf\"");
-//
-//            pdfGeneratorService.createPdf(mockResponseList, response.getOutputStream());
-//
-//            response.getOutputStream().flush();
-//        } catch (IOException e) {
-//            throw new RuntimeException("Error occurred while generating PDF", e);
-//        }
-//    }
     @GetMapping("/spa")
     public ResponseEntity<ReportCourseResponse> testR() {
         List<TransferCreditRequest> mockData = List.of(
@@ -166,5 +142,14 @@ public class TransferCreditController {
     @PostMapping("/sort")
     public ResponseEntity<List<TransferCreditResponse>> sortData(@RequestBody List<TransferCreditResponse> responseList,@RequestParam("key") String key, @RequestParam("direction") boolean ascending ) {
         return ResponseEntity.status(OK).body(transferCreditService.sortData(responseList, key, ascending));
+    }
+
+    @GetMapping("/oc2")
+    public String tssa() throws IOException {
+        return ocrService.getCourseId3();
+    }
+    @GetMapping("/oc3")
+    public String tsaa() throws IOException {
+        return ocrService.getCourseId2();
     }
 }

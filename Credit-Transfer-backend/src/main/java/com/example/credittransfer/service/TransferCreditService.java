@@ -209,21 +209,25 @@ public class TransferCreditService {
         List<TransferCreditResponse> transferCreditResponseList = validateTransferableResponse(responseList);
         ReportCourseResponse reportCourseResponse = new ReportCourseResponse();
 
-        List<TransferCreditResponse> firstSection = transferCreditResponseList.stream()
+        List<TransferCreditResponse> firstSection = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11100"))
-                .toList();
+                .toList());
 
-        List<TransferCreditResponse> secondSection = transferCreditResponseList.stream()
+        List<TransferCreditResponse> secondSection = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11200"))
-                .toList();
+                .toList());
 
 
-        List<TransferCreditResponse> thirdSection = transferCreditResponseList.stream()
+        List<TransferCreditResponse> thirdSection = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "12300"))
-                .toList();
+                .toList());
+
+        firstSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+        secondSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+        thirdSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
 
         reportCourseResponse.setFirstSectionList(firstSection);
         reportCourseResponse.setSecondSectionList(secondSection);
@@ -270,4 +274,15 @@ public class TransferCreditService {
         return transferCreditResponseList;
     }
 
+    public TransferCreditRequest mapToTransferCreditRequest(String dipCourseId, double grade){
+        TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
+        DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(dipCourseId);
+        if(Objects.nonNull(diplomaCourse)){
+            transferCreditRequest.setDiplomaCourse(diplomaCourse);
+            transferCreditRequest.setDipGrade(grade);
+        }
+
+
+        return transferCreditRequest;
+    }
 }
