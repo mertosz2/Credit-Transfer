@@ -236,6 +236,7 @@ export default function Main() {
     if (file) {
       try {
         const newFile = await onUploadFile(file)
+        console.log(newFile)
 
         console.log("list of", newFile.transferCreditResponseList)
 
