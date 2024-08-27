@@ -12,6 +12,7 @@ import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.PDFGeneratorService;
 import com.example.credittransfer.service.TransferCreditService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.input.ObservableInputStream;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -58,10 +60,19 @@ public class TransferCreditController {
         File file = ocrService.convertFile(multipartFile);
         DipCourseIdResponse dipCourseIdResponse = ocrService.getCourseIdByImport(file);
         List<TransferCreditRequest> transferCreditRequestList = ocrService.getCourse(file);
+        List<String> allIdFound = dipCourseIdResponse.getFoundedDipCourseIdList();
+        List<String> inListOfRequest = transferCreditRequestList.stream().map(request -> request.getDiplomaCourse().getDipCourseId()).toList();
+        System.out.println(allIdFound);
+        List<String> dipCourseIdList = new ArrayList<>();
+        if (!Objects.isNull(allIdFound) && !inListOfRequest.isEmpty()) {
+            dipCourseIdList = allIdFound.stream().filter(dipCourseId -> !inListOfRequest.contains(dipCourseId)).toList();
+            if(!dipCourseIdList.isEmpty()) {
+                transferCreditRequestList.addAll(transferCreditService.mapToTransferCreditRequest(dipCourseIdList));
+            }
+
+        }
         file.delete();
-
         dipCourseIdResponse.setTransferCreditResponseList(transferCreditService.getTransferableCourse(transferCreditRequestList));
-
         return ResponseEntity.status(OK).body(dipCourseIdResponse);
     }
 
