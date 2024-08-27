@@ -64,7 +64,6 @@ public class OCRService {
             text = text.replaceAll("[\\[\\]^{}/\\\\()]", "|");
             text = text.replaceAll("\\|\\|", "|");
             text = text.replaceAll("°", "").trim();
-            // Remove all extra spaces and ensure the text is contiguous
 
 
             // Add '|' after non-numeric text
