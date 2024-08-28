@@ -22,6 +22,8 @@ public class UniversityCourse {
 
     private int uniCredit;
 
+    private String preSubject;
+
     @JsonIgnore
     private boolean isActive;
 
