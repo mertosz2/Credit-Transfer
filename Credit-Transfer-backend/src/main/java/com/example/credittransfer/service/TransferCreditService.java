@@ -215,16 +215,18 @@ public class TransferCreditService {
                 .toList());
         firstSection = checkPreSubject(firstSection);
 
-        List<TransferCreditResponse> secondSection = new ArrayList<>(transferCreditResponseList.stream()
+        List<TransferCreditResponse> secondSection = new ArrayList<>(responseList.stream()
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11200"))
                 .toList());
+        secondSection = validateTransferableResponse(secondSection);
 
 
-        List<TransferCreditResponse> thirdSection = new ArrayList<>(transferCreditResponseList.stream()
+        List<TransferCreditResponse> thirdSection = new ArrayList<>(responseList.stream()
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "12300"))
                 .toList());
+        thirdSection = validateTransferableResponse(thirdSection);
 
         firstSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
         secondSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
