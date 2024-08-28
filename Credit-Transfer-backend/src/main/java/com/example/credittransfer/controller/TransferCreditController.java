@@ -4,9 +4,11 @@ import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.DipCourseIdResponse;
 import com.example.credittransfer.dto.response.ReportCourseResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
+import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.exception.FileEmptyException;
 import com.example.credittransfer.exception.FileExtensionNotMatchException;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
+import com.example.credittransfer.repository.UniversityCourseRepository;
 import com.example.credittransfer.service.CourseHistoryService;
 import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.PDFGeneratorService;
@@ -35,13 +37,15 @@ public class TransferCreditController {
     private final CourseHistoryService courseHistoryService;
     private final DiplomaCourseRepository diplomaCourseRepository;
     private final PDFGeneratorService pdfGeneratorService;
+    private final UniversityCourseRepository universityCourseRepository;
 
-    public TransferCreditController(TransferCreditService transferCreditService, OCRService ocrService, CourseHistoryService courseHistoryService, DiplomaCourseRepository diplomaCourseRepository, PDFGeneratorService pdfGeneratorService) {
+    public TransferCreditController(TransferCreditService transferCreditService, OCRService ocrService, CourseHistoryService courseHistoryService, DiplomaCourseRepository diplomaCourseRepository, PDFGeneratorService pdfGeneratorService, UniversityCourseRepository universityCourseRepository) {
         this.transferCreditService = transferCreditService;
         this.ocrService = ocrService;
         this.courseHistoryService = courseHistoryService;
         this.diplomaCourseRepository = diplomaCourseRepository;
         this.pdfGeneratorService = pdfGeneratorService;
+        this.universityCourseRepository = universityCourseRepository;
     }
 
     @GetMapping("")
@@ -162,5 +166,24 @@ public class TransferCreditController {
     @GetMapping("/oc3")
     public String tsaa() throws IOException {
         return ocrService.getCourseId2();
+    }
+    @GetMapping("/za")
+    public ResponseEntity<List<TransferCreditResponse>> testRss() {
+        List<TransferCreditRequest> mockData = List.of(
+//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1201"), 1),//071
+//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9205"), 4),//073
+//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9201"), 4),//073
+//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1207"), 4));//072
+//        new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9205"), 4),//073
+//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9201"), 1));//073
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-7801"), 4));//073
+
+        List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
+        List<TransferCreditResponse> firstSection = new ArrayList<>(mockResponseList.stream()
+                .filter(transferCreditResponse ->
+                        Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11100"))
+                .toList());
+        return ResponseEntity.status(OK).body(transferCreditService.checkPreSubject(firstSection));
+
     }
 }

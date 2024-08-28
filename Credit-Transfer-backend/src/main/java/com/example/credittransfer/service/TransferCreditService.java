@@ -134,7 +134,7 @@ public class TransferCreditService {
         return transferCreditResponseList;
     }
 
-    public List<TransferCreditRequest> mapToTransferCreditRequest(List<String> dipCourseId){
+    public List<TransferCreditRequest> mapToTransferCreditRequest(List<String> dipCourseId) {
         List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>();
         for (String dipCourseIdStr : dipCourseId) {
             TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
@@ -181,10 +181,10 @@ public class TransferCreditService {
                 "วิชาที่เทียบโอนหน่วยกิตได้\nTransferred Course Equivalents",
                 "หน่วยกิต\nCredit"
         );
-        exportExcelService.exportDataToExcel(response,heaerList, reportCourseResponse);
+        exportExcelService.exportDataToExcel(response, heaerList, reportCourseResponse);
     }
 
-    public TransferCreditRequest mapToTransferCreditRequest(DiplomaCourse diplomaCourse, double grade){
+    public TransferCreditRequest mapToTransferCreditRequest(DiplomaCourse diplomaCourse, double grade) {
         TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
         transferCreditRequest.setDiplomaCourse(diplomaCourse);
         transferCreditRequest.setDipGrade(grade);
@@ -195,14 +195,14 @@ public class TransferCreditService {
     public List<TransferCreditRequest> mapToTransferCreditRequestByTCRList(List<TransferCreditResponse> transferCreditResponseList) {
         List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>();
         for (TransferCreditResponse request : transferCreditResponseList) {
-            for(DipCourseResponse dipCourseResponse :request.getDiplomaCourseList()) {
+            for (DipCourseResponse dipCourseResponse : request.getDiplomaCourseList()) {
                 TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
                 transferCreditRequest.setDiplomaCourse(diplomaCourseRepository.findById(dipCourseResponse.getId()).orElseThrow());
                 transferCreditRequest.setDipGrade(dipCourseResponse.getGrade());
                 transferCreditRequestList.add(transferCreditRequest);
             }
         }
-        return  transferCreditRequestList;
+        return transferCreditRequestList;
     }
 
     public ReportCourseResponse getReport(List<TransferCreditResponse> responseList) {
@@ -213,6 +213,7 @@ public class TransferCreditService {
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11100"))
                 .toList());
+        firstSection = checkPreSubject(firstSection);
 
         List<TransferCreditResponse> secondSection = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
@@ -274,15 +275,97 @@ public class TransferCreditService {
         return transferCreditResponseList;
     }
 
-    public TransferCreditRequest mapToTransferCreditRequest(String dipCourseId, double grade){
+    public TransferCreditRequest mapToTransferCreditRequest(String dipCourseId, double grade) {
         TransferCreditRequest transferCreditRequest = new TransferCreditRequest();
         DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(dipCourseId);
-        if(Objects.nonNull(diplomaCourse)){
+        if (Objects.nonNull(diplomaCourse)) {
             transferCreditRequest.setDiplomaCourse(diplomaCourse);
             transferCreditRequest.setDipGrade(grade);
         }
 
 
         return transferCreditRequest;
+    }
+
+    public List<TransferCreditResponse> checkPreSubject(List<TransferCreditResponse> responseList) {
+
+        List<UniversityCourse> compareUni = new ArrayList<>(responseList.stream().map(TransferCreditResponse::getUniversityCourse).toList());
+        compareUni.sort(Comparator.comparing(UniversityCourse::getUniCourseId));
+        System.out.println(compareUni);
+        UniversityCourse lastCourse = compareUni.getLast();
+        Optional<UniversityCourse> preCourseOptional = universityCourseRepository.findByUniCourseId(lastCourse.getPreSubject());//072
+        List<UniversityCourse> preCourseList = new ArrayList<>();
+
+        if (preCourseOptional.isPresent()) {
+            UniversityCourse preCourse = preCourseOptional.get();
+            preCourseList.add(preCourse);
+            while (true) {
+                Optional<UniversityCourse> currentUniOptional = universityCourseRepository.findByUniCourseId(preCourse.getPreSubject());
+                if (currentUniOptional.isPresent()) {
+                    UniversityCourse currentUni = currentUniOptional.get();
+                    preCourseList.add(currentUni);
+                    preCourseOptional = universityCourseRepository.findByUniCourseId(currentUni.getPreSubject());
+                    if (preCourseOptional.isPresent()) {
+                        preCourse = preCourseOptional.get();
+                        preCourseList.add(preCourse);
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+
+            }
+        }
+        preCourseList.sort(Comparator.comparing(UniversityCourse::getUniCourseId));
+        int count = 0;
+        for (UniversityCourse universityCourse : preCourseList) {
+            Optional<TransferCreditResponse> tcOptional = responseList.stream()
+                    .filter(response -> response.getUniversityCourse() == universityCourse)
+                    .findFirst();
+            TransferCreditResponse temp = new TransferCreditResponse();
+            if (count == responseList.size()) {
+                break;
+            }
+            if (tcOptional.isEmpty()) {
+                temp.setTransferable(false);
+                temp.setUniversityCourse(universityCourse);
+                count++;
+            } else {
+                temp = tcOptional.get();
+            }
+
+            TransferCreditResponse tcr = temp;
+            if (!tcr.isTransferable()) {
+                TransferCreditResponse passItem = new TransferCreditResponse();
+
+                for (TransferCreditResponse response : responseList) {
+                    count++;
+                    if (response.isTransferable()) {
+                        passItem = response;
+                        break;
+                    }
+                }
+                if (!Objects.isNull(passItem)) {
+                    TransferCreditResponse shiftItem = passItem;
+                    shiftItem.setTransferable(false);
+                    double totalCredit = passItem.getDiplomaCourseList().stream().mapToDouble(DipCourseResponse::getDipCredit).sum();
+                    boolean isPass = true;
+                    if (passItem.getDiplomaCourseList().stream().anyMatch(dipCourse -> dipCourse.getGrade() < 2)) {
+                        isPass = false;
+                    }
+                    TransferCreditResponse newItem = new TransferCreditResponse();
+                    if (isPass && totalCredit >= tcr.getUniversityCourse().getUniCredit()) {
+                        newItem.setDiplomaCourseList(passItem.getDiplomaCourseList());
+                        newItem.setUniversityCourse(tcr.getUniversityCourse());
+                        newItem.setTransferable(isPass);
+                    }
+                    responseList.remove(passItem);
+                    responseList.add(shiftItem);
+                    responseList.add(newItem);
+                }
+            }
+        }
+        return validateTransferableResponse(responseList);
     }
 }
