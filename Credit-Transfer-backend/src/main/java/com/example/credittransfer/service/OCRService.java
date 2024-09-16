@@ -33,7 +33,7 @@ public class OCRService {
 
     public String getCourseId2() throws IOException {
         Tesseract tesseract = new Tesseract();
-        String fileName = "ใบเกรด 1-2 (1) (1).pdf";
+        String fileName = "ใบเกรด 2.pdf";
         File pdfFile = new ClassPathResource("templates/" + fileName).getFile();
 
         String text = "";
@@ -50,7 +50,7 @@ public class OCRService {
 
     public String getCourseId3() throws IOException {
         Tesseract tesseract = new Tesseract();
-        String fileName = "transcript-test1_1.jpg";
+        String fileName = "ใบเกรด 2.pdf";
         List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>();
         File pdfFile = new ClassPathResource("templates/" + fileName).getFile();
         String newStr = "";
@@ -61,6 +61,7 @@ public class OCRService {
             text = tesseract.doOCR(pdfFile);
 
             // Replace unwanted characters with '|'
+            text = text.replaceAll("-(?!\\d{4})", "|");
             text = text.replaceAll("[\\[\\]^{}/\\\\()]", "|");
             text = text.replaceAll("\\|\\|", "|");
             text = text.replaceAll("°", "").trim();
@@ -123,14 +124,16 @@ public class OCRService {
             text = text.replaceAll("\\s+", "").trim();
             text = text.replaceAll("4\\.[1-9]", "4");
 
+
+
             pattern = Pattern.compile(
                     "\\|(\\d{5}-\\d{4})\\|" +
                             "([^|]+?)\\|" +
-                            "([^|]{1,2})\\|" +
-                            "([^|]{1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|"
+                            "([^|]+?)\\|" +
+                            "([^|]+?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)"
 
             );
             matcher = pattern.matcher(text);
@@ -138,19 +141,18 @@ public class OCRService {
             while (matcher.find()) {
                 String matched = matcher.group(0);
                 String[] parts = matched.split("\\|");
-                System.out.println("5digit = " + Arrays.toString(parts));
                 if (parts.length >= 7) {
-                        if(parts[6].matches("\\\\d+(\\\\.\\\\d+)?")&& parts[1].matches("(\\d{5}-\\d{4})")) {
+                        if(Double.parseDouble(parts[6]) >0) {
                             resultExtend = resultExtend + "|" + String.join("|", parts[1], parts[2], parts[5], parts[6], parts[7]);
                             TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[6]));
                             transferCreditRequestList.add(request);
                         }
-
                 }
             }
             if (!resultExtend.isEmpty()) {
                 text = matcher.replaceAll("");
                 text = text + resultExtend;
+                System.out.println("result ex = " + resultExtend);
 
             }
 
@@ -159,8 +161,8 @@ public class OCRService {
                             "([^|]+?)\\|" +
                             "([^|]{1,2})\\|" +
                             "([^|]{1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|"
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)"
 
             );
             matcher = pattern.matcher(text);
@@ -168,9 +170,8 @@ public class OCRService {
             while (matcher.find()) {
                 String matched = matcher.group(0);
                 String[] parts = matched.split("\\|");
-                System.out.println("4digit = " + Arrays.toString(parts));
                 if (parts.length >= 6) {
-                    if(parts[5].matches("\\\\d+(\\\\.\\\\d+)?")&& parts[1].matches("(\\d{5}-\\d{4})")){
+                    if(Double.parseDouble(parts[5]) > 0){
                         resultExtend2 = resultExtend2 + "|" + String.join("|", parts[1], parts[2], parts[4], parts[5], parts[6]);
                         TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[5]));
                         transferCreditRequestList.add(request);
@@ -331,11 +332,11 @@ public class OCRService {
             pattern = Pattern.compile(
                     "\\|(\\d{5}-\\d{4})\\|" +
                             "([^|]+?)\\|" +
-                            "([^|]{1,2})\\|" +
-                            "([^|]{1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|"
+                            "([^|]+?)\\|" +
+                            "([^|]+?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)"
 
             );
             matcher = pattern.matcher(text);
@@ -344,19 +345,18 @@ public class OCRService {
                 String matched = matcher.group(0);
                 String[] parts = matched.split("\\|");
                 if (parts.length >= 7) {
-                    if(parts[6].matches("\\\\d+(\\\\.\\\\d+)?")&& parts[1].matches("(\\d{5}-\\d{4})")) {
+                    if(Double.parseDouble(parts[6]) >0) {
                         resultExtend = resultExtend + "|" + String.join("|", parts[1], parts[2], parts[5], parts[6], parts[7]);
                         TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[6]));
-                        if (!Objects.isNull(request.getDiplomaCourse())) {
-                            transferCreditRequestList.add(request);
-                        }
+                        transferCreditRequestList.add(request);
                     }
-
                 }
             }
             if (!resultExtend.isEmpty()) {
-                text = matcher.replaceAll("|");
+                text = matcher.replaceAll("");
                 text = text + resultExtend;
+                System.out.println("result ex = " + resultExtend);
+
             }
 
             pattern = Pattern.compile(
@@ -364,8 +364,8 @@ public class OCRService {
                             "([^|]+?)\\|" +
                             "([^|]{1,2})\\|" +
                             "([^|]{1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|" +
-                            "(?!\\d{5}-\\d{4}\\|)(\\\\d+(\\\\.\\\\d+){1,2})\\|"
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)\\|" +
+                            "(?!\\d{5}-\\d{4}\\|)([0-9]+(?:\\.\\d)?)"
 
             );
             matcher = pattern.matcher(text);
@@ -374,18 +374,16 @@ public class OCRService {
                 String matched = matcher.group(0);
                 String[] parts = matched.split("\\|");
                 if (parts.length >= 6) {
-                    if(parts[5].matches("\\\\d+(\\\\.\\\\d+)?")&& parts[1].matches("(\\d{5}-\\d{4})")){
+                    if(Double.parseDouble(parts[5]) > 0){
                         resultExtend2 = resultExtend2 + "|" + String.join("|", parts[1], parts[2], parts[4], parts[5], parts[6]);
                         TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[5]));
-                        if (!Objects.isNull(request.getDiplomaCourse())) {
-                            transferCreditRequestList.add(request);
-                        }
+                        transferCreditRequestList.add(request);
                     }
 
                 }
             }
             if (!resultExtend2.isEmpty()) {
-                text = matcher.replaceAll("|");
+                text = matcher.replaceAll("");
                 text = text + resultExtend2;
             }
 

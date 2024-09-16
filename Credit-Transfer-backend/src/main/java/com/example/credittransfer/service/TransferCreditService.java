@@ -220,7 +220,7 @@ public class TransferCreditService {
 
         List<TransferCreditResponse> secondSection = new ArrayList<>(responseList.stream()
                 .filter(transferCreditResponse ->
-                        Objects.equals(universityCourseRepository.findByUI  d(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11200"))
+                        Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11200"))
                 .toList());
         if(!secondSection.isEmpty()) {
             secondSection = validateTransferableResponse(secondSection);
