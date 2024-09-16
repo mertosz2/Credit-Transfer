@@ -213,24 +213,31 @@ public class TransferCreditService {
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11100"))
                 .toList());
-        firstSection = checkPreSubject(firstSection);
+        if(!firstSection.isEmpty()) {
+            firstSection = checkPreSubject(firstSection);
+            firstSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+        }
 
         List<TransferCreditResponse> secondSection = new ArrayList<>(responseList.stream()
                 .filter(transferCreditResponse ->
-                        Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11200"))
+                        Objects.equals(universityCourseRepository.findByUI  d(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11200"))
                 .toList());
-        secondSection = validateTransferableResponse(secondSection);
+        if(!secondSection.isEmpty()) {
+            secondSection = validateTransferableResponse(secondSection);
+            secondSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+
+        }
 
 
         List<TransferCreditResponse> thirdSection = new ArrayList<>(responseList.stream()
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "12300"))
                 .toList());
-        thirdSection = validateTransferableResponse(thirdSection);
+        if(!thirdSection.isEmpty()) {
+            thirdSection = validateTransferableResponse(thirdSection);
+            thirdSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+        }
 
-        firstSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
-        secondSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
-        thirdSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
 
         reportCourseResponse.setFirstSectionList(firstSection);
         reportCourseResponse.setSecondSectionList(secondSection);

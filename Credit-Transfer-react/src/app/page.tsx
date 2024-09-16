@@ -3,12 +3,50 @@ import { Box } from "@chakra-ui/react"
 import TextField from "../components/TextField"
 import Button from "../components/Button"
 import { useRouter } from "next/navigation"
+import { ChangeEvent, useEffect, useState } from "react"
+import useMutateLogin from "@/feature/authentication/hooks/useMutateLogin"
+import { decodeToken } from "@/util/jwtToken"
+import { IToken, ITokenPayload } from "@/feature/authentication/interface/auth"
+import { jwtDecode } from "jwt-decode"
+
+interface IProps {
+  username: string
+  password: string
+}
 
 export default function Home() {
   const router = useRouter()
-  const handleLogin = () => {
-    router.push("/main")
+  const [password, setPassword] = useState<string>("")
+  const [username, setUsername] = useState<string>("")
+  const [token, setToken] = useState<IToken>()
+  const { onLogin } = useMutateLogin()
+  const decodeToken = (token: string): ITokenPayload | null => {
+    try {
+      const decoded: ITokenPayload = jwtDecode<ITokenPayload>(token) // Decode token string โดยตรง
+      console.log(decoded) // แสดงข้อมูลที่ decode ได้
+      return decoded
+    } catch (error) {
+      console.error("Invalid token", error)
+      return null
+    }
   }
+  const handleLogin = async () => {
+    const loginData: IProps = { username, password }
+    const loginToken = await onLogin(loginData)
+    console.log(loginToken)
+
+    const decodedData = decodeToken(loginToken.token) // ส่ง token string ไปยังฟังก์ชัน decodeToken
+    console.log(decodedData)
+  }
+
+    
+  const handleChangeUsername = (e: ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value)
+  }
+  const handleChangePassword = (e: ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value)
+  }
+
   return (
     <Box
       display="flex"
@@ -45,8 +83,17 @@ export default function Home() {
           gap="24px"
           alignItems="center"
         >
-          <TextField placeholder="รหัสนักศึกษา" />
-          <TextField placeholder="รหัสผ่าน" />
+          <TextField
+            value={username}
+            onChange={handleChangeUsername}
+            placeholder="รหัสนักศึกษา"
+          />
+          <TextField
+            value={password}
+            onChange={handleChangePassword}
+            placeholder="รหัสผ่าน"
+          />
+
           <Button
             label="เข้าสู่ระบบ"
             onClick={handleLogin}

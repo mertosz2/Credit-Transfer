@@ -17,7 +17,6 @@ interface Actions {
   onSetCreditTransferData: (data: IDataSection) => void
 }
 
-// Combine state and actions into the store interface
 interface ICreditTransferStore extends State, Actions {}
 
 const initialState: State = {
@@ -25,18 +24,18 @@ const initialState: State = {
     firstSectionList: [],
     secondSectionList: [],
     thirdSectionList: [],
-    dipCourseId: "", // from IFlatDiplomaCourseList
+    dipCourseId: "",
     universityCourse: {
       uniId: 0,
       uniCourseId: "",
       uniCourseName: "",
       uniCredit: 0
-    }, // from ICreditTransferResponse
-    transferable: false, // from ICreditTransferResponse
+    },
+    transferable: false,
     id: 0,
-    dipCourseName: "", // Make sure to initialize this if it exists in IFlatDiplomaCourseList
-    dipCredit: 0, // Make sure to initialize this if it exists in IFlatDiplomaCourseList
-    grade: 0 // Make sure to initialize this if it exists in IFlatDiplomaCourseList
+    dipCourseName: "",
+    dipCredit: 0,
+    grade: 0
   }
 }
 
@@ -50,7 +49,7 @@ const useCreditTransferStore = create<ICreditTransferStore>()(
           set(() => ({ data: _data }), false, "CreditTransfer/OnsetData")
       }),
       {
-        name: "credit-transfer-store", // Changed name to be more descriptive
+        name: "credit-transfer-store",
         storage: encryptedStorage
       }
     )

@@ -1,15 +1,15 @@
-import axios from "axios";
-import dayjs from "dayjs";
-import Cookies from "js-cookie";
+import axios from "axios"
+import dayjs from "dayjs"
+import Cookies from "js-cookie"
 
-const baseUrl = `http://localhost:8080/`;
+const baseUrl = `http://localhost:8080/`
 
 const services = axios.create({
   baseURL: baseUrl,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "application/json"
   },
-  withCredentials: true,
-});
+  withCredentials: true
+})
 
-export default services;
+export default services

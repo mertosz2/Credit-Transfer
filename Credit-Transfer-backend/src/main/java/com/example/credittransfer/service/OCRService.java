@@ -50,7 +50,7 @@ public class OCRService {
 
     public String getCourseId3() throws IOException {
         Tesseract tesseract = new Tesseract();
-        String fileName = "ใบเกรด 1-2 (1) (1).pdf";
+        String fileName = "transcript-test1_1.jpg";
         List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>();
         File pdfFile = new ClassPathResource("templates/" + fileName).getFile();
         String newStr = "";
@@ -201,10 +201,14 @@ public class OCRService {
             System.out.println("size = " + normalForm.size());
             for (String patternToRemove : normalForm) {
                 String[] parts = patternToRemove.split("\\|");
-                TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[4]));
-                if (!Objects.isNull(request.getDiplomaCourse())) {
-                    transferCreditRequestList.add(request);
+                if(!Objects.isNull(parts[4]))
+                {
+                    TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[4]));
+                    if (!Objects.isNull(request.getDiplomaCourse())) {
+                        transferCreditRequestList.add(request);
+                    }
                 }
+
                 text = text.replace(patternToRemove, "|").trim();
                 System.out.println(patternToRemove);
             }
@@ -229,9 +233,12 @@ public class OCRService {
             newStr = newStr + newStrBuffer2.toString();
             for (String patternToRemove : lessOne) {
                 String[] parts = patternToRemove.split("\\|");
-                TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[3]));
-                if (!Objects.isNull(request.getDiplomaCourse())) {
-                    transferCreditRequestList.add(request);
+                if(!Objects.isNull(parts[3]))
+                {
+                    TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[3]));
+                    if (!Objects.isNull(request.getDiplomaCourse())) {
+                        transferCreditRequestList.add(request);
+                    }
                 }
                 text = text.replace(patternToRemove, "|").trim();
                 System.out.println(patternToRemove);
@@ -401,9 +408,12 @@ public class OCRService {
             System.out.println("size = " + normalForm.size());
             for (String patternToRemove : normalForm) {
                 String[] parts = patternToRemove.split("\\|");
-                TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[4]));
-                if (!Objects.isNull(request.getDiplomaCourse())) {
-                    transferCreditRequestList.add(request);
+                if(Double.parseDouble(parts[3]) > 0)
+                {
+                    TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[4]));
+                    if (!Objects.isNull(request.getDiplomaCourse()) && request.getDipGrade() > 0) {
+                        transferCreditRequestList.add(request);
+                    }
                 }
                 text = text.replace(patternToRemove, "|").trim();
                 System.out.println(patternToRemove);
@@ -429,19 +439,22 @@ public class OCRService {
             newStr = newStr + newStrBuffer2.toString();
             for (String patternToRemove : lessOne) {
                 String[] parts = patternToRemove.split("\\|");
-                TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[3]));
-                if (!Objects.isNull(request.getDiplomaCourse())) {
-                    transferCreditRequestList.add(request);
+                if(Double.parseDouble(parts[3]) > 0 )
+                {
+                    System.out.println(patternToRemove);
+                    System.out.println("Not al");
+                    TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[3]));
+                    if (!Objects.isNull(request.getDiplomaCourse())  && request.getDipGrade() > 0) {
+                        transferCreditRequestList.add(request);
+                    }
                 }
                 text = text.replace(patternToRemove, "|").trim();
-                System.out.println(patternToRemove);
-            }
 
+            }
 
         } catch (TesseractException e) {
             e.printStackTrace();
         }
-
 
         return transferCreditRequestList;
     }
