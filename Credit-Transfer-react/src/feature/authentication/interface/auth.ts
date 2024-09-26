@@ -3,12 +3,9 @@ export interface ISignIn {
   password: string
 }
 
-export interface IToken {
-  token: string
-}
 export interface ITokenPayload {
   role: []
-  user_id: string
+  user_id: number
   user_name: string
   name: string
 }

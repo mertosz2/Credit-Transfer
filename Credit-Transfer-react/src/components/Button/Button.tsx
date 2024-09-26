@@ -1,10 +1,10 @@
-import { Button as ButtonCk, ButtonProps } from "@chakra-ui/react";
-import { JSXElementConstructor, ReactElement } from "react";
+import { Button as ButtonCk, ButtonProps } from "@chakra-ui/react"
+import { JSXElementConstructor, ReactElement } from "react"
 interface IProps extends ButtonProps {
-  label: string;
-  leftIcon?: ReactElement<any, string | JSXElementConstructor<any>>;
-  rightIcon?: ReactElement<any, string | JSXElementConstructor<any>>;
-  onClick?: () => void;
+  label: string
+  leftIcon?: ReactElement<any, string | JSXElementConstructor<any>>
+  rightIcon?: ReactElement<any, string | JSXElementConstructor<any>>
+  onClick?: () => void
 }
 const Button = ({ label, onClick, leftIcon, rightIcon, ...props }: IProps) => {
   return (
@@ -26,7 +26,7 @@ const Button = ({ label, onClick, leftIcon, rightIcon, ...props }: IProps) => {
     >
       {label}
     </ButtonCk>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button

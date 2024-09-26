@@ -454,7 +454,7 @@ public class OCRService {
             e.printStackTrace();
         }
 
-        return transferCreditRequestList;
+        return transferCreditRequestList.stream().filter(transferCreditRequest -> !Objects.isNull(transferCreditRequest.getDiplomaCourse())).toList();
     }
 
 

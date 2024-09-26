@@ -8,7 +8,9 @@ import useMutateLogin from "@/feature/authentication/hooks/useMutateLogin"
 import { decodeToken } from "@/util/jwtToken"
 import { IToken, ITokenPayload } from "@/feature/authentication/interface/auth"
 import { jwtDecode } from "jwt-decode"
-
+import Cookies from "js-cookie"
+import { checkExpireToken } from "@/config/axiosConfig"
+import useProfileStore, { selectOnsetProfileData } from "@/stores/profileStore"
 interface IProps {
   username: string
   password: string
@@ -20,6 +22,7 @@ export default function Home() {
   const [username, setUsername] = useState<string>("")
   const [token, setToken] = useState<IToken>()
   const { onLogin } = useMutateLogin()
+  const setData = useProfileStore(selectOnsetProfileData)
   const decodeToken = (token: string): ITokenPayload | null => {
     try {
       const decoded: ITokenPayload = jwtDecode<ITokenPayload>(token) // Decode token string โดยตรง
@@ -30,16 +33,20 @@ export default function Home() {
       return null
     }
   }
+
   const handleLogin = async () => {
     const loginData: IProps = { username, password }
-    const loginToken = await onLogin(loginData)
-    console.log(loginToken)
+    const loginToken = await onLogin(loginData) // เพิ่มการตรวจสอบประเภท loginToken
 
-    const decodedData = decodeToken(loginToken.token) // ส่ง token string ไปยังฟังก์ชัน decodeToken
-    console.log(decodedData)
+    if (loginToken) {
+      const decodeData = decodeToken(loginToken)
+      console.log(decodeData)
+      if (decodeData) {
+        setData(decodeData)
+      }
+    }
   }
 
-    
   const handleChangeUsername = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value)
   }
@@ -89,6 +96,7 @@ export default function Home() {
             placeholder="รหัสนักศึกษา"
           />
           <TextField
+            type="password"
             value={password}
             onChange={handleChangePassword}
             placeholder="รหัสผ่าน"

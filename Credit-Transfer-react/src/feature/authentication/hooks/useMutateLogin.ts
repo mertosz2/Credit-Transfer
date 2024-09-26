@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { login } from "../services/auth.service"
 import { onSetCookie } from "@/config/handleCookie"
-import { IToken } from "../interface/auth"
 
 const useMutateLogin = () => {
   const toast = useToast()
@@ -16,17 +15,17 @@ const useMutateLogin = () => {
     mutationFn: login,
     mutationKey: ["login"],
     retry: false,
-    onSuccess(res: IToken) {
+    onSuccess(res: string) {
       const token = res
       onSetCookie({
-        jwt: token.token
+        jwt: token
       })
       toast({
         title: "เข้าสู่ระบบสำเร็จ",
         status: "success",
         isClosable: true
       })
-     
+      router.replace("/transfer")
     },
 
     onError: (e) => {

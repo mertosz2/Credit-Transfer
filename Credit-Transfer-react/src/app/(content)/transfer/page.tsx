@@ -53,6 +53,7 @@ import { useRouter } from "next/navigation"
 import useCreditTransferStore, {
   selectOnSetCreditTransferData
 } from "@/stores/creditTransferStore"
+import SideBar from "@/components/SideBar"
 
 export default function Main() {
   const setData = useCreditTransferStore(selectOnSetCreditTransferData)
@@ -575,343 +576,351 @@ export default function Main() {
   }, [displayData, flatData, handleSort, sortConfig, table])
 
   return (
-    <Box height="100%">
+    <>
+      <SideBar />
       <Box
-        display="flex"
         height="100%"
+        paddingLeft="60px"
       >
         <Box
           display="flex"
-          flexDirection="column"
-          width="100%"
           height="100%"
         >
           <Box
             display="flex"
             flexDirection="column"
-            marginTop="60px"
-            gap="24px"
-            paddingRight="120px"
-            paddingLeft="240px"
+            width="100%"
+            height="100%"
           >
             <Box
               display="flex"
-              flexDirection="row"
+              flexDirection="column"
+              marginTop="60px"
               gap="24px"
-              alignSelf="flex-end"
-            >
-              <Button
-                label="อัพโหลดทรานสคริป"
-                backgroundColor="#2E99FC"
-                color="#FFFFFF"
-                paddingY="14px"
-                paddingX="79px"
-                borderRadius="8px"
-                onClick={OpenFileImport}
-              />
-            </Box>
-            {/* Table */}
-            {renderTable}
-            <Box
-              borderRadius="16px"
-              display="flex"
-              width="100%"
-              padding="16px"
-              borderWidth={2}
-              borderStyle="dashed"
-              justifyContent="center"
+              paddingRight="120px"
+              paddingLeft="240px"
             >
               <Box
-                as="button"
-                onClick={OpenAddCourse}
                 display="flex"
-                width="30px"
-                height="30px"
-                borderRadius="16px"
-                backgroundColor="#2ABE0D"
-                justifyContent="center"
-                alignItems="center"
+                flexDirection="row"
+                gap="24px"
+                alignSelf="flex-end"
               >
-                <RiAddFill color="#FFFFFF" />
+                <Button
+                  label="อัพโหลดทรานสคริป"
+                  backgroundColor="#2E99FC"
+                  color="#FFFFFF"
+                  paddingY="14px"
+                  paddingX="79px"
+                  borderRadius="8px"
+                  onClick={OpenFileImport}
+                />
               </Box>
-            </Box>
-            <Box
-              display="flex"
-              alignSelf="flex-end"
-            >
-              <Button
-                label="ถัดไป"
-                paddingY="14px"
-                paddingX="62px"
-                borderRadius="6px"
-                color={
-                  displayData && displayData.length > 0 ? "white" : "black"
-                }
-                onClick={onSubmitCreditTransferData}
-                isDisabled={
-                  displayData && displayData.length > 0 ? false : true
-                }
-                backgroundColor={
-                  displayData && displayData.length > 0 ? "#2ABE0D" : ""
-                }
-              />
+              {/* Table */}
+              {renderTable}
+              <Box
+                borderRadius="16px"
+                display="flex"
+                width="100%"
+                padding="16px"
+                borderWidth={2}
+                borderStyle="dashed"
+                justifyContent="center"
+              >
+                <Box
+                  as="button"
+                  onClick={OpenAddCourse}
+                  display="flex"
+                  width="30px"
+                  height="30px"
+                  borderRadius="16px"
+                  backgroundColor="#2ABE0D"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <RiAddFill color="#FFFFFF" />
+                </Box>
+              </Box>
+              <Box
+                display="flex"
+                alignSelf="flex-end"
+              >
+                <Button
+                  label="ถัดไป"
+                  paddingY="14px"
+                  paddingX="62px"
+                  borderRadius="6px"
+                  color={
+                    displayData && displayData.length > 0 ? "white" : "black"
+                  }
+                  onClick={onSubmitCreditTransferData}
+                  isDisabled={
+                    displayData && displayData.length > 0 ? false : true
+                  }
+                  backgroundColor={
+                    displayData && displayData.length > 0 ? "#2ABE0D" : ""
+                  }
+                />
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-      >
-        <ModalOverlay />
-        <ModalContent padding="12px">
-          <ModalHeader>ผลลัพธ์</ModalHeader>
-          <ModalBody>
-            <Box
-              mb={4}
-              display="flex"
-              gap="16px"
-              flexDirection="column"
-            >
-              <Box fontWeight={700}>รหัสวิชาที่มีในระบบ</Box>
+        <Modal
+          isOpen={isOpen}
+          onClose={onClose}
+        >
+          <ModalOverlay />
+          <ModalContent padding="12px">
+            <ModalHeader>ผลลัพธ์</ModalHeader>
+            <ModalBody>
               <Box
+                mb={4}
                 display="flex"
-                flexWrap="wrap"
-                gap="8px"
+                gap="16px"
+                flexDirection="column"
               >
-                {modalData?.founded.map((courseId, index) => (
-                  <Box key={index}>{`"${courseId}"${" "}`}</Box>
-                ))}
-              </Box>
-
-              <Box>รหัสวิชาที่เจอในระบบ {modalData?.totalfound} วิชา</Box>
-              <Box
-                width="100%"
-                height="1px"
-                backgroundColor="black"
-              ></Box>
-            </Box>
-            <Box
-              mb={4}
-              display="flex"
-              gap="16px"
-              flexDirection="column"
-            >
-              <Box fontWeight={700}>รหัสวิชาที่ไม่มีในระบบ</Box>
-              <Box
-                display="flex"
-                flexWrap="wrap"
-                gap="8px"
-              >
-                {modalData?.notFounded.map((courseId, index) => (
-                  <Box key={index}>{`"${courseId}"${" "}`}</Box>
-                ))}
-              </Box>
-
-              <Box>รหัสวิชาที่ไม่เจอในระบบ {modalData?.totalnotfound} วิชา</Box>
-              <Box
-                width="100%"
-                height="1px"
-                backgroundColor="black"
-              ></Box>
-            </Box>
-            {modalData?.uniqueNewItems &&
-              modalData.uniqueNewItems.length > 0 && (
+                <Box fontWeight={700}>รหัสวิชาที่มีในระบบ</Box>
                 <Box
-                  mb={4}
                   display="flex"
-                  gap="16px"
-                  flexDirection="column"
+                  flexWrap="wrap"
+                  gap="8px"
                 >
-                  <Box fontWeight={700}>รหัสวิชาที่เพิ่ม</Box>
-                  <Box
-                    display="flex"
-                    flexWrap="wrap"
-                    gap="8px"
-                  >
-                    {modalData?.uniqueNewItems.map((courseId, index) => (
-                      <Box key={index}>{`"${courseId}"${" "}`}</Box>
-                    ))}
-                  </Box>
-                  <Box
-                    width="100%"
-                    height="1px"
-                    backgroundColor="black"
-                  ></Box>
+                  {modalData?.founded.map((courseId, index) => (
+                    <Box key={index}>{`"${courseId}"${" "}`}</Box>
+                  ))}
                 </Box>
-              )}
-            <Box
-              display="flex"
-              gap="16px"
-              flexDirection="column"
-            >
-              <Box>
-                พบรหัสวิชาในใบทรานสคริปทั้งหมด {modalData?.totalcourse} วิชา
+
+                <Box>รหัสวิชาที่เจอในระบบ {modalData?.totalfound} วิชา</Box>
+                <Box
+                  width="100%"
+                  height="1px"
+                  backgroundColor="black"
+                ></Box>
               </Box>
               <Box
-                color="red"
-                fontSize="14px"
-                textAlign="center"
-              >
-                *โปรดตรวจสอบว่ารหัสวิชาครบถ้วนตามใบทรานสคริปหรือไม่
-                หากไม่พบท่านสามารถทำการเพิ่มรหัสวิชาลงไปเองได้*
-              </Box>
-            </Box>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              paddingY="14px"
-              paddingX="24px"
-              label="Close"
-              borderRadius="8px"
-              color="white"
-              backgroundColor="#FF4E4E"
-              onClick={onClose}
-            />
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      <Modal
-        isOpen={FileImport}
-        onClose={onClose}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>อัพโหลดทรานสคริป</ModalHeader>
-          <ModalBody>
-            <Input
-              type="file"
-              onChange={handleFileChange}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              padding="4px"
-            />
-          </ModalBody>
-
-          <ModalFooter
-            display="flex"
-            padding="24px"
-            justifyContent="space-between"
-            gap="16px"
-          >
-            <Button
-              label="อัพโหลด"
-              width="100%"
-              onClick={handleFileSubmit}
-              isLoading={isPending}
-              borderWidth={file === undefined ? 1 : 0}
-              borderColor={file === undefined ? "black" : "transparent"}
-              isDisabled={file === undefined ? true : false}
-              backgroundColor={file === undefined ? "transparent" : "#2ABE0D"}
-              color={file === undefined ? "black" : "white"}
-            />
-            <Button
-              label="ยกเลิก"
-              width="100%"
-              onClick={CloseFileImport}
-              backgroundColor="red"
-              color="white"
-            />
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      <Modal
-        isOpen={AddCoure}
-        onClose={CloseAddCourse}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>เพิ่มรหัสวิชา</ModalHeader>
-          <ModalBody>
-            <Box
-              display="flex"
-              gap="4px"
-              flexDirection="column"
-            >
-              <Box>{`รหัสวิชา (Course Code)`}</Box>
-              <Input
-                onChange={handleDipCourseChange}
+                mb={4}
                 display="flex"
+                gap="16px"
+                flexDirection="column"
+              >
+                <Box fontWeight={700}>รหัสวิชาที่ไม่มีในระบบ</Box>
+                <Box
+                  display="flex"
+                  flexWrap="wrap"
+                  gap="8px"
+                >
+                  {modalData?.notFounded.map((courseId, index) => (
+                    <Box key={index}>{`"${courseId}"${" "}`}</Box>
+                  ))}
+                </Box>
+
+                <Box>
+                  รหัสวิชาที่ไม่เจอในระบบ {modalData?.totalnotfound} วิชา
+                </Box>
+                <Box
+                  width="100%"
+                  height="1px"
+                  backgroundColor="black"
+                ></Box>
+              </Box>
+              {modalData?.uniqueNewItems &&
+                modalData.uniqueNewItems.length > 0 && (
+                  <Box
+                    mb={4}
+                    display="flex"
+                    gap="16px"
+                    flexDirection="column"
+                  >
+                    <Box fontWeight={700}>รหัสวิชาที่เพิ่ม</Box>
+                    <Box
+                      display="flex"
+                      flexWrap="wrap"
+                      gap="8px"
+                    >
+                      {modalData?.uniqueNewItems.map((courseId, index) => (
+                        <Box key={index}>{`"${courseId}"${" "}`}</Box>
+                      ))}
+                    </Box>
+                    <Box
+                      width="100%"
+                      height="1px"
+                      backgroundColor="black"
+                    ></Box>
+                  </Box>
+                )}
+              <Box
+                display="flex"
+                gap="16px"
+                flexDirection="column"
+              >
+                <Box>
+                  พบรหัสวิชาในใบทรานสคริปทั้งหมด {modalData?.totalcourse} วิชา
+                </Box>
+                <Box
+                  color="red"
+                  fontSize="14px"
+                  textAlign="center"
+                >
+                  *โปรดตรวจสอบว่ารหัสวิชาครบถ้วนตามใบทรานสคริปหรือไม่
+                  หากไม่พบท่านสามารถทำการเพิ่มรหัสวิชาลงไปเองได้*
+                </Box>
+              </Box>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                paddingY="14px"
+                paddingX="24px"
+                label="Close"
+                borderRadius="8px"
+                color="white"
+                backgroundColor="#FF4E4E"
+                onClick={onClose}
+              />
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        <Modal
+          isOpen={FileImport}
+          onClose={onClose}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>อัพโหลดทรานสคริป</ModalHeader>
+            <ModalBody>
+              <Input
+                type="file"
+                onChange={handleFileChange}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
                 padding="4px"
               />
-            </Box>
-          </ModalBody>
+            </ModalBody>
 
-          <ModalFooter
-            display="flex"
-            padding="24px"
-            justifyContent="space-between"
-            gap="16px"
-          >
-            <Button
-              label="เพิ่ม"
-              width="100%"
-              onClick={handleSubmit}
-              isLoading={isPending}
-              isDisabled={dipCourse === "" ? true : false}
-              borderWidth={dipCourse === "" ? 1 : 0}
-              borderColor={dipCourse === "" ? "black" : "transparent"}
-              backgroundColor={dipCourse === "" ? "transparent" : "#2ABE0D"}
-              color={dipCourse === "" ? "black" : "white"}
-            />
-            <Button
-              label="ยกเลิก"
-              width="100%"
-              onClick={CloseAddCourse}
-              backgroundColor="red"
-              color="white"
-            />
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Modal
-        isOpen={FileImport}
-        onClose={onClose}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>อัพโหลดทรานสคริป</ModalHeader>
-          <ModalBody>
-            <Input
-              type="file"
-              onChange={handleFileChange}
+            <ModalFooter
               display="flex"
-              alignItems="center"
-              justifyContent="center"
-              padding="4px"
-            />
-          </ModalBody>
+              padding="24px"
+              justifyContent="space-between"
+              gap="16px"
+            >
+              <Button
+                label="อัพโหลด"
+                width="100%"
+                onClick={handleFileSubmit}
+                isLoading={isPending}
+                borderWidth={file === undefined ? 1 : 0}
+                borderColor={file === undefined ? "black" : "transparent"}
+                isDisabled={file === undefined ? true : false}
+                backgroundColor={file === undefined ? "transparent" : "#2ABE0D"}
+                color={file === undefined ? "black" : "white"}
+              />
+              <Button
+                label="ยกเลิก"
+                width="100%"
+                onClick={CloseFileImport}
+                backgroundColor="red"
+                color="white"
+              />
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
-          <ModalFooter
-            display="flex"
-            padding="24px"
-            justifyContent="space-between"
-            gap="16px"
-          >
-            <Button
-              label="อัพโหลด"
-              width="100%"
-              onClick={handleFileSubmit}
-              isLoading={isPending}
-              borderWidth={file === undefined ? 1 : 0}
-              borderColor={file === undefined ? "black" : "transparent"}
-              isDisabled={file === undefined ? true : false}
-              backgroundColor={file === undefined ? "transparent" : "#2ABE0D"}
-              color={file === undefined ? "black" : "white"}
-            />
-            <Button
-              label="ยกเลิก"
-              width="100%"
-              onClick={CloseFileImport}
-              backgroundColor="red"
-              color="white"
-            />
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Box>
+        <Modal
+          isOpen={AddCoure}
+          onClose={CloseAddCourse}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>เพิ่มรหัสวิชา</ModalHeader>
+            <ModalBody>
+              <Box
+                display="flex"
+                gap="4px"
+                flexDirection="column"
+              >
+                <Box>{`รหัสวิชา (Course Code)`}</Box>
+                <Input
+                  onChange={handleDipCourseChange}
+                  display="flex"
+                  padding="4px"
+                />
+              </Box>
+            </ModalBody>
+
+            <ModalFooter
+              display="flex"
+              padding="24px"
+              justifyContent="space-between"
+              gap="16px"
+            >
+              <Button
+                label="เพิ่ม"
+                width="100%"
+                onClick={handleSubmit}
+                isLoading={isPending}
+                isDisabled={dipCourse === "" ? true : false}
+                borderWidth={dipCourse === "" ? 1 : 0}
+                borderColor={dipCourse === "" ? "black" : "transparent"}
+                backgroundColor={dipCourse === "" ? "transparent" : "#2ABE0D"}
+                color={dipCourse === "" ? "black" : "white"}
+              />
+              <Button
+                label="ยกเลิก"
+                width="100%"
+                onClick={CloseAddCourse}
+                backgroundColor="red"
+                color="white"
+              />
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+        <Modal
+          isOpen={FileImport}
+          onClose={onClose}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>อัพโหลดทรานสคริป</ModalHeader>
+            <ModalBody>
+              <Input
+                type="file"
+                onChange={handleFileChange}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                padding="4px"
+              />
+            </ModalBody>
+
+            <ModalFooter
+              display="flex"
+              padding="24px"
+              justifyContent="space-between"
+              gap="16px"
+            >
+              <Button
+                label="อัพโหลด"
+                width="100%"
+                onClick={handleFileSubmit}
+                isLoading={isPending}
+                borderWidth={file === undefined ? 1 : 0}
+                borderColor={file === undefined ? "black" : "transparent"}
+                isDisabled={file === undefined ? true : false}
+                backgroundColor={file === undefined ? "transparent" : "#2ABE0D"}
+                color={file === undefined ? "black" : "white"}
+              />
+              <Button
+                label="ยกเลิก"
+                width="100%"
+                onClick={CloseFileImport}
+                backgroundColor="red"
+                color="white"
+              />
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </Box>
+    </>
   )
 }

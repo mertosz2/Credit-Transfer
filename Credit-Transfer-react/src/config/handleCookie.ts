@@ -2,11 +2,11 @@ import Cookies from "js-cookie"
 
 export const onSetCookie = ({ jwt }: { jwt: string }) => {
   Cookies.set("accessToken", jwt)
+  Cookies.set("accessToken", jwt, { expires: 1 / 288 })
 }
 
 export const onRemoveCookie = () => {
   Cookies.remove("accessToken")
-  Cookies.remove("refreshToken")
 }
 
 export const onSetGetStartedCookie = (value: string) => {

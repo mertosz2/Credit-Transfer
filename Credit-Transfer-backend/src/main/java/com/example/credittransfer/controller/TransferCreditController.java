@@ -63,7 +63,7 @@ public class TransferCreditController {
         }
         File file = ocrService.convertFile(multipartFile);
         DipCourseIdResponse dipCourseIdResponse = ocrService.getCourseIdByImport(file);
-        List<TransferCreditRequest> transferCreditRequestList = ocrService.getCourse(file);
+        List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>(ocrService.getCourse(file));
         System.out.println("Request is = " + transferCreditRequestList);
         List<String> allIdFound = dipCourseIdResponse.getFoundedDipCourseIdList();
         List<String> inListOfRequest = transferCreditRequestList.stream().map(request -> request.getDiplomaCourse().getDipCourseId()).toList();
