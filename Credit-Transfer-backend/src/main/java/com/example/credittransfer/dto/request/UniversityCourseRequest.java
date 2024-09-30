@@ -24,4 +24,8 @@ public class UniversityCourseRequest {
 
     @NotNull(message = "Credit can not be null or empty")
     private int uniCredit;
+
+    private String preSubject;
+
+    private int courseCategory;
 }

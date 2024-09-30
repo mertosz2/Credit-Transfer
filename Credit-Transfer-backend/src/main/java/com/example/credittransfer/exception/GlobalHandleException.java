@@ -98,4 +98,20 @@ public class GlobalHandleException extends ResponseEntityExceptionHandler {
         );
         return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
     }
+    @ExceptionHandler(ExistByFirstNameAndLastName.class)
+    public ResponseEntity<Object> handleExistByFirstNameAndLastName(ExistByFirstNameAndLastName ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
+    @ExceptionHandler(ExistByPhoneNumber.class)
+    public ResponseEntity<Object> handleExistByPhoneNumber(ExistByPhoneNumber ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
 }

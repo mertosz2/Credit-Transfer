@@ -1,11 +1,14 @@
 package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
+import com.example.credittransfer.dto.response.DiplomaCourseResponse;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.service.DiplomaCourseService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -18,6 +21,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @RequestMapping("/api/dip")
 @Validated
+@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class DiplomaCourseController {
 
     private final DiplomaCourseService diplomaCourseService;;
@@ -27,25 +31,23 @@ public class DiplomaCourseController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<List<DiplomaCourse>> getAllDipCourse() {
-        return ResponseEntity.status(OK).body(diplomaCourseService.getAllDipCourse());
+    public PagedModel<DiplomaCourseResponse> getAllDipCourse(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return diplomaCourseService.getAllDipCourse(page, size);
     }
 
     @PutMapping("/{dipId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> updateDipCourse(@PathVariable Integer dipId, @RequestBody DiplomaCourseRequest request) {
         return ResponseEntity.status(OK).body(diplomaCourseService.updateCourse(request, dipId));
     }
 
     @PostMapping("")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody DiplomaCourseRequest diplomaCourseRequest) {
         return ResponseEntity.status(OK).body(diplomaCourseService.createCourse(diplomaCourseRequest));
     }
 
     @DeleteMapping("/{dipId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> deleteDipCourse(@PathVariable Integer dipId) {
         return ResponseEntity.status(OK).body(diplomaCourseService.deleteDipCourse(dipId));
     }
