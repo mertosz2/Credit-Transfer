@@ -2,9 +2,13 @@
 import SideBar from "@/components/SideBar"
 import { IFlatDiplomaCourseList } from "@/feature/CreditTransfer/interface/CreditTransfer"
 import { Box } from "@chakra-ui/react"
-import { createColumnHelper, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  useReactTable
+} from "@tanstack/react-table"
 
-export default function Manage() {
+export default function VocationalManage() {
   const columnHelper = createColumnHelper<IFlatDiplomaCourseList>()
   const columns = [
     columnHelper.accessor("dipCourseId", {
@@ -47,11 +51,11 @@ export default function Manage() {
       }
     })
   ]
-  const table = useReactTable({
-    data: flatData,
-    columns,
-    getCoreRowModel: getCoreRowModel()
-  })
+  //   const table = useReactTable({
+  //     data: flatData,
+  //     columns,
+  //     getCoreRowModel: getCoreRowModel()
+  //   })
   return (
     <>
       <SideBar />

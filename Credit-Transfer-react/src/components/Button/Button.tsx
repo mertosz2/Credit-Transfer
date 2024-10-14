@@ -9,10 +9,13 @@ interface IProps extends ButtonProps {
 const Button = ({ label, onClick, leftIcon, rightIcon, ...props }: IProps) => {
   return (
     <ButtonCk
+   
       bgColor={props.bgColor}
       textColor={props.textColor}
       borderColor={props.borderColor}
       borderWidth={props.borderWidth}
+      justifyContent={props.justifyContent || "center"}
+      alignItems={props.alignItems || "center"}
       boxShadow={props.shadow}
       borderRadius={props.borderRadius || "full"}
       fontSize={props.fontSize || 14}

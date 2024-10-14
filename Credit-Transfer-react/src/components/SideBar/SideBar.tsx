@@ -34,9 +34,9 @@ const SideBar = () => {
     router.replace("/")
   }
 
-   const handleVocationalManage  = () =>{
+  const handleVocationalManage = () => {
     router.replace("/vocationalmanage")
-   }
+  }
   return (
     <Box display="flex">
       {data?.role && data.role.length > 0 ? (
@@ -90,8 +90,14 @@ const SideBar = () => {
                         onClick={handleVocationalManage}
                         color="black"
                         borderRadius="8px"
+                        backgroundColor="white" 
+                      />
+                      <Button
+                        label={"จัดการวิชา มหาวิทยาลัย"}
+                        onClick={handleVocationalManage}
+                        color="black"
+                        borderRadius="8px"
                         backgroundColor="white"
-                        leftIcon={<RiLogoutBoxFill color="#FFFFFF" />}
                       />
                     </Box>
 
@@ -160,7 +166,6 @@ const SideBar = () => {
               </Box>
             </Box>
 
-         
             <Button
               label={"ออกจากระบบ"}
               onClick={handleLogout}
