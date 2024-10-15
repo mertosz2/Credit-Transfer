@@ -21,6 +21,8 @@ public class DiplomaCourseResponse {
 
     private String uniCourseId;
 
+    private String uniCourseName;
+
     private String createdBy;
 
     private String createdDate;
