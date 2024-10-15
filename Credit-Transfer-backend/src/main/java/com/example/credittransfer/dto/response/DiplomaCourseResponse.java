@@ -23,6 +23,8 @@ public class DiplomaCourseResponse {
 
     private String uniCourseName;
 
+    private int uniCredit;
+
     private String createdBy;
 
     private String createdDate;
