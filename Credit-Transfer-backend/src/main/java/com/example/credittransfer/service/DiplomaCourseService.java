@@ -156,6 +156,7 @@ public class DiplomaCourseService {
             response.setDipCredit(diplomaCourse.getDipCredit());
             response.setUniCourseId(diplomaCourse.getUniversityCourse().getUniCourseId());
             response.setUniCourseName(diplomaCourse.getUniversityCourse().getUniCourseName());
+            response.setUniCredit(diplomaCourse.getUniversityCourse().getUniCredit());
             response.setCreatedBy(diplomaCourse.getCreatedBy().getFirstName() + " " + diplomaCourse.getCreatedBy().getLastName());
             response.setCreatedDate(diplomaCourse.getCreatedDate().format(formatter));
             response.setLastModifiedBy(diplomaCourse.getLastModifiedBy().getFirstName() + " " + diplomaCourse.getLastModifiedBy().getLastName());
