@@ -2,6 +2,7 @@ package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.UniversityCourseRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
+import com.example.credittransfer.dto.response.UniCourseResponse;
 import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.entity.Users;
 import com.example.credittransfer.projection.DropDown;
@@ -10,6 +11,7 @@ import com.example.credittransfer.repository.UsersRepository;
 import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.UniversityCourseService;
 import jakarta.validation.Valid;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +26,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @RequestMapping("/api/uni")
 @Validated
+//@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class UniversityCourseController {
 
     private final UniversityCourseService universityCourseService;
@@ -33,25 +36,21 @@ public class UniversityCourseController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<List<UniversityCourse>> getAll(){
-        return ResponseEntity.status(OK).body(universityCourseService.findAll());
+    public PagedModel<UniCourseResponse> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size ){
+        return universityCourseService.findAll(page, size);
     }
 
     @PostMapping("")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> createCourse(@Valid @RequestBody UniversityCourseRequest universityCourseRequest) {
         return ResponseEntity.status(OK).body(universityCourseService.createCourse(universityCourseRequest));
     }
 
     @PutMapping("/{uniId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> updateCourse(@PathVariable Integer uniId, @Valid @RequestBody UniversityCourseRequest universityCourseRequest) {
         return ResponseEntity.status(OK).body(universityCourseService.updateCourse(universityCourseRequest, uniId));
     }
 
     @DeleteMapping("/{uniId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseAPI> deleteCourse(@PathVariable Integer uniId) {
         return ResponseEntity.status(OK).body(universityCourseService.deleteUniCourse(uniId));
     }
@@ -69,6 +68,11 @@ public class UniversityCourseController {
     @GetMapping("/uniDropdown")
     public ResponseEntity<List<DropDown>> getUniCourseDropdown(){
         return ResponseEntity.status(OK).body(universityCourseService.getUniCourseDropdown());
+    }
+
+    @GetMapping("/ccDropdown")
+    public ResponseEntity<List<DropDown>> getCourseCategory(){
+        return ResponseEntity.status(OK).body(universityCourseService.getCourseCategoryDropdown());
     }
 
 }

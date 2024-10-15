@@ -2,10 +2,13 @@ package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.LoginRequest;
 import com.example.credittransfer.entity.Users;
+import com.example.credittransfer.projection.DropDown;
 import com.example.credittransfer.repository.UsersRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AuthenticationService {
@@ -28,4 +31,6 @@ public class AuthenticationService {
         Users users = usersRepository.findByUsername(loginRequest.getUsername()).orElseThrow();
         return jwtService.generateToken(users);
     }
+
+
 }

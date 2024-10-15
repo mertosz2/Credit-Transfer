@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DiplomaCourse {
+public class DiplomaCourse extends Auditable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,6 +2,7 @@ package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
 import com.example.credittransfer.dto.response.DipCourseResponse;
+import com.example.credittransfer.dto.response.DiplomaCourseResponse;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
@@ -12,9 +13,15 @@ import com.example.credittransfer.exception.NotFoundUniversityCourseException;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +59,7 @@ public class DiplomaCourseService {
         ));
         diplomaCourse.setActive(true);
         diplomaCourseRepository.save(diplomaCourse);
-        return new ResponseAPI(HttpStatus.CREATED, "create successfully");
+        return new ResponseAPI(HttpStatus.CREATED, "สร้างวิชาสำเร็จ");
     }
 
     public ResponseAPI updateCourse(DiplomaCourseRequest request, Integer dipCourseId) {
@@ -75,15 +82,26 @@ public class DiplomaCourseService {
                 NotFoundUniversityCourseException::new
         ));
         diplomaCourseRepository.save(diplomaCourse);
-        return new ResponseAPI(HttpStatus.OK, "update successfully");
+        return new ResponseAPI(HttpStatus.OK, "อัพเดทวิชาสำเร็จ");
     }
 
     public List<DiplomaCourse> getByDipCourseIdList(List<String> dipCourseIdList) {
         return diplomaCourseRepository.findByDipCourseIdList(dipCourseIdList);
 
     }
-    public List<DiplomaCourse> getAllDipCourse() {
-        return diplomaCourseRepository.findAll();
+    public PagedModel<DiplomaCourseResponse> getAllDipCourse(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DiplomaCourse> diplomaCoursesPage = diplomaCourseRepository.findAll(pageable);
+
+        List<DiplomaCourseResponse> diplomaCourseResponses = diplomaCoursesPage.getContent().stream()
+                .map(this::mapToDiplomaCourseResponse)
+                .toList();
+
+        PageMetadata pageMetadata = new PageMetadata(
+                size, page, diplomaCoursesPage.getTotalElements(), diplomaCoursesPage.getTotalPages());
+
+        PagedModel<DiplomaCourseResponse> pagedModel = PagedModel.of(diplomaCourseResponses, pageMetadata);
+        return pagedModel;
     }
 
     public List<String> getExistDipCourseId(List<String> dipCourseIdList) {
@@ -102,9 +120,9 @@ public class DiplomaCourseService {
         Optional<DiplomaCourse> diplomaCourse = diplomaCourseRepository.findByDipId(dipId);
         if(diplomaCourse.isPresent()){
             diplomaCourseRepository.deleteByDipId(diplomaCourse.get().getDipId());
-            return new ResponseAPI(HttpStatus.OK, "delete course successfully");
+            return new ResponseAPI(HttpStatus.OK, "ลบวิชาสำเร็จ");
         } else {
-            return new ResponseAPI(HttpStatus.BAD_REQUEST, "course not found with given id: " + dipId);
+            return new ResponseAPI(HttpStatus.BAD_REQUEST, "ไม่พบรหัสวิชาดังกล่าว: " + dipId);
         }
     }
 
@@ -126,6 +144,23 @@ public class DiplomaCourseService {
             transferCreditResponse.setUniversityCourse(diplomaCourse.getUniversityCourse());
             return transferCreditResponse;
         }
+    }
+
+    public DiplomaCourseResponse mapToDiplomaCourseResponse(DiplomaCourse diplomaCourse) {
+        DiplomaCourseResponse response = new DiplomaCourseResponse();
+        if(!Objects.isNull(diplomaCourse)) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd-HH:mm:ss");
+            response.setId(diplomaCourse.getDipId());
+            response.setDipCourseId(diplomaCourse.getDipCourseId());
+            response.setDipCourseName(diplomaCourse.getDipCourseName());
+            response.setDipCredit(diplomaCourse.getDipCredit());
+            response.setUniCourseId(diplomaCourse.getUniversityCourse().getUniCourseId());
+            response.setCreatedBy(diplomaCourse.getCreatedBy().getFirstName() + " " + diplomaCourse.getCreatedBy().getLastName());
+            response.setCreatedDate(diplomaCourse.getCreatedDate().format(formatter));
+            response.setLastModifiedBy(diplomaCourse.getLastModifiedBy().getFirstName() + " " + diplomaCourse.getLastModifiedBy().getLastName());
+            response.setLastModifiedDate(diplomaCourse.getLastModifiedDate().format(formatter));
+        }
+        return response;
     }
 
 }

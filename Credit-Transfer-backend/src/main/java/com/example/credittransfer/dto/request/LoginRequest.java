@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LoginRequest {
 
-    @NotNull(message = "username can not be null or empty")
+    @NotNull(message = "กรุณาใส่บัญชีผู้ใช้")
     private String username;
 
-    @NotNull(message = "password can not be null or empty")
+    @NotNull(message = "กรุณาใส่รหัสผ่าน")
     private String password;
 }

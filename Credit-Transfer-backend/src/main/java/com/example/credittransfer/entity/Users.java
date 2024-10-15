@@ -23,6 +23,8 @@ public class Users {
 
     private String lastName;
 
+    private String phone;
+
     private boolean isActive;
 
     @ManyToOne

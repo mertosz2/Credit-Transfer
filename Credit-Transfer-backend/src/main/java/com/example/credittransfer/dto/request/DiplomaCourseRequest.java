@@ -15,17 +15,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DiplomaCourseRequest {
 
-    @NotBlank(message = "Course id can not be null or empty")
-    @Pattern(regexp = "\\d{5}-\\d{4}", message = "course code pattern is 'xxxxx-xxxx, ex. 30000-1212")
+    @NotBlank(message = "กรุณาใส่รหัสวิชา")
+    @Pattern(regexp = "\\d{5}-\\d{4}", message = "รูปแบบของรหัสวิชาเป็นดังนี้ 'xxxxx-xxxx, ตัวอย่าง. 30000-1212")
     private String dipCourseId;
 
-    @NotBlank(message = "Course name can not be null or empty")
+    @NotBlank(message = "กรุณาใส่ชื่อวิชา")
     private String dipCourseName;
 
-    @NotNull(message = "Credit can not be null or empty")
+    @NotNull(message = "กรุณาใส่หน่วยกิต")
     private int dipCredit;
 
-    @NotNull(message = "course can not be null or empty")
+    @NotNull(message = "กรุณาเลือกวิชาที่จะเทียบโอน")
     private Integer uniId;
 
     private int dipGrade;
