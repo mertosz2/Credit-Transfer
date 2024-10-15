@@ -26,7 +26,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @RequestMapping("/api/uni")
 @Validated
-@PreAuthorize("hasAnyAuthority('ADMIN')")
+//@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class UniversityCourseController {
 
     private final UniversityCourseService universityCourseService;

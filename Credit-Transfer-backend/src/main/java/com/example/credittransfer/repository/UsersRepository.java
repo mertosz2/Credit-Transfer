@@ -26,4 +26,5 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
     @Query("update Users u set u.isActive = false where u.usersId =:userId")
     void deleteUsersByUsersId(Integer userId);
 
+
 }

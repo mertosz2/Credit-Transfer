@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @RequestMapping("/api/dip")
 @Validated
-@PreAuthorize("hasAnyAuthority('ADMIN')")
+//@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class DiplomaCourseController {
 
     private final DiplomaCourseService diplomaCourseService;;

@@ -2,6 +2,7 @@ package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.UsersRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
+import com.example.credittransfer.dto.response.UsersResponse;
 import com.example.credittransfer.entity.Users;
 import com.example.credittransfer.exception.ExistByFirstNameAndLastName;
 import com.example.credittransfer.exception.ExistByPhoneNumber;
@@ -10,9 +11,15 @@ import com.example.credittransfer.projection.DropDown;
 import com.example.credittransfer.repository.RolesRepository;
 import com.example.credittransfer.repository.UsersRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 import java.util.Objects;
@@ -68,7 +75,8 @@ public class UsersService {
             if (usersRepository.existsByUsername(request.getUsername()) && !Objects.equals(users.getUsername(), request.getUsername())) {
                 throw new ExistByUsername(request.getUsername());
             }
-            if (usersRepository.existsByFirstNameAndLastName(request.getFirstName(), request.getLastName())) {
+            if (usersRepository.existsByFirstNameAndLastName(request.getFirstName(), request.getLastName())
+                    &&!usersRepository.existsByFirstNameAndLastName(users.getFirstName(), users.getLastName()) ) {
                 throw new ExistByFirstNameAndLastName(request.getFirstName(), request.getLastName());
             }
             if (usersRepository.existsByPhone(request.getPhone())) {
@@ -96,8 +104,27 @@ public class UsersService {
         }
     }
 
-    public List<Users> getAllUser() {
-        return usersRepository.findAll();
+    public PagedModel<UsersResponse> getAllUser(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Users> users = usersRepository.findAll(pageable);
+        List<UsersResponse> usersResponseList = users.getContent().stream().map(this::mapToUsersResponse).toList();
+
+        PageMetadata pageMetadata = new PageMetadata(page, size, users.getTotalElements(), users.getTotalPages());
+        PagedModel<UsersResponse> pagedModel = PagedModel.of(usersResponseList, pageMetadata);
+        return pagedModel;
     }
+
+    public UsersResponse mapToUsersResponse(Users users) {
+        UsersResponse usersResponse = new UsersResponse();
+        if(!Objects.isNull(users)) {
+            usersResponse.setUserId(users.getUsersId());
+            usersResponse.setUsername(users.getUsername());
+            usersResponse.setFullName(users.getFirstName() + " " + users.getLastName());
+            usersResponse.setPhone(users.getPhone());
+            usersResponse.setRole(users.getRole().getRoleName());
+        }
+        return usersResponse;
+    }
+
 
 }
