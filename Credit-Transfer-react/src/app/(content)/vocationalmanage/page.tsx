@@ -50,13 +50,13 @@ export default function VocationalManage() {
       header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
       cell: (info) => info.getValue()
     }),
-    columnHelper.accessor("universityCourse.uniCourseId", {
+    columnHelper.accessor("uniCourseId", {
       header: () => <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
-    columnHelper.accessor("universityCourse.uniCourseName", {
+    columnHelper.accessor("uniCourseName", {
       header: () => (
         <Box whiteSpace="pre-wrap">
           วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course Equivalents
@@ -66,7 +66,7 @@ export default function VocationalManage() {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
-    columnHelper.accessor("universityCourse.uniCredit", {
+    columnHelper.accessor("uniCredit", {
       header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null

@@ -12,6 +12,7 @@ export interface DiplomaCourseResponseList {
   dipCourseName: string
   dipCredit: number
   uniCourseId: string
+  uniCourseName: string
   createdBy: string
   createdDate: string
   lastModifiedBy: string
