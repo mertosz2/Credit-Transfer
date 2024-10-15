@@ -481,7 +481,7 @@ export default function Main() {
     })
   ]
 
-  const table = useReactTable({
+  const   table = useReactTable({
     data: flatData,
     columns,
     getCoreRowModel: getCoreRowModel()
