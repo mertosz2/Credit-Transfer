@@ -4,7 +4,6 @@ import com.example.credittransfer.dto.request.TransferCreditRequest;
 import com.example.credittransfer.dto.response.DipCourseIdResponse;
 import com.example.credittransfer.dto.response.ReportCourseResponse;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
-import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.exception.FileEmptyException;
 import com.example.credittransfer.exception.FileExtensionNotMatchException;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
@@ -14,7 +13,6 @@ import com.example.credittransfer.service.OCRService;
 import com.example.credittransfer.service.PDFGeneratorService;
 import com.example.credittransfer.service.TransferCreditService;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.input.ObservableInputStream;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -70,7 +67,7 @@ public class TransferCreditController {
         List<String> dipCourseIdList = new ArrayList<>();
         if (!Objects.isNull(allIdFound)) {
             dipCourseIdList = allIdFound.stream().filter(dipCourseId -> !inListOfRequest.contains(dipCourseId)).toList();
-            if(!dipCourseIdList.isEmpty()) {
+            if (!dipCourseIdList.isEmpty()) {
                 transferCreditRequestList.addAll(transferCreditService.mapToTransferCreditRequest(dipCourseIdList));
             }
 
@@ -155,7 +152,7 @@ public class TransferCreditController {
     }
 
     @PostMapping("/sort")
-    public ResponseEntity<List<TransferCreditResponse>> sortData(@RequestBody List<TransferCreditResponse> responseList,@RequestParam("key") String key, @RequestParam("direction") boolean ascending ) {
+    public ResponseEntity<List<TransferCreditResponse>> sortData(@RequestBody List<TransferCreditResponse> responseList, @RequestParam("key") String key, @RequestParam("direction") boolean ascending) {
         return ResponseEntity.status(OK).body(transferCreditService.sortData(responseList, key, ascending));
     }
 
@@ -163,10 +160,12 @@ public class TransferCreditController {
     public String tssa() throws IOException {
         return ocrService.getCourseId3();
     }
+
     @GetMapping("/oc3")
     public String tsaa() throws IOException {
         return ocrService.getCourseId2();
     }
+
     @GetMapping("/za")
     public ResponseEntity<List<TransferCreditResponse>> testRss() {
         List<TransferCreditRequest> mockData = List.of(

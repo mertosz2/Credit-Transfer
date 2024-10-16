@@ -63,4 +63,9 @@ public class DiplomaCourseController {
 
     }
 
+    @PostMapping("/sort")
+    public PagedModel<DiplomaCourseResponse> sortData(@RequestBody PagedModel<DiplomaCourseResponse> responseList, @RequestParam("key") String key, @RequestParam("direction") boolean ascending) {
+        return diplomaCourseService.sortData(responseList, key, ascending);
+    }
+
 }
