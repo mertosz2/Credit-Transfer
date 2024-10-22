@@ -2,6 +2,7 @@ package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.UsersRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
+import com.example.credittransfer.dto.response.UniCourseResponse;
 import com.example.credittransfer.dto.response.UsersResponse;
 import com.example.credittransfer.entity.Users;
 import com.example.credittransfer.projection.DropDown;
@@ -49,5 +50,10 @@ public class UsersController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<ResponseAPI> deleteUser(@PathVariable Integer userId) {
         return ResponseEntity.status(OK).body(usersService.deleteUser(userId));
+    }
+
+    @PostMapping("/sort")
+    public PagedModel<UsersResponse> sortData(@RequestBody PagedModel<UsersResponse> responseList, @RequestParam("key") String key, @RequestParam("direction") boolean ascending) {
+        return usersService.sortData(responseList, key, ascending);
     }
 }

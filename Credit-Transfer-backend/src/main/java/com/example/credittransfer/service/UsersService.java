@@ -2,6 +2,7 @@ package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.UsersRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
+import com.example.credittransfer.dto.response.UniCourseResponse;
 import com.example.credittransfer.dto.response.UsersResponse;
 import com.example.credittransfer.entity.Users;
 import com.example.credittransfer.exception.ExistByFirstNameAndLastName;
@@ -21,9 +22,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsersService {
@@ -106,7 +109,7 @@ public class UsersService {
 
     public PagedModel<UsersResponse> getAllUser(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Users> users = usersRepository.findAll(pageable);
+        Page<Users> users = usersRepository.getAllUsers(pageable);
         List<UsersResponse> usersResponseList = users.getContent().stream().map(this::mapToUsersResponse).toList();
 
         PageMetadata pageMetadata = new PageMetadata(size,page, users.getTotalElements(), users.getTotalPages());
@@ -124,6 +127,37 @@ public class UsersService {
             usersResponse.setRole(users.getRole().getRoleName());
         }
         return usersResponse;
+    }
+
+    public PagedModel<UsersResponse> sortData(PagedModel<UsersResponse> pagedModel, String key, boolean ascending) {
+        List<UsersResponse> sortedList = pagedModel.getContent().stream()
+                .sorted(getComparator(key, ascending))
+                .collect(Collectors.toList());
+
+        return PagedModel.of(sortedList, pagedModel.getMetadata());
+    }
+
+    private Comparator<UsersResponse> getComparator(String key, boolean ascending) {
+        Comparator<UsersResponse> comparator;
+
+        switch (key) {
+            case "fullName":
+                comparator = Comparator.comparing(UsersResponse::getFullName);
+                break;
+            case "username":
+                comparator = Comparator.comparing(UsersResponse::getUsername);
+                break;
+            case "phone":
+                comparator = Comparator.comparing(UsersResponse::getPhone);
+                break;
+            case "role":
+                comparator = Comparator.comparing(UsersResponse::getRole);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid sorting key: " + key);
+        }
+
+        return ascending ? comparator : comparator.reversed();
     }
 
 
