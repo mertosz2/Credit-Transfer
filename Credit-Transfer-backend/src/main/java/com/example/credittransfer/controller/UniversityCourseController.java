@@ -88,12 +88,12 @@ public class UniversityCourseController {
 
     @GetMapping("/search")
     public PagedModel<UniCourseResponse> searchCourse(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")int size,
-                                                      @RequestParam String uniCourseId,
-                                                      @RequestParam String uniCourseName,
-                                                      @RequestParam String courseCategory,
-                                                      @RequestParam String courseCategoryName,
-                                                      @RequestParam Integer uniCredit,
-                                                      @RequestParam String preSubject) {
+                                                      @RequestParam(required = false) String uniCourseId,
+                                                      @RequestParam(required = false) String uniCourseName,
+                                                      @RequestParam(required = false) String courseCategory,
+                                                      @RequestParam(required = false) String courseCategoryName,
+                                                      @RequestParam(required = false) Integer uniCredit,
+                                                      @RequestParam(required = false) String preSubject) {
         return universityCourseService.searchCourse(page, size, uniCourseId, uniCourseName, courseCategory, courseCategoryName, uniCredit, preSubject);
     }
 }
