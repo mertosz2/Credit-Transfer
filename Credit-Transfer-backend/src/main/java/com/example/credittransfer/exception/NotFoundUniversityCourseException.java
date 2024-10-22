@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class NotFoundUniversityCourseException extends RuntimeException {
-    public NotFoundUniversityCourseException() {
-        super("ไม่พบวิชานี้ในระบบ");
+    public NotFoundUniversityCourseException(String msg) {
+        super("ไม่พบวิชานี้ในระบบ: " + msg );
     }
 }

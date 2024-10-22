@@ -1,7 +1,7 @@
 import { Button as ButtonCk, ButtonProps } from "@chakra-ui/react"
 import { JSXElementConstructor, ReactElement } from "react"
 interface IProps extends ButtonProps {
-  label: string
+  label: string |ReactElement<any, string | JSXElementConstructor<any>>
   leftIcon?: ReactElement<any, string | JSXElementConstructor<any>>
   rightIcon?: ReactElement<any, string | JSXElementConstructor<any>>
   onClick?: () => void
@@ -13,6 +13,8 @@ const Button = ({ label, onClick, leftIcon, rightIcon, ...props }: IProps) => {
       textColor={props.textColor}
       borderColor={props.borderColor}
       borderWidth={props.borderWidth}
+      justifyContent={props.justifyContent || "center"}
+      alignItems={props.alignItems || "center"}
       boxShadow={props.shadow}
       borderRadius={props.borderRadius || "full"}
       fontSize={props.fontSize || 14}

@@ -20,13 +20,11 @@ export default function Home() {
   const router = useRouter()
   const [password, setPassword] = useState<string>("")
   const [username, setUsername] = useState<string>("")
-  const [token, setToken] = useState<IToken>()
   const { onLogin } = useMutateLogin()
   const setData = useProfileStore(selectOnsetProfileData)
   const decodeToken = (token: string): ITokenPayload | null => {
     try {
       const decoded: ITokenPayload = jwtDecode<ITokenPayload>(token) // Decode token string โดยตรง
-      console.log(decoded) // แสดงข้อมูลที่ decode ได้
       return decoded
     } catch (error) {
       console.error("Invalid token", error)
@@ -40,10 +38,14 @@ export default function Home() {
 
     if (loginToken) {
       const decodeData = decodeToken(loginToken)
-      console.log(decodeData)
       if (decodeData) {
         setData(decodeData)
       }
+      Cookies.set("accessToken", loginToken, { expires: 1 / 48 })
+
+      // ใช้ useRouter เพื่อเปลี่ยนเส้นทางไปยัง /transfer
+
+      router.push("/transfer")
     }
   }
 
@@ -62,7 +64,6 @@ export default function Home() {
       padding="24px"
       width="100%"
       height="100vh"
-      //background="radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%)"
       background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
     >
       <Box

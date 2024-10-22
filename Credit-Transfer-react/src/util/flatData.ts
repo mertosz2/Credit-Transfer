@@ -47,7 +47,7 @@ export const flattenData = (data: ICreditTransferResponse[]) => {
   }, [])
 }
 export const flattenData2 = (data: ICreditTransferResponse[] | undefined) => {
-  return data?.reduce((acc: IFlatDiplomaCourseList[] , item) => {
+  return data?.reduce((acc: IFlatDiplomaCourseList[], item) => {
     item.diplomaCourseList.forEach((course, index) => {
       acc.push({
         ...course,
@@ -60,4 +60,3 @@ export const flattenData2 = (data: ICreditTransferResponse[] | undefined) => {
     return acc
   }, [])
 }
-

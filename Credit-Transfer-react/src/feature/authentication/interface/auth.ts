@@ -4,7 +4,7 @@ export interface ISignIn {
 }
 
 export interface ITokenPayload {
-  role: []
+  role: string[]
   user_id: number
   user_name: string
   name: string

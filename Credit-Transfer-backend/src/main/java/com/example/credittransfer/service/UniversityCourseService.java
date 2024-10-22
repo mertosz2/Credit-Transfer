@@ -3,9 +3,11 @@ package com.example.credittransfer.service;
 import com.example.credittransfer.dto.request.UniversityCourseRequest;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.dto.response.UniCourseResponse;
+import com.example.credittransfer.entity.CourseCategory;
 import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.exception.ExistByCourseIdException;
 import com.example.credittransfer.exception.ExistByCourseNameException;
+import com.example.credittransfer.exception.NotFoundUniversityCourseException;
 import com.example.credittransfer.projection.DropDown;
 import com.example.credittransfer.repository.CourseCategoryRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
@@ -36,7 +38,7 @@ public class UniversityCourseService {
 
     public PagedModel<UniCourseResponse> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<UniversityCourse> uniCoursePage = universityCourseRepository.findAll(pageable);
+        Page<UniversityCourse> uniCoursePage = universityCourseRepository.findAllUniCourse(pageable);
 
         List<UniCourseResponse> uniCourseResponseList = uniCoursePage.getContent()
                 .stream().map(this::mapToUniCourseResponse).toList();
@@ -62,8 +64,8 @@ public class UniversityCourseService {
         universityCourse.setUniCourseName(request.getUniCourseName());
         universityCourse.setUniCredit(request.getUniCredit());
         if (!Objects.equals(request.getPreSubject(), "-")) {
-            UniversityCourse preSubject = universityCourseRepository.findByUId(Integer.valueOf(request.getPreSubject()));
-            universityCourse.setPreSubject(preSubject.getPreSubject());
+            UniversityCourse preSubject = universityCourseRepository.findByUniCourseId((request.getPreSubject())).orElseThrow();
+            universityCourse.setPreSubject(preSubject.getUniCourseId());
         } else {
             universityCourse.setPreSubject(request.getPreSubject());
         }
@@ -75,29 +77,45 @@ public class UniversityCourseService {
 
     @Transactional
     public ResponseAPI updateCourse(UniversityCourseRequest request, Integer uniId) {
+        UniversityCourse universityCourse = universityCourseRepository.findById(uniId).orElseThrow(() -> new NotFoundUniversityCourseException("uniId " + uniId.toString()));
 
-        UniversityCourse universityCourse = universityCourseRepository.findById(uniId).orElseThrow();
         if (universityCourseRepository.existsByUniCourseId(request.getUniCourseId())
                 && !Objects.equals(universityCourse.getUniCourseId(), request.getUniCourseId())) {
             throw new ExistByCourseIdException(request.getUniCourseId());
         }
+
         if (universityCourseRepository.existsByUniCourseName(request.getUniCourseName())
                 && !Objects.equals(universityCourse.getUniCourseName(), request.getUniCourseName())) {
             throw new ExistByCourseNameException(request.getUniCourseName());
         }
+
         if (!Objects.equals(request.getPreSubject(), "-")) {
-            UniversityCourse preSubject = universityCourseRepository.findByUId(Integer.valueOf(request.getPreSubject()));
-            universityCourse.setPreSubject(preSubject.getPreSubject());
+            Optional<UniversityCourse> preSubjectOpt = universityCourseRepository.findByUniCourseId(request.getPreSubject());
+            if (!preSubjectOpt.isPresent()) {
+                throw new NotFoundUniversityCourseException("presubject " + request.getPreSubject());
+            }
+            UniversityCourse preSubject = preSubjectOpt.get();
+            universityCourse.setPreSubject(preSubject.getUniCourseId());
         } else {
             universityCourse.setPreSubject(request.getPreSubject());
         }
-        universityCourse.setCourseCategory(courseCategoryRepository.findById(request.getCourseCategory()).orElseThrow());
+
+        Optional<CourseCategory> courseCategoryOpt = courseCategoryRepository.findById(request.getCourseCategory());
+        if (courseCategoryOpt.isEmpty()) {
+            System.out.println("cc id = " + request.getCourseCategory());
+            throw new NotFoundUniversityCourseException(String.valueOf("cc id = " + request.getCourseCategory())); // หรือสร้าง exception ที่เหมาะสม
+        }
+        CourseCategory courseCategory = courseCategoryOpt.get();
+        universityCourse.setCourseCategory(courseCategory);
+
         universityCourse.setUniCourseId(request.getUniCourseId());
         universityCourse.setUniCourseName(request.getUniCourseName());
         universityCourse.setUniCredit(request.getUniCredit());
         universityCourseRepository.save(universityCourse);
+
         return new ResponseAPI(HttpStatus.OK, "อัพเดทวิชาสำเร็จ");
     }
+
 
     @Transactional
     public ResponseAPI deleteUniCourse(Integer uniId) {
@@ -118,8 +136,28 @@ public class UniversityCourseService {
         return universityCourseRepository.findByUniCourseId(uniCourseId).orElseThrow(NoClassDefFoundError::new);
     }
 
-    public List<DropDown> getUniCourseDropdown() {
+    public List<DropDown> getCreateUniCourseDropdown() {
         return universityCourseRepository.getUniversityCoursesDropDown();
+    }
+    public List<DropDown> getEditUniCourseDropdown() {
+        List<DropDown> uniDropdown = universityCourseRepository.getUniversityCoursesDropDown();
+        uniDropdown.addFirst(new DropDown() {
+            @Override
+            public int getId() {
+                return 0;
+            }
+
+            @Override
+            public String getValue() {
+                return "-";
+            }
+
+            @Override
+            public String getLabel() {
+                return "-";
+            }
+        });
+        return uniDropdown;
     }
 
     public UniCourseResponse mapToUniCourseResponse(UniversityCourse universityCourse) {
