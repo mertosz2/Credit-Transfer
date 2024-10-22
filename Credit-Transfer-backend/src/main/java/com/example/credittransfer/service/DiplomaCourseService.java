@@ -169,7 +169,7 @@ public class DiplomaCourseService {
 
         return PagedModel.of(sortedList, pagedModel.getMetadata());
     }
-
+    //sort item
     private Comparator<DiplomaCourseResponse> getComparator(String key, boolean ascending) {
         Comparator<DiplomaCourseResponse> comparator;
 
@@ -198,5 +198,5 @@ public class DiplomaCourseService {
 
         return ascending ? comparator : comparator.reversed();
     }
-    
+
 }
