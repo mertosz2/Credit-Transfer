@@ -4,7 +4,7 @@ import { getAllDipCourse } from "../services/getAlldipCourse.service"
 
 const useGetAllDipCourse = () => {
   const toast = useToast()
-  const { data: dipCourseData } = useQuery({
+  const { data: dipCourseData, refetch } = useQuery({
     queryKey: ["getAllDipCourse"],
     queryFn: async () => {
       try {
@@ -21,6 +21,6 @@ const useGetAllDipCourse = () => {
     },
     retry: false
   })
-  return { dipCourseData }
+  return { dipCourseData, refetch }
 }
 export default useGetAllDipCourse

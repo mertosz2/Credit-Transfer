@@ -27,6 +27,5 @@ public class DiplomaCourse extends Auditable{
 
     @ManyToOne
     @JoinColumn(name = "universityCourse_id")
-    @JsonIgnore
     private UniversityCourse universityCourse;
 }

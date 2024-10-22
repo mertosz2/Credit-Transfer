@@ -2,6 +2,9 @@ package com.example.credittransfer.repository;
 
 
 import com.example.credittransfer.entity.DiplomaCourse;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,6 +41,9 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
 
     @Query("select d from DiplomaCourse d where d.dipId = :dipId and d.isActive = true")
     Optional<DiplomaCourse> findByDipId(Integer dipId);
+
+    @Query("select d from DiplomaCourse d where d.isActive = true")
+    Page<DiplomaCourse> findAllDip(Pageable pageable);
 
 
 

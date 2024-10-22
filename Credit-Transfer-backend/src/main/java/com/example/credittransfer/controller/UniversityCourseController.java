@@ -65,9 +65,14 @@ public class UniversityCourseController {
         return ResponseEntity.status(OK).body(universityCourseService.findByUniCourseId(uniCourseId));
     }
 
-    @GetMapping("/uniDropdown")
-    public ResponseEntity<List<DropDown>> getUniCourseDropdown(){
-        return ResponseEntity.status(OK).body(universityCourseService.getUniCourseDropdown());
+    @GetMapping("/uniEDropdown")
+    public ResponseEntity<List<DropDown>> getEditUniCourseDropdown(){
+        return ResponseEntity.status(OK).body(universityCourseService.getEditUniCourseDropdown());
+    }
+
+    @GetMapping("/uniCDropdown")
+    public ResponseEntity<List<DropDown>> getCreateUniCourseDropdown(){
+        return ResponseEntity.status(OK).body(universityCourseService.getCreateUniCourseDropdown());
     }
 
     @GetMapping("/ccDropdown")

@@ -5,7 +5,7 @@ import { RiLogoutBoxFill } from "@remixicon/react"
 import logo from "../SideBar/image/logo.png"
 import Cookies from "js-cookie"
 import { onRemoveCookie } from "@/config/handleCookie"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { decodeToken } from "@/util/jwtToken"
 import useProfileStore, {
@@ -13,14 +13,18 @@ import useProfileStore, {
   selectProfileData
 } from "@/stores/profileStore"
 
-const SideBar = () => {
+const SideBar = ({ id }: { id: number }) => {
   const [accessToken, setAccessToken] = useState<string | undefined>(
     Cookies.get("accessToken")
   )
+
   const onResetProfile = useProfileStore(resetProfile)
   const data = useProfileStore(selectProfileData)
+  const processData = data?.role
   const toast = useToast()
   const router = useRouter()
+
+  const [activePath, setActivePath] = useState<number>()
   const handleLogout = () => {
     toast({
       title: "ออกจากระบบ",
@@ -28,15 +32,30 @@ const SideBar = () => {
       isClosable: true
     })
     onRemoveCookie()
-
-    setAccessToken(undefined) // อัปเดต state เมื่อ logout
+    setAccessToken(undefined)
     onResetProfile()
     router.replace("/")
   }
 
+  const handleCreditTransfer = () => {
+    router.replace("/transfer")
+  }
   const handleVocationalManage = () => {
     router.replace("/vocationalmanage")
   }
+  const handleUniversityManage = () => {
+    router.replace("/universitymanage")
+  }
+  const handleManageAccount = () => {
+    router.replace("/manageaccount")
+  }
+  const checkRole = () => {
+    if (data?.role.includes("SUPER_ADMIN")) {
+      return true
+    }
+    return false
+  }
+  console.log(activePath)
   return (
     <Box display="flex">
       {data?.role && data.role.length > 0 ? (
@@ -77,28 +96,43 @@ const SideBar = () => {
                       gap="10px"
                     >
                       <Box
-                        paddingY="8px"
-                        paddingX="60px"
-                        backgroundColor="white"
-                        color="black"
-                        borderRadius="8px"
+                        display="flex"
+                        flexDirection="column"
+                        gap="10px"
                       >
-                        เทียบโอนรายวิชา
+                        <Button
+                          label={"เทียบโอนรายวิชา"}
+                          onClick={handleCreditTransfer}
+                          color="black"
+                          borderRadius="8px"
+                          backgroundColor={id == 1 ? " #00E0FF" : "white"}
+                        />
+                        <Button
+                          paddingY="8px"
+                          paddingX="60px"
+                          label={"จัดการวิชา ปวส"}
+                          onClick={handleVocationalManage}
+                          color="black"
+                          borderRadius="8px"
+                          backgroundColor={id == 2 ? " #00E0FF" : "white"}
+                        />
+                        <Button
+                          label={"จัดการวิชา มหาวิทยาลัย"}
+                          onClick={handleUniversityManage}
+                          color="black"
+                          borderRadius="8px"
+                          backgroundColor={id == 3 ? " #00E0FF" : "white"}
+                        />
+                        {checkRole() ? (
+                          <Button
+                            label={"จัดการบัญชี"}
+                            onClick={handleManageAccount}
+                            color="black"
+                            borderRadius="8px"
+                            backgroundColor={id == 4 ? " #00E0FF" : "white"}
+                          />
+                        ) : null}
                       </Box>
-                      <Button
-                        label={"จัดการวิชา ปวส"}
-                        onClick={handleVocationalManage}
-                        color="black"
-                        borderRadius="8px"
-                        backgroundColor="white" 
-                      />
-                      <Button
-                        label={"จัดการวิชา มหาวิทยาลัย"}
-                        onClick={handleVocationalManage}
-                        color="black"
-                        borderRadius="8px"
-                        backgroundColor="white"
-                      />
                     </Box>
 
                     <Box
@@ -110,7 +144,7 @@ const SideBar = () => {
                       color="black"
                       borderRadius="8px"
                     >
-                      {item}
+                      {data.name}
                     </Box>
                     <Button
                       label={"ออกจากระบบ"}
@@ -158,7 +192,7 @@ const SideBar = () => {
               <Box
                 paddingY="8px"
                 paddingX="60px"
-                backgroundColor="white"
+                backgroundColor={activePath == 1 ? " #00E0FF" : "white"}
                 color="black"
                 borderRadius="8px"
               >

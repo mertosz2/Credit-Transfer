@@ -39,7 +39,6 @@ const initialState: State = {
   }
 }
 
-// Create the Zustand store
 const useCreditTransferStore = create<ICreditTransferStore>()(
   devtools(
     persist(
@@ -56,7 +55,6 @@ const useCreditTransferStore = create<ICreditTransferStore>()(
   )
 )
 
-// Export selectors
 export const selectOnSetCreditTransferData = (state: ICreditTransferStore) =>
   state.onSetCreditTransferData
 

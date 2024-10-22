@@ -1,7 +1,7 @@
 import { Button as ButtonCk, ButtonProps } from "@chakra-ui/react"
 import { JSXElementConstructor, ReactElement } from "react"
 interface IProps extends ButtonProps {
-  label: string
+  label: string |ReactElement<any, string | JSXElementConstructor<any>>
   leftIcon?: ReactElement<any, string | JSXElementConstructor<any>>
   rightIcon?: ReactElement<any, string | JSXElementConstructor<any>>
   onClick?: () => void
@@ -9,7 +9,6 @@ interface IProps extends ButtonProps {
 const Button = ({ label, onClick, leftIcon, rightIcon, ...props }: IProps) => {
   return (
     <ButtonCk
-   
       bgColor={props.bgColor}
       textColor={props.textColor}
       borderColor={props.borderColor}

@@ -199,7 +199,6 @@ export default function Main() {
     }
   }, [CloseAddCourse, dipCourse, displayData, onUpdateDipCourse, toast])
 
-  // Example of useEffect to watch the displayData and update flatData accordingly
   useEffect(() => {
     setFlatData(flattenData(displayData))
   }, [displayData, setFlatData])
@@ -237,10 +236,6 @@ export default function Main() {
     if (file) {
       try {
         const newFile = await onUploadFile(file)
-        console.log(newFile)
-
-        console.log("list of", newFile.transferCreditResponseList)
-
         if (newFile) {
           const newIm = newFile.transferCreditResponseList
           const transferCreditResponseList = displayData || []
@@ -289,7 +284,7 @@ export default function Main() {
           setModalData({
             founded: newFile.foundedDipCourseIdList,
             notFounded: newFile.notFoundedDipCourseIdList,
-            duplicates: duplicateIdsArray, // แสดงข้อมูลซ้ำใน modal
+            duplicates: duplicateIdsArray, 
             uniqueNewItems: uniqueNewItemsArray,
             totalfound: newFile.totalFounded,
             totalnotfound: newFile.totalNotFounded,
@@ -397,7 +392,6 @@ export default function Main() {
         direction = "descending"
       }
 
-      // function api
       if (sortConfig) {
         const sortedData = await onSortData({
           data: displayData,
@@ -481,7 +475,7 @@ export default function Main() {
     })
   ]
 
-  const   table = useReactTable({
+  const table = useReactTable({
     data: flatData,
     columns,
     getCoreRowModel: getCoreRowModel()
@@ -502,39 +496,42 @@ export default function Main() {
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const isTransferable = header.column.id === "transferable"
                   return (
                     <Th
                       padding="16px"
-                      cursor="pointer"
+                      cursor={isTransferable ? "not-allowed" : "pointer"}
                       key={header.id}
-                      onClick={() =>
-                        handleSort(
-                          header.column.id.includes("_")
-                            ? (getStringAfterUnderscore(
-                                header.column.id
-                              ) as TKey)
-                            : (header.column.id as TKey)
-                        )
-                      }
+                      onClick={() => {
+                        if (!isTransferable) {
+                          handleSort(
+                            header.column.id.includes("_")? (getStringAfterUnderscore(header.column.id) as TKey)
+                              : (header.column.id as TKey)
+                          )
+                        }
+                      }}
                     >
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
                       )}
-                      <Icon
-                        as={
-                          sortConfig && sortConfig.direction === "ascending"
-                            ? ChevronUpIcon
-                            : ChevronDownIcon
-                        }
-                      />
+                      {isTransferable ? (
+                        <Box height="16px" />
+                      ) : (
+                        <Icon
+                          as={
+                            sortConfig && sortConfig.direction === "ascending"
+                              ? ChevronUpIcon
+                              : ChevronDownIcon
+                          }
+                        />
+                      )}
                     </Th>
                   )
                 })}
               </Tr>
             ))}
           </Thead>
-
           <Tbody>
             {flatData &&
               flatData.length > 0 &&
@@ -577,7 +574,7 @@ export default function Main() {
 
   return (
     <>
-      <SideBar />
+      <SideBar id={1} />
       <Box
         height="100%"
         paddingLeft="60px"
@@ -598,7 +595,7 @@ export default function Main() {
               marginTop="60px"
               gap="24px"
               paddingRight="120px"
-              paddingLeft="240px"
+              paddingLeft="280px"
             >
               <Box
                 display="flex"

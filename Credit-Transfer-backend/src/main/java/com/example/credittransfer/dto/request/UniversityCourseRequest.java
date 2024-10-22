@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class UniversityCourseRequest {
 
     @NotBlank(message = "กรุณาใส่รหัสวิชา")
-    @Pattern(regexp = "^[A-Z]{2}-\\d{3}", message = "รูปแบบของรหัสวิชาเป็นดังนี้ xx-xxx , ตัวอย่าง. SP-102")
+    @Pattern(regexp = "^[A-Z]{2}\\d{3}$", message = "รูปแบบของรหัสวิชาเป็นดังนี้ xx-xxx , ตัวอย่าง. SP-102")
     private String uniCourseId;
 
     @NotBlank(message = "กรุณาใส่ขื่อวิชา")

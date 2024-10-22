@@ -2,6 +2,8 @@ package com.example.credittransfer.repository;
 
 import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.projection.DropDown;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,7 +40,8 @@ public interface UniversityCourseRepository extends JpaRepository<UniversityCour
     @Query("select uc from UniversityCourse uc where uc.uniId = :id and uc.isActive = true")
     UniversityCourse findByUId(Integer id);
 
-
+    @Query("select uc from UniversityCourse  uc where uc.isActive = true")
+    Page<UniversityCourse> findAllUniCourse(Pageable pageable);
 
 
 }

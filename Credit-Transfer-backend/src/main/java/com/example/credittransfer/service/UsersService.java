@@ -109,7 +109,7 @@ public class UsersService {
         Page<Users> users = usersRepository.findAll(pageable);
         List<UsersResponse> usersResponseList = users.getContent().stream().map(this::mapToUsersResponse).toList();
 
-        PageMetadata pageMetadata = new PageMetadata(page, size, users.getTotalElements(), users.getTotalPages());
+        PageMetadata pageMetadata = new PageMetadata(size,page, users.getTotalElements(), users.getTotalPages());
         PagedModel<UsersResponse> pagedModel = PagedModel.of(usersResponseList, pageMetadata);
         return pagedModel;
     }

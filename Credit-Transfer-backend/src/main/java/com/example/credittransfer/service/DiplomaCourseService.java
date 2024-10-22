@@ -22,10 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DiplomaCourseService {
@@ -55,7 +53,7 @@ public class DiplomaCourseService {
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
         diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow(
-                NotFoundUniversityCourseException::new
+                () -> new NotFoundUniversityCourseException("uniId: " + request.getUniId())
         ));
         diplomaCourse.setActive(true);
         diplomaCourseRepository.save(diplomaCourse);
@@ -79,7 +77,7 @@ public class DiplomaCourseService {
         diplomaCourse.setDipCourseName(request.getDipCourseName());
         diplomaCourse.setDipCredit(request.getDipCredit());
         diplomaCourse.setUniversityCourse(universityCourseRepository.findByUniId(request.getUniId()).orElseThrow(
-                NotFoundUniversityCourseException::new
+                () -> new NotFoundUniversityCourseException("uniId: " + request.getUniId())
         ));
         diplomaCourseRepository.save(diplomaCourse);
         return new ResponseAPI(HttpStatus.OK, "อัพเดทวิชาสำเร็จ");
@@ -91,7 +89,7 @@ public class DiplomaCourseService {
     }
     public PagedModel<DiplomaCourseResponse> getAllDipCourse(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<DiplomaCourse> diplomaCoursesPage = diplomaCourseRepository.findAll(pageable);
+        Page<DiplomaCourse> diplomaCoursesPage = diplomaCourseRepository.findAllDip(pageable);
 
         List<DiplomaCourseResponse> diplomaCourseResponses = diplomaCoursesPage.getContent().stream()
                 .map(this::mapToDiplomaCourseResponse)
@@ -165,4 +163,40 @@ public class DiplomaCourseService {
         return response;
     }
 
+
+    public PagedModel<DiplomaCourseResponse> sortData(PagedModel<DiplomaCourseResponse> pagedModel, String key, boolean ascending) {
+        List<DiplomaCourseResponse> sortedList = pagedModel.getContent().stream()
+                .sorted(getComparator(key, ascending))
+                .collect(Collectors.toList());
+
+        return PagedModel.of(sortedList, pagedModel.getMetadata());
+    }
+    private Comparator<DiplomaCourseResponse> getComparator(String key, boolean ascending) {
+        Comparator<DiplomaCourseResponse> comparator;
+
+        switch (key) {
+            case "dipCourseId":
+                comparator = Comparator.comparing(DiplomaCourseResponse::getDipCourseId);
+                break;
+            case "dipCourseName":
+                comparator = Comparator.comparing(DiplomaCourseResponse::getDipCourseName);
+                break;
+            case "dipCredit":
+                comparator = Comparator.comparing(DiplomaCourseResponse::getDipCredit);
+                break;
+            case "uniCourseId":
+                comparator = Comparator.comparing(DiplomaCourseResponse::getUniCourseId);
+                break;
+            case "uniCourseName":
+                comparator = Comparator.comparing(DiplomaCourseResponse::getUniCourseName);
+                break;
+            case "uniCredit":
+                comparator = Comparator.comparing(DiplomaCourseResponse::getUniCredit);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid sorting key: " + key);
+        }
+
+        return ascending ? comparator : comparator.reversed();
+    }
 }
