@@ -24,7 +24,6 @@ const SideBar = ({ id }: { id: number }) => {
   const toast = useToast()
   const router = useRouter()
 
-  const [activePath, setActivePath] = useState<number>()
   const handleLogout = () => {
     toast({
       title: "ออกจากระบบ",
@@ -55,7 +54,6 @@ const SideBar = ({ id }: { id: number }) => {
     }
     return false
   }
-  console.log(activePath)
   return (
     <Box display="flex">
       {data?.role && data.role.length > 0 ? (
@@ -68,7 +66,6 @@ const SideBar = ({ id }: { id: number }) => {
                   position="fixed"
                   flexDirection="column"
                   padding="20px"
-                  minW="200px"
                   height="100vh"
                   borderWidth="1px"
                   borderColor="black"
@@ -164,7 +161,7 @@ const SideBar = ({ id }: { id: number }) => {
         <Box
           display="flex"
           position="fixed"
-          flexDirection="column"
+          flexDirection={{ lg: "row", xl: "column" }}
           padding="20px"
           minW="200px"
           height="100vh"
@@ -192,7 +189,7 @@ const SideBar = ({ id }: { id: number }) => {
               <Box
                 paddingY="8px"
                 paddingX="60px"
-                backgroundColor={activePath == 1 ? " #00E0FF" : "white"}
+                backgroundColor={id == 1 ? " #00E0FF" : "white"}
                 color="black"
                 borderRadius="8px"
               >

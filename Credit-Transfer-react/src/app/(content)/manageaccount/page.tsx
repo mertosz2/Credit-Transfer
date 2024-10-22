@@ -272,11 +272,11 @@ export default function ManageAccount() {
   const columnHelper = createColumnHelper<IUsersResponseList>()
   const columns = [
     columnHelper.accessor("username", {
-      header: () => <Box whiteSpace="pre-wrap">ชื่อผู้ใช้{"\n"}Username</Box>,
+      header: () => <Box whiteSpace="pre-wrap">ชื่อ{"\n"}Name</Box>,
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("fullName", {
-      header: () => <Box whiteSpace="pre-wrap">ชื่อ{"\n"}Name</Box>,
+      header: () => <Box whiteSpace="pre-wrap">ชื่อผู้ใช้{"\n"}UserName</Box>,
       cell: (info) => info.getValue()
     }),
 

@@ -148,7 +148,7 @@ export default function Main() {
 
         if (isDipCourseExists) {
           toast({
-            title: "DipCourse already exists in the list.",
+            title: "รหัสวิชานี้มีอยู่ในรายการแล้ว",
             status: "error",
             isClosable: true
           })
@@ -284,7 +284,7 @@ export default function Main() {
           setModalData({
             founded: newFile.foundedDipCourseIdList,
             notFounded: newFile.notFoundedDipCourseIdList,
-            duplicates: duplicateIdsArray, 
+            duplicates: duplicateIdsArray,
             uniqueNewItems: uniqueNewItemsArray,
             totalfound: newFile.totalFounded,
             totalnotfound: newFile.totalNotFounded,
@@ -410,24 +410,42 @@ export default function Main() {
 
   const columns = [
     columnHelper.accessor("dipCourseId", {
-      header: () => <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>,
+      header: () => (
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
+          รหัสวิชา{"\n"}Course Code
+        </Box>
+      ),
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("dipCourseName", {
       header: () => (
-        <Box whiteSpace="pre-wrap">
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
           วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
         </Box>
       ),
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("grade", {
-      header: () => <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>,
+      header: () => (
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
+          เกรด{"\n"}Grade
+        </Box>
+      ),
       cell: (info) => (
         <Input
           width="60px"
           type="number"
           step="0.5"
+          fontSize={{ lg: "12px", xl: "12" }}
           value={info.getValue() || 0}
           onChange={(e) =>
             handleGradeChange(Number(e.target.value), info.row.index)
@@ -436,18 +454,35 @@ export default function Main() {
       )
     }),
     columnHelper.accessor("dipCredit", {
-      header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
+      header: () => (
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
+          หน่วยกิต{"\n"}Credit
+        </Box>
+      ),
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("universityCourse.uniCourseId", {
-      header: () => <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>,
+      header: () => (
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
+          รหัสวิชา{"\n"}Course Code
+        </Box>
+      ),
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
     columnHelper.accessor("universityCourse.uniCourseName", {
       header: () => (
-        <Box whiteSpace="pre-wrap">
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
           วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course Equivalents
         </Box>
       ),
@@ -456,13 +491,27 @@ export default function Main() {
       }
     }),
     columnHelper.accessor("universityCourse.uniCredit", {
-      header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
+      header: () => (
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
+          หน่วยกิต{"\n"}Credit
+        </Box>
+      ),
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
     columnHelper.accessor("transferable", {
-      header: () => <Box whiteSpace="pre-wrap">สถานะ{"\n"}Status</Box>,
+      header: () => (
+        <Box
+          whiteSpace="pre-wrap"
+          fontSize={{ lg: "10px", xl: "12px" }}
+        >
+          สถานะ{"\n"}Status
+        </Box>
+      ),
       cell: (info) => {
         return info.row.original.isFirstInGroup ? (
           info.getValue() ? (
@@ -491,7 +540,7 @@ export default function Main() {
           borderRadius: 16
         }}
       >
-        <Table size="sm">
+        <Table size={{ lg: "sm", xl: "md" }}>
           <Thead bgColor="#D7D7D7">
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
@@ -505,7 +554,10 @@ export default function Main() {
                       onClick={() => {
                         if (!isTransferable) {
                           handleSort(
-                            header.column.id.includes("_")? (getStringAfterUnderscore(header.column.id) as TKey)
+                            header.column.id.includes("_")
+                              ? (getStringAfterUnderscore(
+                                  header.column.id
+                                ) as TKey)
                               : (header.column.id as TKey)
                           )
                         }
@@ -546,6 +598,7 @@ export default function Main() {
                     }
                     return (
                       <Td
+                        fontSize={{ lg: "11px", xl: "12" }}
                         key={cell.id}
                         rowSpan={
                           row.original.isFirstInGroup && cellIndex >= 4
@@ -577,11 +630,12 @@ export default function Main() {
       <SideBar id={1} />
       <Box
         height="100%"
-        paddingLeft="60px"
+        paddingLeft={{ lg: "0px", xl: "60px" }}
       >
         <Box
           display="flex"
           height="100%"
+          padding={{ lg: "16px", xl: "0px" }}
         >
           <Box
             display="flex"
@@ -592,10 +646,10 @@ export default function Main() {
             <Box
               display="flex"
               flexDirection="column"
-              marginTop="60px"
+              marginTop={{ lg: "24px", xl: "60x" }}
               gap="24px"
-              paddingRight="120px"
-              paddingLeft="280px"
+              paddingRight={{ lg: "0px", xl: "120px" }}
+              paddingLeft={{ lg: "0px", xl: "280px" }}
             >
               <Box
                 display="flex"
@@ -616,20 +670,20 @@ export default function Main() {
               {/* Table */}
               {renderTable}
               <Box
+                as="button"
+                onClick={OpenAddCourse}
                 borderRadius="16px"
                 display="flex"
                 width="100%"
-                padding="16px"
+                padding={{ lg: "8px", xl: "16px" }}
                 borderWidth={2}
                 borderStyle="dashed"
                 justifyContent="center"
               >
                 <Box
-                  as="button"
-                  onClick={OpenAddCourse}
                   display="flex"
-                  width="30px"
-                  height="30px"
+                  width={{ lg: "16px", xl: "30px" }}
+                  height={{ lg: "16px", xl: "30px" }}
                   borderRadius="16px"
                   backgroundColor="#2ABE0D"
                   justifyContent="center"

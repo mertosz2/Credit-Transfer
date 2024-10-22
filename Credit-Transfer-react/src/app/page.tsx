@@ -20,7 +20,7 @@ export default function Home() {
   const router = useRouter()
   const [password, setPassword] = useState<string>("")
   const [username, setUsername] = useState<string>("")
-  const { onLogin } = useMutateLogin()
+  const { onLogin, isPending } = useMutateLogin()
   const setData = useProfileStore(selectOnsetProfileData)
   const decodeToken = (token: string): ITokenPayload | null => {
     try {
@@ -34,16 +34,13 @@ export default function Home() {
 
   const handleLogin = async () => {
     const loginData: IProps = { username, password }
-    const loginToken = await onLogin(loginData) // เพิ่มการตรวจสอบประเภท loginToken
-
+    const loginToken = await onLogin(loginData)
     if (loginToken) {
       const decodeData = decodeToken(loginToken)
       if (decodeData) {
         setData(decodeData)
       }
       Cookies.set("accessToken", loginToken, { expires: 1 / 48 })
-
-      // ใช้ useRouter เพื่อเปลี่ยนเส้นทางไปยัง /transfer
 
       router.push("/transfer")
     }
@@ -94,7 +91,7 @@ export default function Home() {
           <TextField
             value={username}
             onChange={handleChangeUsername}
-            placeholder="รหัสนักศึกษา"
+            placeholder="ชื่อผู้ใช้งาน"
           />
           <TextField
             type="password"
@@ -104,8 +101,10 @@ export default function Home() {
           />
 
           <Button
-            label="เข้าสู่ระบบ"
+            label={isPending ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
             onClick={handleLogin}
+            isDisabled={isPending} 
+            isLoading={isPending}
           ></Button>
         </Box>
       </Box>

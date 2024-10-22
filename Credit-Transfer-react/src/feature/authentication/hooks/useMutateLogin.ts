@@ -10,7 +10,8 @@ const useMutateLogin = () => {
   const {
     mutateAsync: onLogin,
     isPaused: isLoginPending,
-    isError: isLoginError
+    isError: isLoginError,
+    isPending
   } = useMutation({
     mutationFn: login,
     mutationKey: ["login"],
@@ -31,14 +32,14 @@ const useMutateLogin = () => {
     onError: (e) => {
       if (e) {
         toast({
-          title: "เข้่าสู่ระบบไม่สำเร็จ",
+          title: "เข้าสู่ระบบไม่สำเร็จ",
           status: "error",
           isClosable: true
         })
       }
     }
   })
-  return { onLogin, isLoginError, isLoginPending }
+  return { onLogin, isLoginError, isLoginPending, isPending }
 }
 
 export default useMutateLogin
