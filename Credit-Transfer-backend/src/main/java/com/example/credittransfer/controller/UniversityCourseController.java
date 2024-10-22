@@ -1,6 +1,7 @@
 package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.UniversityCourseRequest;
+import com.example.credittransfer.dto.response.DiplomaCourseResponse;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.dto.response.UniCourseResponse;
 import com.example.credittransfer.entity.UniversityCourse;
@@ -80,4 +81,19 @@ public class UniversityCourseController {
         return ResponseEntity.status(OK).body(universityCourseService.getCourseCategoryDropdown());
     }
 
+    @PostMapping("/sort")
+    public PagedModel<UniCourseResponse> sortData(@RequestBody PagedModel<UniCourseResponse> responseList, @RequestParam("key") String key, @RequestParam("direction") boolean ascending) {
+        return universityCourseService.sortData(responseList, key, ascending);
+    }
+
+    @GetMapping("/search")
+    public PagedModel<UniCourseResponse> searchCourse(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")int size,
+                                                      @RequestParam String uniCourseId,
+                                                      @RequestParam String uniCourseName,
+                                                      @RequestParam String courseCategory,
+                                                      @RequestParam String courseCategoryName,
+                                                      @RequestParam Integer uniCredit,
+                                                      @RequestParam String preSubject) {
+        return universityCourseService.searchCourse(page, size, uniCourseId, uniCourseName, courseCategory, courseCategoryName, uniCredit, preSubject);
+    }
 }

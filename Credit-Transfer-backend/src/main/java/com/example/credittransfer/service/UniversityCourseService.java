@@ -1,6 +1,7 @@
 package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.UniversityCourseRequest;
+import com.example.credittransfer.dto.response.DiplomaCourseResponse;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.dto.response.UniCourseResponse;
 import com.example.credittransfer.entity.CourseCategory;
@@ -21,9 +22,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UniversityCourseService {
@@ -180,5 +183,60 @@ public class UniversityCourseService {
 
     public List<DropDown> getCourseCategoryDropdown() {
         return courseCategoryRepository.getCourseCategoryDropdown();
+    }
+
+    public PagedModel<UniCourseResponse> sortData(PagedModel<UniCourseResponse> pagedModel, String key, boolean ascending) {
+        List<UniCourseResponse> sortedList = pagedModel.getContent().stream()
+                .sorted(getComparator(key, ascending))
+                .collect(Collectors.toList());
+
+        return PagedModel.of(sortedList, pagedModel.getMetadata());
+    }
+
+    private Comparator<UniCourseResponse> getComparator(String key, boolean ascending) {
+        Comparator<UniCourseResponse> comparator;
+
+        switch (key) {
+            case "uniCourseId":
+                comparator = Comparator.comparing(UniCourseResponse::getUniCourseId);
+                break;
+            case "uniCourseName":
+                comparator = Comparator.comparing(UniCourseResponse::getUniCourseName);
+                break;
+            case "courseCategory":
+                comparator = Comparator.comparing(UniCourseResponse::getCourseCategory);
+                break;
+            case "uniCredit":
+                comparator = Comparator.comparing(UniCourseResponse::getUniCredit);
+                break;
+            case "preSubject":
+                comparator = Comparator.comparing(UniCourseResponse::getPreSubject);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid sorting key: " + key);
+        }
+
+        return ascending ? comparator : comparator.reversed();
+    }
+
+    public PagedModel<UniCourseResponse> searchCourse(int page, int size,
+                                                      String uniCourseId,
+                                                      String uniCourseName,
+                                                      String courseCategory,
+                                                      String courseCategoryName,
+                                                      Integer uniCredit,
+                                                      String preSubject) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UniversityCourse> uniCoursePage = universityCourseRepository.searchUniCourse(
+                pageable, uniCourseId, uniCourseName, courseCategory, courseCategoryName, uniCredit, preSubject);
+
+        List<UniCourseResponse> uniCourseResponseList = uniCoursePage.getContent()
+                .stream().map(this::mapToUniCourseResponse).toList();
+
+        PageMetadata pageMetadata = new PageMetadata(size, page, uniCoursePage.getTotalElements(), uniCoursePage.getTotalPages());
+        PagedModel<UniCourseResponse> pagedModel = PagedModel.of(uniCourseResponseList, pageMetadata);
+
+        return pagedModel;
     }
 }

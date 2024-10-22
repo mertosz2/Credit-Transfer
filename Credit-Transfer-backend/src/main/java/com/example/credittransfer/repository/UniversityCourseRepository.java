@@ -43,5 +43,21 @@ public interface UniversityCourseRepository extends JpaRepository<UniversityCour
     @Query("select uc from UniversityCourse  uc where uc.isActive = true")
     Page<UniversityCourse> findAllUniCourse(Pageable pageable);
 
+    @Query("SELECT uc FROM UniversityCourse uc WHERE" +
+            "(uc.uniCourseId LIKE %:uniCourseId% OR " +
+            "uc.uniCourseName LIKE %:uniCourseName% OR " +
+            "uc.courseCategory.courseCategoryCode LIKE %:courseCategory% OR " +
+            "uc.courseCategory.courseCategoryName LIKE %:courseCategoryName% OR " +
+            "uc.uniCredit =:uniCredit OR " +
+            "uc.preSubject LIKE %:preSubject%) AND " +
+            "uc.isActive = true")
+    Page<UniversityCourse> searchUniCourse(Pageable pageable,
+                                           String uniCourseId,
+                                           String uniCourseName,
+                                           String courseCategory,
+                                           String courseCategoryName,
+                                           Integer uniCredit,
+                                           String preSubject);
+
 
 }

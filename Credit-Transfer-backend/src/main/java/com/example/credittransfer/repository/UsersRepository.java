@@ -1,6 +1,8 @@
 package com.example.credittransfer.repository;
 
 import com.example.credittransfer.entity.Users;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +27,10 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
     @Modifying
     @Query("update Users u set u.isActive = false where u.usersId =:userId")
     void deleteUsersByUsersId(Integer userId);
+
+    @Query("select u from Users u where u.isActive = true ")
+    Page<Users> getAllUsers(Pageable pageable);
+
 
 
 }
