@@ -4,6 +4,7 @@ import com.example.credittransfer.dto.request.DiplomaCourseRequest;
 import com.example.credittransfer.dto.response.DiplomaCourseResponse;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.dto.response.TransferCreditResponse;
+import com.example.credittransfer.dto.response.UniCourseResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
 import com.example.credittransfer.service.DiplomaCourseService;
 import jakarta.validation.Valid;
@@ -66,6 +67,16 @@ public class DiplomaCourseController {
     @PostMapping("/sort")
     public PagedModel<DiplomaCourseResponse> sortData(@RequestBody PagedModel<DiplomaCourseResponse> responseList, @RequestParam("key") String key, @RequestParam("direction") boolean ascending) {
         return diplomaCourseService.sortData(responseList, key, ascending);
+    }
+
+    @GetMapping("/search")
+    public PagedModel<DiplomaCourseResponse> searchCourse(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")int size,
+                                                      @RequestParam(required = false) String dipCourseId,
+                                                      @RequestParam(required = false) String dipCourseName,
+                                                      @RequestParam(required = false) String uniCourseId,
+                                                      @RequestParam(required = false) String uniCourseName,
+                                                      @RequestParam(required = false) Integer dipCredit) {
+        return diplomaCourseService.searchCourse(page, size, dipCourseId, dipCourseName, uniCourseId, uniCourseName, dipCredit);
     }
 
 }

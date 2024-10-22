@@ -1,11 +1,9 @@
 package com.example.credittransfer.service;
 
 import com.example.credittransfer.dto.request.DiplomaCourseRequest;
-import com.example.credittransfer.dto.response.DipCourseResponse;
-import com.example.credittransfer.dto.response.DiplomaCourseResponse;
-import com.example.credittransfer.dto.response.ResponseAPI;
-import com.example.credittransfer.dto.response.TransferCreditResponse;
+import com.example.credittransfer.dto.response.*;
 import com.example.credittransfer.entity.DiplomaCourse;
+import com.example.credittransfer.entity.UniversityCourse;
 import com.example.credittransfer.exception.ExistByCourseIdException;
 import com.example.credittransfer.exception.ExistByCourseNameException;
 import com.example.credittransfer.exception.NotFoundDiplomaCourseException;
@@ -39,12 +37,10 @@ public class DiplomaCourseService {
     }
 
     public ResponseAPI createCourse(DiplomaCourseRequest request) {
-        if(diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId()))
-        {
+        if (diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId())) {
             throw new ExistByCourseIdException(request.getDipCourseId());
         }
-        if(diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName()))
-        {
+        if (diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName())) {
             throw new ExistByCourseNameException(request.getDipCourseName());
         }
 
@@ -63,14 +59,12 @@ public class DiplomaCourseService {
     public ResponseAPI updateCourse(DiplomaCourseRequest request, Integer dipCourseId) {
 
         DiplomaCourse diplomaCourse = diplomaCourseRepository.findById(dipCourseId).orElseThrow();
-        if(diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId())
-                && !Objects.equals(diplomaCourse.getDipCourseId(), request.getDipCourseId()))
-        {
+        if (diplomaCourseRepository.existsByDipCourseId(request.getDipCourseId())
+                && !Objects.equals(diplomaCourse.getDipCourseId(), request.getDipCourseId())) {
             throw new ExistByCourseIdException(request.getDipCourseId());
         }
-        if(diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName())
-                && !Objects.equals(diplomaCourse.getDipCourseName(), request.getDipCourseName()))
-        {
+        if (diplomaCourseRepository.existsByDipCourseName(request.getDipCourseName())
+                && !Objects.equals(diplomaCourse.getDipCourseName(), request.getDipCourseName())) {
             throw new ExistByCourseNameException(request.getDipCourseName());
         }
         diplomaCourse.setDipCourseId(request.getDipCourseId());
@@ -87,6 +81,7 @@ public class DiplomaCourseService {
         return diplomaCourseRepository.findByDipCourseIdList(dipCourseIdList);
 
     }
+
     public PagedModel<DiplomaCourseResponse> getAllDipCourse(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<DiplomaCourse> diplomaCoursesPage = diplomaCourseRepository.findAllDip(pageable);
@@ -113,10 +108,11 @@ public class DiplomaCourseService {
                 .filter(dipCourseId -> Objects.isNull(diplomaCourseRepository.findByDipCourseId(dipCourseId)))
                 .toList();
     }
+
     @Transactional
     public ResponseAPI deleteDipCourse(Integer dipId) {
         Optional<DiplomaCourse> diplomaCourse = diplomaCourseRepository.findByDipId(dipId);
-        if(diplomaCourse.isPresent()){
+        if (diplomaCourse.isPresent()) {
             diplomaCourseRepository.deleteByDipId(diplomaCourse.get().getDipId());
             return new ResponseAPI(HttpStatus.OK, "ลบวิชาสำเร็จ");
         } else {
@@ -130,7 +126,7 @@ public class DiplomaCourseService {
 
     public TransferCreditResponse findByDipCourseId(String dipCourseId) {
         DiplomaCourse diplomaCourse = diplomaCourseRepository.findByDipCourseId(dipCourseId);
-        if(Objects.isNull(diplomaCourse)) {
+        if (Objects.isNull(diplomaCourse)) {
             throw new NotFoundDiplomaCourseException(dipCourseId);
         } else {
             List<DipCourseResponse> dipCourseResponseList = new ArrayList<>();
@@ -146,7 +142,7 @@ public class DiplomaCourseService {
 
     public DiplomaCourseResponse mapToDiplomaCourseResponse(DiplomaCourse diplomaCourse) {
         DiplomaCourseResponse response = new DiplomaCourseResponse();
-        if(!Objects.isNull(diplomaCourse)) {
+        if (!Objects.isNull(diplomaCourse)) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd-HH:mm:ss");
             response.setId(diplomaCourse.getDipId());
             response.setDipCourseId(diplomaCourse.getDipCourseId());
@@ -162,6 +158,7 @@ public class DiplomaCourseService {
         }
         return response;
     }
+
     public PagedModel<DiplomaCourseResponse> sortData(PagedModel<DiplomaCourseResponse> pagedModel, String key, boolean ascending) {
         List<DiplomaCourseResponse> sortedList = pagedModel.getContent().stream()
                 .sorted(getComparator(key, ascending))
@@ -169,6 +166,7 @@ public class DiplomaCourseService {
 
         return PagedModel.of(sortedList, pagedModel.getMetadata());
     }
+
     //sort item
     private Comparator<DiplomaCourseResponse> getComparator(String key, boolean ascending) {
         Comparator<DiplomaCourseResponse> comparator;
@@ -199,4 +197,26 @@ public class DiplomaCourseService {
         return ascending ? comparator : comparator.reversed();
     }
 
+    public PagedModel<DiplomaCourseResponse> searchCourse(int page, int size,
+                                                          String dipCourseId,
+                                                          String dipCourseName,
+                                                          String uniCourseId,
+                                                          String uniCourseName,
+                                                          Integer dipCredit) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DiplomaCourse> diplomaCoursesPage = diplomaCourseRepository.searchUniCourse(
+                pageable, dipCourseId, dipCourseName, uniCourseId, uniCourseName, dipCredit);
+
+        List<DiplomaCourseResponse> diplomaCourseResponses = diplomaCoursesPage.getContent().stream()
+                .map(this::mapToDiplomaCourseResponse)
+                .toList();
+
+        PageMetadata pageMetadata = new PageMetadata(
+                size, page, diplomaCoursesPage.getTotalElements(), diplomaCoursesPage.getTotalPages());
+
+        PagedModel<DiplomaCourseResponse> pagedModel = PagedModel.of(diplomaCourseResponses, pageMetadata);
+        return pagedModel;
+
+    }
 }

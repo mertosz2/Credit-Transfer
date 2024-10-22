@@ -1,7 +1,9 @@
 package com.example.credittransfer.repository;
 
 
+import com.example.credittransfer.dto.response.DiplomaCourseResponse;
 import com.example.credittransfer.entity.DiplomaCourse;
+import com.example.credittransfer.entity.UniversityCourse;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +46,20 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
 
     @Query("select d from DiplomaCourse d where d.isActive = true")
     Page<DiplomaCourse> findAllDip(Pageable pageable);
+
+    @Query("SELECT d FROM DiplomaCourse d WHERE" +
+            "(d.dipCourseId LIKE %:dipCourseId% OR " +
+            "d.dipCourseName LIKE %:dipCourseName% OR " +
+            "d.universityCourse.uniCourseId LIKE %:uniCourseId% OR " +
+            "d.universityCourse.uniCourseName LIKE %:uniCourseName% OR " +
+            "d.dipCredit =:dipCredit) AND " +
+            "d.isActive = true")
+    Page<DiplomaCourse> searchUniCourse(Pageable pageable,
+                                                String dipCourseId,
+                                                String dipCourseName,
+                                                String uniCourseId,
+                                                String uniCourseName,
+                                                Integer dipCredit);
 
 
 
