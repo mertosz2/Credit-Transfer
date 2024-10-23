@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class TransferCreditService {
@@ -242,7 +243,12 @@ public class TransferCreditService {
         reportCourseResponse.setFirstSectionList(firstSection);
         reportCourseResponse.setSecondSectionList(secondSection);
         reportCourseResponse.setThirdSectionList(thirdSection);
+        int totalCredit = Stream.of(firstSection, secondSection, thirdSection)
+                .flatMap(Collection::stream)
+                .mapToInt(section -> section.getUniversityCourse().getUniCredit())
+                .sum();
 
+        reportCourseResponse.setTotalCredit(totalCredit);
         return reportCourseResponse;
     }
 
