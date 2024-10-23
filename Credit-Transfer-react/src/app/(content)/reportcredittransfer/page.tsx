@@ -16,6 +16,7 @@ import {
   TableContainer,
   Tbody,
   Td,
+  Tfoot,
   Th,
   Thead,
   Tr,
@@ -234,7 +235,6 @@ export default function Report() {
                           return (
                             <Td
                               key={cell.id}
-                              fontSize="13px"
                               rowSpan={
                                 row.original.isFirstInGroup && cellIndex >= 4
                                   ? row.original.groupSize
@@ -342,6 +342,36 @@ export default function Report() {
                       <Td colSpan={7}></Td>
                     </Tr>
                   )}
+                  <Tr>
+                    <Td
+                      backgroundColor="white"
+                      colSpan={3}
+                      borderWidth={1}
+                    >
+                      หน่วยกิตรวมของวิชา ปวส
+                    </Td>
+                    <Td
+                      backgroundColor="white"
+                      colSpan={1}
+                      borderWidth={1}
+                    >
+                      {data?.totalCredit}
+                    </Td>
+                    <Td
+                      backgroundColor="white"
+                      colSpan={2}
+                      borderWidth={1}
+                    >
+                      {data?.totalCredit}
+                    </Td>
+                    <Td
+                      backgroundColor="white"
+                      colSpan={2}
+                      borderWidth={1}
+                    >
+                      18
+                    </Td>
+                  </Tr>
                 </Tbody>
               </Table>
             ) : (
@@ -409,6 +439,7 @@ export default function Report() {
                       ส่วนที่ 1.2 รายวิชาธุรกิจและประกอบการ
                     </Td>
                   </Tr>
+
                   {flatData2.length > 0 ? (
                     table2.getRowModel().rows.map((row) => (
                       <Tr key={row.id}>
@@ -485,6 +516,36 @@ export default function Report() {
                     </Tr>
                   )}
                 </Tbody>
+                <Tr>
+                  <Td
+                    backgroundColor="white"
+                    colSpan={3}
+                    borderWidth={1}
+                  >
+                    หน่วยกิตรวมของวิชา ปวส
+                  </Td>
+                  <Td
+                    backgroundColor="white"
+                    colSpan={1}
+                    borderWidth={1}
+                  >
+                    {data?.totalCredit}
+                  </Td>
+                  <Td
+                    backgroundColor="white"
+                    colSpan={2}
+                    borderWidth={1}
+                  >
+                    หน่วยกิตรวมของวิชา UTCC
+                  </Td>
+                  <Td
+                    backgroundColor="white"
+                    colSpan={2}
+                    borderWidth={1}
+                  >
+                    {data?.totalCredit}
+                  </Td>
+                </Tr>
               </Table>
             )}
           </TableContainer>

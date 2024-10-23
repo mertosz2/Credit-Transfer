@@ -196,6 +196,9 @@ const SideBar = ({ id }: { id: number }) => {
               color={id == 1 ? " white" : "black"}
               fontWeight={id == 1 ? 700 : 400}
               borderRadius="8px"
+              onClick={() => {
+                router.push("/transfer")
+              }}
             >
               เทียบโอนรายวิชา
             </Button>

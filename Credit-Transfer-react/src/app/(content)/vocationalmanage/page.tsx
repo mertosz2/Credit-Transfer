@@ -463,8 +463,7 @@ export default function VocationalManage() {
                               )}
                               {isMoreInformaion ? (
                                 <Box height="16px" />
-                              ) : // ตรวจสอบว่า key ของ sortConfig ตรงกับ column.id ก่อนแสดงไอคอน
-                              sortConfig &&
+                              ) : sortConfig &&
                                 sortConfig.key === header.column.id ? (
                                 <Icon
                                   as={
@@ -474,7 +473,7 @@ export default function VocationalManage() {
                                   }
                                 />
                               ) : (
-                                <Icon as={ChevronDownIcon} /> // ไอคอนเริ่มต้น (สามารถเลือกเป็นไอคอนอื่นได้)
+                                <Icon as={ChevronDownIcon} />
                               )}
                             </Th>
                           )
