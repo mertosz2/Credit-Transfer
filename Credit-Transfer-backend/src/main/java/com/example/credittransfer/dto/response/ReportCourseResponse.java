@@ -9,5 +9,6 @@ public class ReportCourseResponse {
     public List<TransferCreditResponse> firstSectionList;
     public List<TransferCreditResponse> secondSectionList;
     public List<TransferCreditResponse> thirdSectionList;
-    int totalCredit;
+    int totalUniCredit;
+    int totalDipCredit;
 }
