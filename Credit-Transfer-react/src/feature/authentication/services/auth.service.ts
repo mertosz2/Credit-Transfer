@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { ISignIn } from "../interface/auth"
 
 export const login = async (data: ISignIn) => {

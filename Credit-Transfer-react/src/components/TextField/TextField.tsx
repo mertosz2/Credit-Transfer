@@ -7,9 +7,10 @@ interface IProps extends InputProps {
 const TextField = ({ placeholder, value, onChange, ...rest }: IProps) => {
   return (
     <Input
+      type="password"
       placeholder={placeholder}
-      value={value} // ส่งต่อ value ที่รับมา
-      onChange={onChange} // ส่งต่อ onChange ที่รับมา
+      value={value}
+      onChange={onChange}
       borderWidth="2px"
       borderColor="black"
     ></Input>

@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IUploadFileResponse } from "../interface/UploadFileCreditTransfer"
 
 export const UploadFileCreditTransfer = async (file: File) => {

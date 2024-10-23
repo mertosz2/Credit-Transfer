@@ -28,7 +28,8 @@ import {
   ModalFooter,
   Tfoot,
   useToast,
-  Icon
+  Icon,
+  useBreakpointValue
 } from "@chakra-ui/react"
 import React, {
   ChangeEvent,
@@ -410,42 +411,26 @@ export default function Main() {
 
   const columns = [
     columnHelper.accessor("dipCourseId", {
-      header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
-          รหัสวิชา{"\n"}Course Code
-        </Box>
-      ),
+      header: () => <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>,
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("dipCourseName", {
       header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
+        <Box whiteSpace="pre-wrap">
           วิชาที่ขอเทียบโอน{"\n"}Course Transferred From
         </Box>
       ),
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("grade", {
-      header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
-          เกรด{"\n"}Grade
-        </Box>
-      ),
+      header: () => <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>,
       cell: (info) => (
         <Input
-          width="60px"
+          width={{ lg: "30px", xl: "60px" }}
           type="number"
           step="0.5"
-          fontSize={{ lg: "12px", xl: "12" }}
+          fontSize={{ lg: "12px", xl: "16px" }}
+          fontWeight={700}
           value={info.getValue() || 0}
           onChange={(e) =>
             handleGradeChange(Number(e.target.value), info.row.index)
@@ -454,35 +439,18 @@ export default function Main() {
       )
     }),
     columnHelper.accessor("dipCredit", {
-      header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
-          หน่วยกิต{"\n"}Credit
-        </Box>
-      ),
+      header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
       cell: (info) => info.getValue()
     }),
     columnHelper.accessor("universityCourse.uniCourseId", {
-      header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
-          รหัสวิชา{"\n"}Course Code
-        </Box>
-      ),
+      header: () => <Box whiteSpace="pre-wrap">รหัสวิชา{"\n"}Course Code</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
     columnHelper.accessor("universityCourse.uniCourseName", {
       header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
+        <Box whiteSpace="pre-wrap">
           วิชาที่เทียบโอนหน่วยกิตได้{"\n"}Transferred Course Equivalents
         </Box>
       ),
@@ -491,27 +459,13 @@ export default function Main() {
       }
     }),
     columnHelper.accessor("universityCourse.uniCredit", {
-      header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
-          หน่วยกิต{"\n"}Credit
-        </Box>
-      ),
+      header: () => <Box whiteSpace="pre-wrap">หน่วยกิต{"\n"}Credit</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? info.getValue() : null
       }
     }),
     columnHelper.accessor("transferable", {
-      header: () => (
-        <Box
-          whiteSpace="pre-wrap"
-          fontSize={{ lg: "10px", xl: "12px" }}
-        >
-          สถานะ{"\n"}Status
-        </Box>
-      ),
+      header: () => <Box whiteSpace="pre-wrap">สถานะ{"\n"}Status</Box>,
       cell: (info) => {
         return info.row.original.isFirstInGroup ? (
           info.getValue() ? (
@@ -523,7 +477,7 @@ export default function Main() {
       }
     })
   ]
-
+  const tableSize = useBreakpointValue({ lg: "lg", xl: "xl" })
   const table = useReactTable({
     data: flatData,
     columns,
@@ -540,97 +494,193 @@ export default function Main() {
           borderRadius: 16
         }}
       >
-        <Table size={{ lg: "sm", xl: "md" }}>
-          <Thead bgColor="#D7D7D7">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const isTransferable = header.column.id === "transferable"
-                  return (
-                    <Th
-                      padding="16px"
-                      cursor={isTransferable ? "not-allowed" : "pointer"}
-                      key={header.id}
-                      onClick={() => {
-                        if (!isTransferable) {
-                          handleSort(
-                            header.column.id.includes("_")
-                              ? (getStringAfterUnderscore(
-                                  header.column.id
-                                ) as TKey)
-                              : (header.column.id as TKey)
-                          )
-                        }
-                      }}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {isTransferable ? (
-                        <Box height="16px" />
-                      ) : (
-                        <Icon
-                          as={
-                            sortConfig && sortConfig.direction === "ascending"
-                              ? ChevronUpIcon
-                              : ChevronDownIcon
-                          }
-                        />
-                      )}
-                    </Th>
-                  )
-                })}
-              </Tr>
-            ))}
-          </Thead>
-          <Tbody>
-            {flatData &&
-              flatData.length > 0 &&
-              displayData &&
-              displayData.length > 0 &&
-              table.getRowModel().rows.map((row) => (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell, cellIndex) => {
-                    // Apply colspan to universityCourse columns
-                    if (cellIndex >= 4 && !row.original.isFirstInGroup) {
-                      return null
-                    }
+        {tableSize === "lg" ? (
+          <Table
+            size={{ lg: "sm" }}
+            backgroundColor="white"
+          >
+            <Thead bgColor="#D7D7D7">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <Tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const isTransferable = header.column.id === "transferable"
                     return (
-                      <Td
-                        fontSize={{ lg: "11px", xl: "12" }}
-                        key={cell.id}
-                        rowSpan={
-                          row.original.isFirstInGroup && cellIndex >= 4
-                            ? row.original.groupSize
-                            : 1
-                        }
+                      <Th
+                        padding="16px"
+                        fontWeight={700}
+                        fontSize={{
+                          lg: "10px"
+                        }}
+                        cursor={isTransferable ? "not-allowed" : "pointer"}
+                        key={header.id}
+                        onClick={() => {
+                          if (!isTransferable) {
+                            handleSort(
+                              header.column.id.includes("_")
+                                ? (getStringAfterUnderscore(
+                                    header.column.id
+                                  ) as TKey)
+                                : (header.column.id as TKey)
+                            )
+                          }
+                        }}
                       >
                         {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                          header.column.columnDef.header,
+                          header.getContext()
                         )}
-                      </Td>
+                        {isTransferable ? (
+                          <Box height="16px" />
+                        ) : (
+                          <Icon
+                            as={
+                              sortConfig && sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                          />
+                        )}
+                      </Th>
                     )
                   })}
                 </Tr>
               ))}
-          </Tbody>
-          <Tfoot
-            display="flex"
-            padding="8px"
-          ></Tfoot>
-        </Table>
+            </Thead>
+            <Tbody>
+              {flatData &&
+                flatData.length > 0 &&
+                displayData &&
+                displayData.length > 0 &&
+                table.getRowModel().rows.map((row) => (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map((cell, cellIndex) => {
+                      if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                        return null
+                      }
+                      return (
+                        <Td
+                          key={cell.id}
+                          fontWeight={700}
+                          fontSize={{
+                            lg: "11px"
+                          }}
+                          rowSpan={
+                            row.original.isFirstInGroup && cellIndex >= 4
+                              ? row.original.groupSize
+                              : 1
+                          }
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </Td>
+                      )
+                    })}
+                  </Tr>
+                ))}
+            </Tbody>
+            <Tfoot
+              display="flex"
+              padding="8px"
+            ></Tfoot>
+          </Table>
+        ) : (
+          <Table
+            size={{ xl: "md" }}
+            backgroundColor="white"
+          >
+            <Thead bgColor="#D7D7D7">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <Tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const isTransferable = header.column.id === "transferable"
+                    return (
+                      <Th
+                        padding="16px"
+                        cursor={isTransferable ? "not-allowed" : "pointer"}
+                        key={header.id}
+                        onClick={() => {
+                          if (!isTransferable) {
+                            handleSort(
+                              header.column.id.includes("_")
+                                ? (getStringAfterUnderscore(
+                                    header.column.id
+                                  ) as TKey)
+                                : (header.column.id as TKey)
+                            )
+                          }
+                        }}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {isTransferable ? (
+                          <Box height="16px" />
+                        ) : (
+                          <Icon
+                            as={
+                              sortConfig && sortConfig.direction === "ascending"
+                                ? ChevronUpIcon
+                                : ChevronDownIcon
+                            }
+                          />
+                        )}
+                      </Th>
+                    )
+                  })}
+                </Tr>
+              ))}
+            </Thead>
+            <Tbody>
+              {flatData &&
+                flatData.length > 0 &&
+                displayData &&
+                displayData.length > 0 &&
+                table.getRowModel().rows.map((row) => (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map((cell, cellIndex) => {
+                      if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                        return null
+                      }
+                      return (
+                        <Td
+                          key={cell.id}
+                          rowSpan={
+                            row.original.isFirstInGroup && cellIndex >= 4
+                              ? row.original.groupSize
+                              : 1
+                          }
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </Td>
+                      )
+                    })}
+                  </Tr>
+                ))}
+            </Tbody>
+            <Tfoot
+              display="flex"
+              padding="8px"
+            ></Tfoot>
+          </Table>
+        )}
       </TableContainer>
     )
-  }, [displayData, flatData, handleSort, sortConfig, table])
+  }, [displayData, flatData, handleSort, sortConfig, table, tableSize])
 
   return (
     <>
       <SideBar id={1} />
       <Box
-        height="100%"
-        paddingLeft={{ lg: "0px", xl: "60px" }}
+        minHeight={{ lg: "100vh", xl: "100vh" }}
+        width="100%"
+        backgroundSize="cover"
+        background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
       >
         <Box
           display="flex"
@@ -646,18 +696,16 @@ export default function Main() {
             <Box
               display="flex"
               flexDirection="column"
-              marginTop={{ lg: "24px", xl: "60x" }}
-              gap="24px"
+              marginTop={{ lg: "100px", xl: "60px" }}
               paddingRight={{ lg: "0px", xl: "120px" }}
-              paddingLeft={{ lg: "0px", xl: "280px" }}
+              paddingLeft={{ lg: "0px", xl: "340px" }}
             >
               <Box
                 display="flex"
-                flexDirection="row"
-                gap="24px"
-                alignSelf="flex-end"
+                flexDirection="column"
               >
                 <Button
+                  alignSelf="flex-end"
                   label="อัพโหลดทรานสคริป"
                   backgroundColor="#2E99FC"
                   color="#FFFFFF"
@@ -666,6 +714,14 @@ export default function Main() {
                   borderRadius="8px"
                   onClick={OpenFileImport}
                 />
+                <Box
+                  display="flex"
+                  alignSelf="flex-start"
+                  fontWeight={700}
+                  fontSize="32px"
+                >
+                  รายวิชาเทียบโอน หมวดศึกษาทั่วไป
+                </Box>
               </Box>
               {/* Table */}
               {renderTable}
@@ -675,10 +731,12 @@ export default function Main() {
                 borderRadius="16px"
                 display="flex"
                 width="100%"
+                borderColor={"white"}
                 padding={{ lg: "8px", xl: "16px" }}
                 borderWidth={2}
                 borderStyle="dashed"
                 justifyContent="center"
+                marginTop="24px"
               >
                 <Box
                   display="flex"
@@ -695,6 +753,7 @@ export default function Main() {
               <Box
                 display="flex"
                 alignSelf="flex-end"
+                marginTop="24px"
               >
                 <Button
                   label="ถัดไป"
@@ -741,7 +800,7 @@ export default function Main() {
                   ))}
                 </Box>
 
-                <Box>รหัสวิชาที่เจอในระบบ {modalData?.totalfound} วิชา</Box>
+                <Box>รหัสวิชาที่มีในระบบ {modalData?.totalfound} วิชา</Box>
                 <Box
                   width="100%"
                   height="1px"
@@ -766,7 +825,7 @@ export default function Main() {
                 </Box>
 
                 <Box>
-                  รหัสวิชาที่ไม่เจอในระบบ {modalData?.totalnotfound} วิชา
+                  รหัสวิชาที่ไม่มีในระบบ {modalData?.totalnotfound} วิชา
                 </Box>
                 <Box
                   width="100%"
@@ -813,7 +872,7 @@ export default function Main() {
                   textAlign="center"
                 >
                   *โปรดตรวจสอบว่ารหัสวิชาครบถ้วนตามใบทรานสคริปหรือไม่
-                  หากไม่พบท่านสามารถทำการเพิ่มรหัสวิชาลงไปเองได้*
+                  หากไม่พบท่านสามารถเพิ่มรหัสวิชาได้*
                 </Box>
               </Box>
             </ModalBody>

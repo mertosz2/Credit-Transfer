@@ -8,4 +8,11 @@ export interface ISortDipArgs {
   key: TDipKey
   direction: boolean
 }
-export type TDipKey = 'dipCourseId' | 'dipCourseName' | 'dipCredit' | 'uniCourseId' | 'uniCourseName' | 'uniCredit' | string;
+export type TDipKey =
+  | "dipCourseId"
+  | "dipCourseName"
+  | "dipCredit"
+  | "uniCourseId"
+  | "uniCourseName"
+  | "uniCredit"
+  | string

@@ -355,7 +355,8 @@ export default function VocationalManage() {
       <SideBar id={2} />
       <Box
         height="100%"
-        marginLeft="60px"
+        backgroundSize="cover"
+        background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
       >
         <Box
           display="flex"
@@ -371,17 +372,15 @@ export default function VocationalManage() {
               display="flex"
               flexDirection="column"
               marginTop="60px"
-              gap="24px"
               paddingRight="120px"
-              paddingLeft="280px"
+              paddingLeft="340px"
             >
               <Box
                 display="flex"
-                flexDirection="row"
-                gap="24px"
-                alignSelf="flex-end"
+                flexDirection="column"
               >
                 <Button
+                  alignSelf="flex-end"
                   label="เพิ่มวิชา"
                   backgroundColor="#2ABE0D"
                   color="#FFFFFF"
@@ -391,6 +390,14 @@ export default function VocationalManage() {
                   onClick={OpenAddDipCourse}
                 />
                 <Box
+                  display="flex"
+                  alignSelf="flex-start"
+                  fontWeight={700}
+                  fontSize="32px"
+                >
+                  จัดการวิชา ปวส
+                </Box>
+                {/* <Box
                   display="flex"
                   flexDirection="row"
                   gap="8px"
@@ -416,7 +423,7 @@ export default function VocationalManage() {
                     isDisabled={checkNextPage()}
                     onClick={handleNextPage}
                   ></Button>
-                </Box>
+                </Box> */}
               </Box>
               <TableContainer
                 sx={{ tableLayout: "auto" }}
@@ -427,7 +434,10 @@ export default function VocationalManage() {
                   borderTopLeftRadius: 16
                 }}
               >
-                <Table size="md">
+                <Table
+                  size="md"
+                  backgroundColor="white"
+                >
                   <Thead bgColor="#D7D7D7">
                     {table.getHeaderGroups().map((headerGroup) => (
                       <Tr key={headerGroup.id}>

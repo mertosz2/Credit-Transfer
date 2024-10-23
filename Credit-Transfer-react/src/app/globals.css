@@ -1,0 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
+@font-face {
+  font-family: "Kanit";
+  src: url("/public/asset/fonts/Kanit/Kanit-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; 
+}
+@font-face {
+  font-family: "KanitBold";
+  src: url("/public/asset/fonts/Kanit-Bold.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; 
+}
+@font-face {
+    font-family: "Mitr";
+    src: url("/public/asset/fonts/Mitr/Mitr-Bold.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; 
+  }

@@ -4,7 +4,7 @@ import Button from "../Button/Button"
 import { RiLogoutBoxFill } from "@remixicon/react"
 import logo from "../SideBar/image/logo.png"
 import Cookies from "js-cookie"
-import { onRemoveCookie } from "@/config/handleCookie"
+import { onRemoveCookie } from "@/configs/handleCookie"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { decodeToken } from "@/util/jwtToken"
@@ -20,7 +20,6 @@ const SideBar = ({ id }: { id: number }) => {
 
   const onResetProfile = useProfileStore(resetProfile)
   const data = useProfileStore(selectProfileData)
-  const processData = data?.role
   const toast = useToast()
   const router = useRouter()
 
@@ -100,7 +99,7 @@ const SideBar = ({ id }: { id: number }) => {
                         <Button
                           label={"เทียบโอนรายวิชา"}
                           onClick={handleCreditTransfer}
-                          color="black"
+                          color={id == 1 ? " white" : "black"}
                           borderRadius="8px"
                           backgroundColor={id == 1 ? " #00E0FF" : "white"}
                         />
@@ -109,14 +108,14 @@ const SideBar = ({ id }: { id: number }) => {
                           paddingX="60px"
                           label={"จัดการวิชา ปวส"}
                           onClick={handleVocationalManage}
-                          color="black"
+                          color={id == 2 ? " white" : "black"}
                           borderRadius="8px"
                           backgroundColor={id == 2 ? " #00E0FF" : "white"}
                         />
                         <Button
-                          label={"จัดการวิชา มหาวิทยาลัย"}
+                          label={"จัดการวิชา UTCC"}
                           onClick={handleUniversityManage}
-                          color="black"
+                          color={id == 3 ? " white" : "black"}
                           borderRadius="8px"
                           backgroundColor={id == 3 ? " #00E0FF" : "white"}
                         />
@@ -124,7 +123,7 @@ const SideBar = ({ id }: { id: number }) => {
                           <Button
                             label={"จัดการบัญชี"}
                             onClick={handleManageAccount}
-                            color="black"
+                            color={id == 4 ? " white" : "black"}
                             borderRadius="8px"
                             backgroundColor={id == 4 ? " #00E0FF" : "white"}
                           />
@@ -160,50 +159,60 @@ const SideBar = ({ id }: { id: number }) => {
       ) : (
         <Box
           display="flex"
-          position="fixed"
+          position="absolute"
           flexDirection={{ lg: "row", xl: "column" }}
           padding="20px"
-          minW="200px"
-          height="100vh"
+          width={{ lg: "100%", xl: "auto" }}
+          height={{ lg: "100px", xl: "100vh" }}
           borderWidth="1px"
           borderColor="black"
           alignItems="center"
           backgroundColor="#000080"
-          textColor="white"
+          justifyContent="space-between"
           gap="24px"
         >
-          <ImageCustom
-            width={220}
-            height={108}
-            src={logo}
-            alt={"logo"}
-          />
+          <Box>
+            <ImageCustom
+              width={220}
+              height={108}
+              src={logo}
+              alt={"logo"}
+            />
+          </Box>
+
           <Box
+            marginTop={{ lg: "16px", xl: "0px" }}
             display="flex"
             flexDirection="column"
-            justifyContent="space-between"
+            width={{ lg: "20%", xl: "100%" }}
+            justifyContent={{ lg: "flex-end", xl: "space-between" }}
             height="100%"
-            gap="10px"
+            gap={{ lg: "10px", xl: "0px" }}
           >
-            <Box flex={1}>
-              <Box
-                paddingY="8px"
-                paddingX="60px"
-                backgroundColor={id == 1 ? " #00E0FF" : "white"}
-                color="black"
-                borderRadius="8px"
-              >
-                เทียบโอนรายวิชา
-              </Box>
-            </Box>
+            <Button
+              paddingY="8px"
+              label={"เทียบโอนรายวิชา"}
+              backgroundColor={id == 1 ? " #00E0FF" : "white"}
+              color={id == 1 ? " white" : "black"}
+              fontWeight={id == 1 ? 700 : 400}
+              borderRadius="8px"
+            >
+              เทียบโอนรายวิชา
+            </Button>
 
             <Button
+              paddingY="8px"
               label={"ออกจากระบบ"}
               onClick={handleLogout}
               color="white"
               borderRadius="8px"
               backgroundColor="#FF4E4E"
-              leftIcon={<RiLogoutBoxFill color="#FFFFFF" />}
+              leftIcon={
+                <RiLogoutBoxFill
+                  color="#FFFFFF"
+                  size={16}
+                />
+              }
             />
           </Box>
         </Box>

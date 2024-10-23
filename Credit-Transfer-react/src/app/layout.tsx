@@ -3,15 +3,6 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Providers } from "./provider"
-import { Box, useToast } from "@chakra-ui/react"
-import { ImageCustom } from "@/components/Image/Image"
-import logo from "../asset/image/logo.png"
-import Button from "@/components/Button"
-import { RiLogoutBoxFill } from "@remixicon/react"
-import Cookies from "js-cookie"
-import { onRemoveCookie } from "@/config/handleCookie"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 

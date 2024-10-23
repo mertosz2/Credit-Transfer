@@ -1,5 +1,6 @@
 "use client"
 import Button from "@/components/Button"
+import SideBar from "@/components/SideBar"
 import {
   ICreditTransferResponse,
   IFlatDiplomaCourseList
@@ -17,7 +18,8 @@ import {
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
+  useBreakpointValue
 } from "@chakra-ui/react"
 import {
   createColumnHelper,
@@ -103,6 +105,18 @@ export default function Report() {
     columns,
     getCoreRowModel: getCoreRowModel()
   })
+  const table2 = useReactTable({
+    data: flatData2,
+    columns,
+    getCoreRowModel: getCoreRowModel()
+  })
+
+  // การสร้าง table สำหรับ flatData3
+  const table3 = useReactTable({
+    data: flatData3,
+    columns,
+    getCoreRowModel: getCoreRowModel()
+  })
 
   const handleDownload = async () => {
     if (downloadData) {
@@ -131,114 +145,116 @@ export default function Report() {
       document.body.removeChild(link)
     }
   }
-
+  const tableSize = useBreakpointValue({ lg: "lg", xl: "xl" })
   return (
-    <Box
-      width="100%"
-      height="100%"
-      paddingRight="120px"
-      paddingLeft="240px"
-      marginTop="60px"
-    >
+    <>
+      <SideBar id={0} />
       <Box
+        minHeight={{ lg: "100vh", xl: "100vh" }}
         width="100%"
-        display="flex"
-        justifyContent="flex-end"
-      >
-        <Button
-          onClick={handleDownload}
-          label="ดาวน์โหลด"
-          paddingY="14px"
-          paddingX="46px"
-          borderRadius="8px"
-          color="white"
-          backgroundColor="#0C388E"
-        />
-      </Box>
-      <Box
-        display="flex"
-        flexDirection="column"
-        gap="8px"
+        backgroundSize="cover"
+        background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
       >
         <Box
-          marginTop="16px"
-          fontWeight={700}
-          fontSize="32px"
+          width="100%"
+          height="100%"
+          paddingRight={{ lg: "16px", xl: "120px" }}
+          paddingLeft={{ lg: "16px", xl: "340px" }}
         >
-          รายชื่อวิชาเทียบโอน หมวดวิชาศึกษาทั่วไป
-        </Box>
-      </Box>
+          <Box
+            width="100%"
+            display="flex"
+            justifyContent="flex-end"
+          >
+            <Button
+              marginTop={{ lg: "120px", xl: "60px" }}
+              onClick={handleDownload}
+              label="ดาวน์โหลด"
+              paddingY="14px"
+              paddingX="46px"
+              borderRadius="8px"
+              color="white"
+              backgroundColor="#0C388E"
+            />
+          </Box>
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap="8px"
+          >
+            <Box
+              marginTop="16px"
+              fontWeight={700}
+              fontSize="32px"
+            >
+              รายชื่อวิชาเทียบโอน หมวดวิชาศึกษาทั่วไป
+            </Box>
+          </Box>
 
-      <TableContainer
-        sx={{ tableLayout: "auto" }}
-        style={{
-          borderWidth: 1,
-          borderColor: "black",
-          borderTopRightRadius: 16,
-          borderTopLeftRadius: 16
-        }}
-      >
-        <Table size="md">
-          <Thead bgColor="#D7D7D7">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <Th
-                    key={header.id}
-                    padding="16px"
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </Th>
-                ))}
-              </Tr>
-            ))}
-          </Thead>
-          <Tbody>
-            {(flatData.length > 0 ||
-              flatData2.length > 0 ||
-              flatData3.length > 0) && (
-              <>
-                <>
-                  <Tr>
-                    <Td
-                      colSpan={7}
-                      style={{
-                        backgroundColor: "#2E99FC",
-                        color: "white",
-                        fontWeight: 700
-                      }}
-                    >
-                      ส่วนที่ 1.1 รายวิชาภาษาอังกฤษ
-                    </Td>
-                  </Tr>
-                  {flatData.length > 0 ? (
-                    <>
-                      {flatData.map((item, index) => (
-                        <Tr
-                          key={index}
-                          paddingY="8px"
+          <TableContainer
+            sx={{ tableLayout: "auto" }}
+            style={{
+              borderWidth: 1,
+              borderColor: "black",
+              borderTopRightRadius: 16,
+              borderTopLeftRadius: 16
+            }}
+          >
+            {tableSize === "lg" ? (
+              <Table
+                size="sm"
+                backgroundColor="white"
+              >
+                <Thead bgColor="#D7D7D7">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <Tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <Th
+                          key={header.id}
+                          padding="16px"
+                          fontSize="10.5px"
                         >
-                          <Td>{item.dipCourseId}</Td>
-                          <Td>{item.dipCourseName}</Td>
-                          <Td>{item.grade}</Td>
-                          <Td>{item.dipCredit}</Td>
-                          <Td>{item.universityCourse.uniCourseId}</Td>
-                          <Td>{item.universityCourse.uniCourseName}</Td>
-                          <Td>{item.universityCourse.uniCredit}</Td>
-                        </Tr>
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </Th>
                       ))}
-                    </>
+                    </Tr>
+                  ))}
+                </Thead>
+                <Tbody>
+                  {flatData.length > 0 ? (
+                    table.getRowModel().rows.map((row) => (
+                      <Tr key={row.id}>
+                        {row.getVisibleCells().map((cell, cellIndex) => {
+                          if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                            return null
+                          }
+                          return (
+                            <Td
+                              key={cell.id}
+                              fontSize="13px"
+                              rowSpan={
+                                row.original.isFirstInGroup && cellIndex >= 4
+                                  ? row.original.groupSize
+                                  : 1
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </Td>
+                          )
+                        })}
+                      </Tr>
+                    ))
                   ) : (
                     <Tr>
                       <Td colSpan={7}></Td>
                     </Tr>
                   )}
-                </>
-
-                <>
                   <Tr>
                     <Td
                       colSpan={7}
@@ -252,30 +268,38 @@ export default function Report() {
                     </Td>
                   </Tr>
                   {flatData2.length > 0 ? (
-                    <>
-                      {flatData2.map((item, index) => (
-                        <Tr
-                          key={index}
-                          paddingY="8px"
-                        >
-                          <Td>{item.dipCourseId}</Td>
-                          <Td>{item.dipCourseName}</Td>
-                          <Td>{item.grade}</Td>
-                          <Td>{item.dipCredit}</Td>
-                          <Td>{item.universityCourse.uniCourseId}</Td>
-                          <Td>{item.universityCourse.uniCourseName}</Td>
-                          <Td>{item.universityCourse.uniCredit}</Td>
-                        </Tr>
-                      ))}
-                    </>
+                    table2.getRowModel().rows.map((row) => (
+                      <Tr key={row.id}>
+                        {row.getVisibleCells().map((cell, cellIndex) => {
+                          if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                            return null
+                          }
+                          return (
+                            <Td
+                              key={cell.id}
+                              rowSpan={
+                                row.original.isFirstInGroup && cellIndex >= 4
+                                  ? row.original.groupSize
+                                  : 1
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </Td>
+                          )
+                        })}
+                      </Tr>
+                    ))
                   ) : (
                     <Tr>
-                      <Td colSpan={7}></Td>
+                      <Td
+                        backgroundColor="white"
+                        colSpan={7}
+                      ></Td>
                     </Tr>
                   )}
-                </>
-
-                <>
                   <Tr>
                     <Td
                       colSpan={7}
@@ -289,34 +313,183 @@ export default function Report() {
                     </Td>
                   </Tr>
                   {flatData3.length > 0 ? (
-                    <>
-                      {flatData3.map((item, index) => (
-                        <Tr
-                          key={index}
-                          paddingY="8px"
-                        >
-                          <Td>{item.dipCourseId}</Td>
-                          <Td>{item.dipCourseName}</Td>
-                          <Td>{item.grade}</Td>
-                          <Td>{item.dipCredit}</Td>
-
-                          <Td>{item.universityCourse.uniCourseId}</Td>
-                          <Td>{item.universityCourse.uniCourseName}</Td>
-                          <Td>{item.universityCourse.uniCredit}</Td>
-                        </Tr>
-                      ))}
-                    </>
+                    table3.getRowModel().rows.map((row) => (
+                      <Tr key={row.id}>
+                        {row.getVisibleCells().map((cell, cellIndex) => {
+                          if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                            return null
+                          }
+                          return (
+                            <Td
+                              key={cell.id}
+                              rowSpan={
+                                row.original.isFirstInGroup && cellIndex >= 4
+                                  ? row.original.groupSize
+                                  : 1
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </Td>
+                          )
+                        })}
+                      </Tr>
+                    ))
                   ) : (
                     <Tr>
                       <Td colSpan={7}></Td>
                     </Tr>
                   )}
-                </>
-              </>
+                </Tbody>
+              </Table>
+            ) : (
+              <Table
+                size="md"
+                backgroundColor="white"
+              >
+                <Thead bgColor="#D7D7D7">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <Tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <Th
+                          key={header.id}
+                          padding="16px"
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </Th>
+                      ))}
+                    </Tr>
+                  ))}
+                </Thead>
+                <Tbody>
+                  {flatData.length > 0 ? (
+                    table.getRowModel().rows.map((row) => (
+                      <Tr key={row.id}>
+                        {row.getVisibleCells().map((cell, cellIndex) => {
+                          if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                            return null
+                          }
+                          return (
+                            <Td
+                              key={cell.id}
+                              rowSpan={
+                                row.original.isFirstInGroup && cellIndex >= 4
+                                  ? row.original.groupSize
+                                  : 1
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </Td>
+                          )
+                        })}
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={7}></Td>
+                    </Tr>
+                  )}
+                  <Tr>
+                    <Td
+                      colSpan={7}
+                      style={{
+                        backgroundColor: "#2E99FC",
+                        color: "white",
+                        fontWeight: 700
+                      }}
+                    >
+                      ส่วนที่ 1.2 รายวิชาธุรกิจและประกอบการ
+                    </Td>
+                  </Tr>
+                  {flatData2.length > 0 ? (
+                    table2.getRowModel().rows.map((row) => (
+                      <Tr key={row.id}>
+                        {row.getVisibleCells().map((cell, cellIndex) => {
+                          if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                            return null
+                          }
+                          return (
+                            <Td
+                              key={cell.id}
+                              rowSpan={
+                                row.original.isFirstInGroup && cellIndex >= 4
+                                  ? row.original.groupSize
+                                  : 1
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </Td>
+                          )
+                        })}
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td
+                        backgroundColor="white"
+                        colSpan={7}
+                      ></Td>
+                    </Tr>
+                  )}
+                  <Tr>
+                    <Td
+                      colSpan={7}
+                      style={{
+                        backgroundColor: "#2E99FC",
+                        color: "white",
+                        fontWeight: 700
+                      }}
+                    >
+                      ส่วนที่ 2 รายวิชาศึกษาทั่วไปเลือก
+                    </Td>
+                  </Tr>
+                  {flatData3.length > 0 ? (
+                    table3.getRowModel().rows.map((row) => (
+                      <Tr key={row.id}>
+                        {row.getVisibleCells().map((cell, cellIndex) => {
+                          if (cellIndex >= 4 && !row.original.isFirstInGroup) {
+                            return null
+                          }
+                          return (
+                            <Td
+                              key={cell.id}
+                              rowSpan={
+                                row.original.isFirstInGroup && cellIndex >= 4
+                                  ? row.original.groupSize
+                                  : 1
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </Td>
+                          )
+                        })}
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={7}></Td>
+                    </Tr>
+                  )}
+                </Tbody>
+              </Table>
             )}
-          </Tbody>
-        </Table>
-      </TableContainer>
-    </Box>
+          </TableContainer>
+        </Box>
+      </Box>
+    </>
   )
 }

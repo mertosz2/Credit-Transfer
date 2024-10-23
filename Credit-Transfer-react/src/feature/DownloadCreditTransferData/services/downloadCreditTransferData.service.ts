@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { ICreditTransferResponse } from "@/feature/CreditTransfer/interface/CreditTransfer"
 
 export const downloadCreditTransferData = async (

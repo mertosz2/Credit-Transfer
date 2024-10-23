@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IAddUniCourseResponse } from "../interface/AddUniCourseData"
 import { IResponseDropDownData } from "@/feature/VocationalMange/DropdownDipCourseData/interface/dropdowndata"
 

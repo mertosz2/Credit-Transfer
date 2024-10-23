@@ -2,7 +2,7 @@ import { useToast } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { login } from "../services/auth.service"
-import { onSetCookie } from "@/config/handleCookie"
+import { onSetCookie } from "@/configs/handleCookie"
 
 const useMutateLogin = () => {
   const toast = useToast()

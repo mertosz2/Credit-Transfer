@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { ICreateUserResponse } from "../interface/CreateUser"
 
 export const createUser = async (data: ICreateUserResponse) => {

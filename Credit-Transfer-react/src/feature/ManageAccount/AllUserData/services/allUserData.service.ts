@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IAllUserResponse } from "../interface/AllUserData"
 
 export const allUserData = async () => {

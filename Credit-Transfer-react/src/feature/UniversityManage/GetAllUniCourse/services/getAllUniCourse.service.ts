@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IUniCourseResponse } from "../interface/GetAllUniCourse"
 
 export const getAllUniCourse = async () => {

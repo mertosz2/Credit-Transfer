@@ -311,127 +311,13 @@ export default function ManageAccount() {
     direction: "ascending" | "descending"
   } | null>(null)
 
-  // const handleSort = useCallback(
-  //   async (key: TKey) => {
-  //     let direction: "ascending" | "descending" = "ascending"
-
-  //     if (
-  //       sortConfig &&
-  //       sortConfig.key === key &&
-  //       sortConfig.direction === "ascending"
-  //     ) {
-  //       direction = "descending"
-  //     }
-
-  //     // function api
-  //     if (sortConfig) {
-  //       const sortedData = await onSortData({
-  //         data: UniCourseData?._embedded?.UnilomaCourseResponseList || [],
-  //         key: key,
-  //         direction: sortConfig.direction === "ascending"
-  //       })
-  //       setDisplayData(sortedData)
-  //       setFlatData(flattenData(sortedData))
-  //     }
-  //     setSortConfig({ key, direction })
-  //   },
-  //   [displayData, onSortData, sortConfig]
-  // )
-  // const renderTable = useMemo(() => {
-  //   return (
-  //     <TableContainer
-  //       sx={{ tableLayout: "auto" }}
-  //       style={{
-  //         borderWidth: 1,
-  //         borderColor: "black",
-  //         borderRadius: 16
-  //       }}
-  //     >
-  //       <Table size="sm">
-  //         <Thead bgColor="#D7D7D7">
-  //           {table.getHeaderGroups().map((headerGroup) => (
-  //             <Tr key={headerGroup.id}>
-  //               {headerGroup.headers.map((header) => {
-  //                 return (
-  //                   <Th
-  //                     padding="16px"
-  //                     cursor="pointer"
-  //                     key={header.id}
-  //                     onClick={() =>
-  //                       handleSort(
-  //                         header.column.id.includes("_")
-  //                           ? (getStringAfterUnderscore(
-  //                               header.column.id
-  //                             ) as TKey)
-  //                           : (header.column.id as TKey)
-  //                       )
-  //                     }
-  //                   >
-  //                     {flexRender(
-  //                       header.column.columnDef.header,
-  //                       header.getContext()
-  //                     )}
-  //                     <Icon
-  //                       as={
-  //                         sortConfig && sortConfig.direction === "ascending"
-  //                           ? ChevronUpIcon
-  //                           : ChevronDownIcon
-  //                       }
-  //                     />
-  //                   </Th>
-  //                 )
-  //               })}
-  //             </Tr>
-  //           ))}
-  //         </Thead>
-
-  //         <Tbody>
-  //           {flatData &&
-  //             flatData.length > 0 &&
-  //             displayData &&
-  //             displayData.length > 0 &&
-  //             table.getRowModel().rows.map((row) => (
-  //               <Tr key={row.id}>
-  //                 {row.getVisibleCells().map((cell, cellIndex) => {
-  //                   // Apply colspan to universityCourse columns
-  //                   if (cellIndex >= 4 && !row.original.isFirstInGroup) {
-  //                     return null
-  //                   }
-  //                   return (
-  //                     <Td
-  //                       key={cell.id}
-  //                       rowSpan={
-  //                         row.original.isFirstInGroup && cellIndex >= 4
-  //                           ? row.original.groupSize
-  //                           : 1
-  //                       }
-  //                     >
-  //                       {flexRender(
-  //                         cell.column.columnDef.cell,
-  //                         cell.getContext()
-  //                       )}
-  //                     </Td>
-  //                   )
-  //                 })}
-  //               </Tr>
-  //             ))}
-  //         </Tbody>
-  //         <Tfoot
-  //           display="flex"
-  //           padding="8px"
-  //         ></Tfoot>
-  //       </Table>
-  //     </TableContainer>
-  //   )
-  // }, [displayData, flatData, handleSort, sortConfig, table])
-  // console.log(UniCourseData)
-
   return (
     <>
       <SideBar id={4} />
       <Box
-        height="100%"
-        marginLeft="60px"
+        height="100vh"
+        backgroundSize="cover"
+        background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
       >
         <Box
           display="flex"
@@ -447,17 +333,15 @@ export default function ManageAccount() {
               display="flex"
               flexDirection="column"
               marginTop="60px"
-              gap="24px"
               paddingRight="120px"
-              paddingLeft="280px"
+              paddingLeft="340px"
             >
               <Box
                 display="flex"
-                flexDirection="row"
-                gap="24px"
-                alignSelf="flex-end"
+                flexDirection="column"
               >
                 <Button
+                  alignSelf="flex-end"
                   label="เพิ่มบัญชี"
                   backgroundColor="#2ABE0D"
                   color="#FFFFFF"
@@ -467,6 +351,14 @@ export default function ManageAccount() {
                   onClick={OpenCreateUser}
                 />
                 <Box
+                  display="flex"
+                  alignSelf="flex-start"
+                  fontWeight={700}
+                  fontSize="32px"
+                >
+                  จัดการบัญชี
+                </Box>
+                {/* <Box function nextpage
                   display="flex"
                   flexDirection="row"
                   gap="8px"
@@ -492,7 +384,7 @@ export default function ManageAccount() {
                     isDisabled={checkNextPage()}
                     onClick={handleNextPage}
                   ></Button>
-                </Box>
+                </Box> */}
               </Box>
               <TableContainer
                 sx={{ tableLayout: "auto" }}
@@ -503,7 +395,10 @@ export default function ManageAccount() {
                   borderTopLeftRadius: 16
                 }}
               >
-                <Table size="md">
+                <Table
+                  size="md"
+                  backgroundColor="white"
+                >
                   <Thead bgColor="#D7D7D7">
                     {table.getHeaderGroups().map((headerGroup) => (
                       <Tr key={headerGroup.id}>

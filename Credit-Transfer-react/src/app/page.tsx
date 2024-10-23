@@ -1,5 +1,7 @@
 "use client"
-import { Box } from "@chakra-ui/react"
+import { NextRequest, NextResponse } from "next/server"
+
+import { Box, Image, Input } from "@chakra-ui/react"
 import TextField from "../components/TextField"
 import Button from "../components/Button"
 import { useRouter } from "next/navigation"
@@ -9,8 +11,10 @@ import { decodeToken } from "@/util/jwtToken"
 import { IToken, ITokenPayload } from "@/feature/authentication/interface/auth"
 import { jwtDecode } from "jwt-decode"
 import Cookies from "js-cookie"
-import { checkExpireToken } from "@/config/axiosConfig"
+import { checkExpireToken } from "@/configs/axiosConfig"
 import useProfileStore, { selectOnsetProfileData } from "@/stores/profileStore"
+import { ImageCustom } from "@/components/Image/Image"
+import Homepage from "../asset/image/page1.jpg"
 interface IProps {
   username: string
   password: string
@@ -56,56 +60,105 @@ export default function Home() {
   return (
     <Box
       display="flex"
-      justifyContent="center"
-      alignItems="center"
-      padding="24px"
       width="100%"
       height="100vh"
+      paddingX={{ lg: "120px", xl: "240px" }}
+      paddingY={{ lg: "90px", xl: "180px" }}
+      //background="linear-gradient(356deg, rgba(180,231,229,1) 0%, rgba(240,233,196,1) 46%, rgba(242,247,247,1) 100%)"
       background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
     >
       <Box
-        display="flex"
-        flexDirection="column"
-        paddingY="80px"
-        paddingX="94px"
-        backgroundColor="white"
+        width="100%"
+        height="100%"
+        background="linear-gradient(356deg, rgba(180,231,229,1) 0%, rgba(246,246,246,1) 19%, rgba(242,247,247,1) 100%)"
         borderRadius="16px"
-        alignItems="center"
+        borderWidth={2}
+        borderColor="black"
       >
-        <Box fontSize="30px">ระบบการจัดการวิชาเทียบโอนหน่วยกิต</Box>
-        <Box fontSize="30px">มหาวิทยาลัยหอการค้าไทย</Box>
         <Box
-          width="100%"
-          height="3px"
-          backgroundColor="black"
-          marginTop="42px"
-        ></Box>
-
-        <Box
-          marginTop="24px"
           display="flex"
-          flexDirection="column"
-          gap="24px"
-          alignItems="center"
+          flexDirection="row"
+          width="100%"
+          height="100%"
         >
-          <TextField
-            value={username}
-            onChange={handleChangeUsername}
-            placeholder="ชื่อผู้ใช้งาน"
-          />
-          <TextField
-            type="password"
-            value={password}
-            onChange={handleChangePassword}
-            placeholder="รหัสผ่าน"
-          />
+          <Box width={{ lg: "60%", xl: "65%" }}>
+            <Image
+              width="100%"
+              height="100%"
+              backgroundSize="cover"
+              borderTopLeftRadius={16}
+              borderBottomLeftRadius={16}
+              src={Homepage.src}
+              alt="Homepage"
+            />
+          </Box>
+          <Box
+            width={{ lg: "40%", xl: "35%" }}
+            height="100%"
+            flexDirection="column"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap="24px"
+          >
+            <Box
+              whiteSpace="pre-wrap"
+              fontSize={{ lg: "18px", xl: "30px" }}
+              fontWeight={{ lg: 700, xl: "normal" }}
+            >
+              ระบบเทียบโอนรายวิชาศึกษาทั่วไป
+            </Box>
+            <Box
+              whiteSpace="pre-wrap"
+              fontSize={{ lg: "18px", xl: "30px" }}
+              fontWeight={{ lg: 700, xl: "normal" }}
+            >
+              (ระดับ ปวส.)
+            </Box>
+            <Box
+              fontSize={{ lg: "18px", xl: "30px" }}
+              fontWeight={{ lg: 700, xl: "normal" }}
+            >
+              มหาวิทยาลัยหอการค้าไทย
+            </Box>
 
-          <Button
-            label={isPending ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
-            onClick={handleLogin}
-            isDisabled={isPending} 
-            isLoading={isPending}
-          ></Button>
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap="24px"
+            >
+              <Input
+                type="text"
+                value={username}
+                onChange={handleChangeUsername}
+                placeholder="ชื่อผู้ใช้งาน"
+                borderWidth="2px"
+                borderColor="black"
+              />
+              <TextField
+                type="password"
+                value={password}
+                onChange={handleChangePassword}
+                placeholder="รหัสผ่าน"
+              />
+              <Button
+                borderRadius={8}
+                backgroundColor="#0C388E"
+                color="white"
+                label={"เข้าสู่ระบบ"}
+                onClick={handleLogin}
+              ></Button>
+              <Button
+                borderRadius={8}
+                backgroundColor="grey"
+                color="white"
+                label={"เข้าสู่ระบบแบบผู้เยี่ยมชม"}
+                onClick={() => {
+                  router.push(`/transfer`)
+                }}
+              ></Button>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Box>

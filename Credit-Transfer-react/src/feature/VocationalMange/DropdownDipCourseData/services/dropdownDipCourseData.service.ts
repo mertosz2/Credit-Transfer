@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IResponseDropDownData } from "../interface/dropdowndata"
 
 export const getDropDownDipCourseData = async () => {

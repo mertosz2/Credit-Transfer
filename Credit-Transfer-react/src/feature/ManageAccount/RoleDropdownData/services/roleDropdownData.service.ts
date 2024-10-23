@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IRoleDropdownResponse } from "../interface/RoleDropdownData"
 
 export const roleDropdownData = async () => {

@@ -9,10 +9,3 @@ export const onRemoveCookie = () => {
   Cookies.remove("accessToken")
 }
 
-export const onSetGetStartedCookie = (value: string) => {
-  Cookies.set("getStarted", value)
-}
-
-export const onRemoveGetStartedCookie = () => {
-  Cookies.remove("getStarted")
-}

@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IEditUserResponse } from "../interface/EditUserData"
 
 export const editUserData = async (id: number, data: IEditUserResponse) => {

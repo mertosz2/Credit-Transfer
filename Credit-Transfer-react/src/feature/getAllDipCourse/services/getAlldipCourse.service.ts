@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 import { IDipCourseRespone } from "../interface/getAllDipCourse"
 
 export const getAllDipCourse = async () => {

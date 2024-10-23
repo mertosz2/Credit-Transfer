@@ -1,4 +1,4 @@
-import services from "@/config/axiosConfig"
+import services from "@/configs/axiosConfig"
 
 export const deleteUniCourseData = async (id: number) => {
   const response = await services.delete(`api/uni/${id}`)
