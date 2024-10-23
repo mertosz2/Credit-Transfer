@@ -260,7 +260,6 @@ public class TransferCreditService {
 
         reportCourseResponse.setTotalUniCredit(totalUniCredit);
         reportCourseResponse.setTotalDipCredit(totalDipCredit);
-        System.out.println("dip = " + totalDipCredit + " uni = " + totalUniCredit);
         return reportCourseResponse;
     }
 
@@ -318,7 +317,6 @@ public class TransferCreditService {
 
         List<UniversityCourse> compareUni = new ArrayList<>(responseList.stream().map(TransferCreditResponse::getUniversityCourse).toList());
         compareUni.sort(Comparator.comparing(UniversityCourse::getUniCourseId));
-        System.out.println(compareUni);
         UniversityCourse lastCourse = compareUni.getLast();
         Optional<UniversityCourse> preCourseOptional = universityCourseRepository.findByUniCourseId(lastCourse.getPreSubject());//072
         List<UniversityCourse> preCourseList = new ArrayList<>();
