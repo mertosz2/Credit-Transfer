@@ -254,5 +254,8 @@ public class ExportExcelService {
         rowCount++;
         rowCount = writeData(reportCourseResponse.thirdSectionList,rowCount);
 
+        createCell(row, 9, reportCourseResponse.getTotalCredit(), defaultStyle);
+
+
     }
 }
