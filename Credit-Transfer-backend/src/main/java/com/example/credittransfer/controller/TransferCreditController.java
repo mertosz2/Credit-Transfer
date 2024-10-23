@@ -99,16 +99,16 @@ public class TransferCreditController {
         String headerKey = "Content-Disposition";
         String headerValue = "attachment; filename=credit-transfer.xlsx";
         response.setHeader(headerKey, headerValue);
-//        List<TransferCreditRequest> mockData = List.of(
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30001-1055"), 4),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-2003"), 2),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30204-2004"), 3),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1101"), 4),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9205"), 4),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9201"), 2),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1201"), 2),
-//                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1207"), 4));
-        List<TransferCreditRequest> mockData = new ArrayList<>();
+        List<TransferCreditRequest> mockData = List.of(
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30001-1055"), 4),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-2003"), 2),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30204-2004"), 3),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1101"), 4),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9205"), 4),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-9201"), 2),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1201"), 2),
+                new TransferCreditRequest(diplomaCourseRepository.findByDipCourseId("30000-1207"), 4));
+//        List<TransferCreditRequest> mockData = new ArrayList<>();
         List<TransferCreditResponse> mockResponseList = transferCreditService.getTransferableCourse(mockData);
         transferCreditService.exportExcel(response, transferCreditService.getReport(mockResponseList));
 

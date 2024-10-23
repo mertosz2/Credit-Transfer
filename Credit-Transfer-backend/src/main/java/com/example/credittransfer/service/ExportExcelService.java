@@ -231,6 +231,9 @@ public class ExportExcelService {
         defaultStyle.setWrapText(true);
         setBorder(defaultStyle);
 
+        XSSFCellStyle totalCreditStyle = defaultStyle;
+        totalCreditStyle.setAlignment(HorizontalAlignment.CENTER);
+
         int rowCount = 5;
         Row row = sheet.createRow(rowCount);
         row.setHeightInPoints(40);
@@ -254,7 +257,10 @@ public class ExportExcelService {
         rowCount++;
         rowCount = writeData(reportCourseResponse.thirdSectionList,rowCount);
 
-        createCell(row, 9, reportCourseResponse.getTotalCredit(), defaultStyle);
+        Row totalCreditRow = sheet.createRow(rowCount);
+        createCell(totalCreditRow, 6, reportCourseResponse.getTotalDipCredit(), totalCreditStyle);
+        createCell(totalCreditRow, 9, reportCourseResponse.getTotalUniCredit(), totalCreditStyle);
+
 
 
     }

@@ -152,7 +152,7 @@ public class OCRService {
             if (!resultExtend.isEmpty()) {
                 text = matcher.replaceAll("");
                 text = text + resultExtend;
-                System.out.println("result ex = " + resultExtend);
+
 
             }
 
@@ -199,7 +199,7 @@ public class OCRService {
                 normalForm.add(temp);
 
             }
-            System.out.println("size = " + normalForm.size());
+
             for (String patternToRemove : normalForm) {
                 String[] parts = patternToRemove.split("\\|");
                 if(!Objects.isNull(parts[4]))
@@ -211,7 +211,7 @@ public class OCRService {
                 }
 
                 text = text.replace(patternToRemove, "|").trim();
-                System.out.println(patternToRemove);
+
             }
 
             newStr = newStrBuffer.toString();
@@ -229,7 +229,7 @@ public class OCRService {
                 String temp = newStrBuffer2.toString().trim();
                 lessOne.add(temp);
             }
-            System.out.println("size = " + lessOne.size());
+
 
             newStr = newStr + newStrBuffer2.toString();
             for (String patternToRemove : lessOne) {
@@ -242,7 +242,7 @@ public class OCRService {
                     }
                 }
                 text = text.replace(patternToRemove, "|").trim();
-                System.out.println(patternToRemove);
+
             }
 
         } catch (TesseractException e) {
@@ -355,7 +355,7 @@ public class OCRService {
             if (!resultExtend.isEmpty()) {
                 text = matcher.replaceAll("");
                 text = text + resultExtend;
-                System.out.println("result ex = " + resultExtend);
+
 
             }
 
@@ -403,7 +403,7 @@ public class OCRService {
                 normalForm.add(temp);
 
             }
-            System.out.println("size = " + normalForm.size());
+
             for (String patternToRemove : normalForm) {
                 String[] parts = patternToRemove.split("\\|");
                 if(Double.parseDouble(parts[3]) > 0)
@@ -414,7 +414,7 @@ public class OCRService {
                     }
                 }
                 text = text.replace(patternToRemove, "|").trim();
-                System.out.println(patternToRemove);
+
             }
 
             newStr = newStrBuffer.toString();
@@ -432,15 +432,13 @@ public class OCRService {
                 String temp = newStrBuffer2.toString().trim();
                 lessOne.add(temp);
             }
-            System.out.println("size = " + lessOne.size());
+
 
             newStr = newStr + newStrBuffer2.toString();
             for (String patternToRemove : lessOne) {
                 String[] parts = patternToRemove.split("\\|");
                 if(Double.parseDouble(parts[3]) > 0 )
                 {
-                    System.out.println(patternToRemove);
-                    System.out.println("Not al");
                     TransferCreditRequest request = transferCreditService.mapToTransferCreditRequest(parts[1], Double.parseDouble(parts[3]));
                     if (!Objects.isNull(request.getDiplomaCourse())  && request.getDipGrade() > 0) {
                         transferCreditRequestList.add(request);

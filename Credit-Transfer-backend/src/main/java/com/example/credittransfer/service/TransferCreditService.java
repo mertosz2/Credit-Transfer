@@ -209,7 +209,8 @@ public class TransferCreditService {
     public ReportCourseResponse getReport(List<TransferCreditResponse> responseList) {
         List<TransferCreditResponse> transferCreditResponseList = validateTransferableResponse(responseList);
         ReportCourseResponse reportCourseResponse = new ReportCourseResponse();
-
+        int totalUniCredit = 0;
+        int totalDipCredit = 0;
         List<TransferCreditResponse> firstSection = new ArrayList<>(transferCreditResponseList.stream()
                 .filter(transferCreditResponse ->
                         Objects.equals(universityCourseRepository.findByUId(transferCreditResponse.getUniversityCourse().getUniId()).getCourseCategory().getCourseCategoryCode(), "11100"))
@@ -217,6 +218,11 @@ public class TransferCreditService {
         if(!firstSection.isEmpty()) {
             firstSection = checkPreSubject(firstSection);
             firstSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+            totalUniCredit += firstSection.stream().mapToInt(firstList -> firstList.getUniversityCourse().getUniCredit()).sum();
+            totalDipCredit += firstSection.stream()
+                    .flatMap(firstList -> firstList.getDiplomaCourseList().stream())
+                    .mapToInt(DipCourseResponse::getDipCredit)
+                    .sum();
         }
 
         List<TransferCreditResponse> secondSection = new ArrayList<>(responseList.stream()
@@ -226,9 +232,12 @@ public class TransferCreditService {
         if(!secondSection.isEmpty()) {
             secondSection = validateTransferableResponse(secondSection);
             secondSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
-
+            totalUniCredit += secondSection.stream().mapToInt(secondList -> secondList.getUniversityCourse().getUniCredit()).sum();
+            totalDipCredit += secondSection.stream()
+                    .flatMap(secondList -> secondList.getDiplomaCourseList().stream())
+                    .mapToInt(DipCourseResponse::getDipCredit)
+                    .sum();
         }
-
 
         List<TransferCreditResponse> thirdSection = new ArrayList<>(responseList.stream()
                 .filter(transferCreditResponse ->
@@ -237,18 +246,20 @@ public class TransferCreditService {
         if(!thirdSection.isEmpty()) {
             thirdSection = validateTransferableResponse(thirdSection);
             thirdSection.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
+            totalUniCredit += thirdSection.stream().mapToInt(thirdList -> thirdList.getUniversityCourse().getUniCredit()).sum();
+            totalDipCredit += thirdSection.stream()
+                    .flatMap(thirdList -> thirdList.getDiplomaCourseList().stream())
+                    .mapToInt(DipCourseResponse::getDipCredit)
+                    .sum();
         }
-
 
         reportCourseResponse.setFirstSectionList(firstSection);
         reportCourseResponse.setSecondSectionList(secondSection);
         reportCourseResponse.setThirdSectionList(thirdSection);
-        int totalCredit = Stream.of(firstSection, secondSection, thirdSection)
-                .flatMap(Collection::stream)
-                .mapToInt(section -> section.getUniversityCourse().getUniCredit())
-                .sum();
 
-        reportCourseResponse.setTotalCredit(totalCredit);
+
+        reportCourseResponse.setTotalUniCredit(totalUniCredit);
+        reportCourseResponse.setTotalDipCredit(totalDipCredit);
         return reportCourseResponse;
     }
 
@@ -306,7 +317,6 @@ public class TransferCreditService {
 
         List<UniversityCourse> compareUni = new ArrayList<>(responseList.stream().map(TransferCreditResponse::getUniversityCourse).toList());
         compareUni.sort(Comparator.comparing(UniversityCourse::getUniCourseId));
-        System.out.println(compareUni);
         UniversityCourse lastCourse = compareUni.getLast();
         Optional<UniversityCourse> preCourseOptional = universityCourseRepository.findByUniCourseId(lastCourse.getPreSubject());//072
         List<UniversityCourse> preCourseList = new ArrayList<>();
