@@ -1,10 +1,4 @@
-import {
-  ICreditTransferResponse,
-  IDataSection,
-  IDiplomaCourseList,
-  IFlatDiplomaCourseList,
-  IUniversityCourse
-} from "@/feature/CreditTransfer/interface/CreditTransfer"
+import { IDataSection } from "@/feature/CreditTransfer/interface/CreditTransfer"
 import { encryptedStorage } from "@/util/encryptedStorage"
 import create from "zustand"
 import { devtools, persist } from "zustand/middleware"
@@ -35,7 +29,9 @@ const initialState: State = {
     id: 0,
     dipCourseName: "",
     dipCredit: 0,
-    grade: 0
+    grade: 0,
+    totalUniCredit: 0,
+    totalDipCredit: 0
   }
 }
 

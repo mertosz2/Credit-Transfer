@@ -55,15 +55,27 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { getNextUser } from "@/feature/ManageAccount/AllUserData/services/allUserData.service"
 import useGetRoleDorpdownData from "@/feature/ManageAccount/RoleDropdownData/hooks/useGetRoleDropdownData"
+import { TUniKey } from "@/feature/UniversityManage/SortUniCourseData/interface/SortUniCourseData"
 
 export default function ManageAccount() {
   const [page, setPage] = useState(0)
   const [newAllUserData, setnewAllUserData] = useState<IAllUserResponse | null>(
     null
   )
-  const checkValue = () => {
-    return modalEditData.role === 0
-  }
+  const checkValue = () =>
+    CreateUserData.firstName !== "" &&
+    CreateUserData.lastName !== "" &&
+    CreateUserData.username !== "" &&
+    CreateUserData.password !== "" &&
+    CreateUserData.phone !== "" &&
+    CreateUserData.role > 0
+  const checkEditValue = () =>
+    modalEditData.firstName !== "" &&
+    modalEditData.lastName !== "" &&
+    modalEditData.username !== "" &&
+    modalEditData.password !== "" &&
+    modalEditData.phone !== "" &&
+    modalEditData.role > 0
   const { roleDropdown } = useGetRoleDorpdownData()
   const { onEditUserData } = useMutateEditUserData()
   const [selectUniCourseId, setSelectUniCourseId] = useState<number>(0)
@@ -130,7 +142,8 @@ export default function ManageAccount() {
   })
 
   const handleOpenEditUserData = (item: any) => {
-    setGetId(item.uniId)
+    console.log(item)
+    setGetId(item.userId)
     setModalEditData({
       username: item.username,
       password: item.password,
@@ -206,13 +219,12 @@ export default function ManageAccount() {
     const value = Number(e.target.value)
     setModalEditData((prevData) => ({
       ...prevData,
-      courseCategory: value
+      role: value
     }))
   }
 
   const handleEditSubmit = () => {
     const submit = onEditUserData({
-      id: getId,
       data: {
         username: modalEditData.username,
         password: modalEditData.password,
@@ -220,7 +232,8 @@ export default function ManageAccount() {
         lastName: modalEditData.lastName,
         phone: modalEditData.phone,
         role: modalEditData.role
-      }
+      },
+      id: getId
     }).then(() => {
       CloseEditUserData()
       refreshApiAfterEdit()
@@ -238,28 +251,28 @@ export default function ManageAccount() {
     })
   }
 
-  const handleNextPage = () => {
-    setPage((prevPage) => {
-      const newPage = prevPage + 1
+  // const handleNextPage = () => {
+  //   setPage((prevPage) => {
+  //     const newPage = prevPage + 1
 
-      getNextUser(newPage).then((newUniData) => {
-        setnewAllUserData(newUniData)
-      })
+  //     getNextUser(newPage).then((newUniData) => {
+  //       setnewAllUserData(newUniData)
+  //     })
 
-      return newPage
-    })
-  }
-  const handlePrevPage = () => {
-    setPage((prevPage) => {
-      const newPage = prevPage - 1
+  //     return newPage
+  //   })
+  // }
+  // const handlePrevPage = () => {
+  //   setPage((prevPage) => {
+  //     const newPage = prevPage - 1
 
-      getNextUser(newPage).then((newUniData) => {
-        setnewAllUserData(newUniData)
-      })
+  //     getNextUser(newPage).then((newUniData) => {
+  //       setnewAllUserData(newUniData)
+  //     })
 
-      return newPage
-    })
-  }
+  //     return newPage
+  //   })
+  // }
   const refreshApiAfterEdit = useCallback(async () => {
     try {
       const newUniData = await getNextUser(page)
@@ -306,16 +319,13 @@ export default function ManageAccount() {
     getCoreRowModel: getCoreRowModel(),
     debugTable: true
   })
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof IAllUserResponse | string | null
-    direction: "ascending" | "descending"
-  } | null>(null)
 
   return (
     <>
       <SideBar id={4} />
       <Box
-        height="100vh"
+        minHeight="100vh"
+        height="auto"
         backgroundSize="cover"
         background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
       >
@@ -581,9 +591,11 @@ export default function ManageAccount() {
               gap="16px"
             >
               <Button
-                label="อัพโหลด"
+                label="เพิ่ม"
                 width="100%"
+                backgroundColor={checkValue() ? "#2ABE0D" : "transparent"}
                 onClick={handleSubmitAddUniCourse}
+                isDisabled={!checkValue()}
               />
               <Button
                 label="ยกเลิก"
@@ -607,7 +619,7 @@ export default function ManageAccount() {
               justifyContent="center"
               fontSize="24px"
             >
-              แก้ไขวิชา
+              แก้ไขบัญชี
             </ModalHeader>
             <ModalBody
               display="flex"
@@ -713,8 +725,9 @@ export default function ManageAccount() {
               <Button
                 label="ตกลง"
                 width="100%"
-                backgroundColor={checkValue() ? "#2ABE0D" : "transparent"}
+                backgroundColor={checkEditValue() ? "#2ABE0D" : "transparent"}
                 onClick={handleEditSubmit}
+                 isDisabled={!checkEditValue()}
               />
               <Button
                 label="ยกเลิก"

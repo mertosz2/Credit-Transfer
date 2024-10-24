@@ -1,10 +1,7 @@
 "use client"
 import Button from "@/components/Button"
 import SideBar from "@/components/SideBar"
-import useSortData from "@/feature/CreditTransfer/hooks/useSortData"
-import { TKey } from "@/feature/CreditTransfer/interface/CreditTransfer"
 import useGetAllDipCourse from "@/feature/getAllDipCourse/hooks/useGetAllDipCourse"
-import useGetNextDipCourse from "@/feature/getAllDipCourse/hooks/useGetNextDipCourse"
 import {
   IDipCourseRespone,
   IDiplomaCourseResponseList
@@ -14,11 +11,17 @@ import useGetUniCourseDropdownData from "@/feature/UniversityManage/UniCourseDro
 import useMutateAddDipCourse from "@/feature/VocationalMange/AddDipCourseData/hook/useMutateAddDipcourseData"
 import { IAddDipCourseResponse } from "@/feature/VocationalMange/AddDipCourseData/interface/AddDipcourseData"
 import useMutateDeleteDipCourseData from "@/feature/VocationalMange/DeleteDipCourseData/hooks/useMutateDeleteDipCourseData"
-import useGetDropdownDipCourseData from "@/feature/VocationalMange/DropdownDipCourseData/hook/useGetDropDownDipCourseData"
+
 import useMutateEditDipCourseData from "@/feature/VocationalMange/EditDipCourseData/hooks/useMutateEditDipCourseDataById"
+import useGetAllDipCourseData from "@/feature/VocationalMange/SearchDipCourseData/hooks/useGetAllDipCourseData"
+import { ISearchDipResponse } from "@/feature/VocationalMange/SearchDipCourseData/interface/SearchDipCourseData"
+import {
+  getNextSearchDipCourseData,
+  searchDipCourseData
+} from "@/feature/VocationalMange/SearchDipCourseData/services/getAllDipCourseData.service"
 import useMutateSortDipCourseData from "@/feature/VocationalMange/SortDipCourseData/hooks/useMutateSortDipCourseData"
 import { TDipKey } from "@/feature/VocationalMange/SortDipCourseData/interface/SortDipCourseData"
-import { getStringAfterUnderscore } from "@/util/string"
+
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons"
 import {
   Box,
@@ -38,14 +41,18 @@ import {
   Tr,
   useDisclosure,
   Select,
-  Icon
+  Icon,
+  useToast
 } from "@chakra-ui/react"
 import {
   RiArrowLeftSLine,
   RiArrowRightSLine,
   RiDeleteBin2Fill,
   RiEdit2Fill,
-  RiFileTextFill
+  RiFileTextFill,
+  RiRefreshFill,
+  RiRefreshLine,
+  RiSearchFill
 } from "@remixicon/react"
 import {
   createColumnHelper,
@@ -56,6 +63,8 @@ import {
 import { useCallback, useEffect, useState } from "react"
 
 export default function VocationalManage() {
+  const toast = useToast()
+  const { getAllDipData } = useGetAllDipCourseData()
   const [page, setPage] = useState(0)
   const [newDipCourseData, setNewDipCourseData] = useState<IDipCourseRespone>()
   const { dropdownUniData } = useGetUniCourseDropdownData()
@@ -64,10 +73,20 @@ export default function VocationalManage() {
   const { dipCourseData } = useGetAllDipCourse()
   const { onAddDipCourseData } = useMutateAddDipCourse()
   const { onDeleteDipCourse } = useMutateDeleteDipCourseData()
-  const [getId, setGetId] = useState<number>(0)
-  const checkValue = () => modalEditData.uniId > 0
-  const currentPage = (newDipCourseData?.page?.number ?? 0) + 1
   const { onSortDipCourseData } = useMutateSortDipCourseData()
+  const [getId, setGetId] = useState<number>(0)
+  const checkValue = () =>
+    modalEditData.uniId > 0 && modalEditData.dipCredit > 0
+  const checkIsEmpty = () => {
+    if (searchCourseData) {
+      return false
+    }
+    return true
+  }
+  const checkAddCourseValue = () =>
+    addCourseData.uniId > 0 && addCourseData.dipCredit > 0
+  const currentPage = (newDipCourseData?.page?.number ?? 0) + 1
+
   const checkPrevPage = () => {
     if (newDipCourseData) {
       if (newDipCourseData?.page?.number <= 0) {
@@ -89,10 +108,10 @@ export default function VocationalManage() {
   }
 
   useEffect(() => {
-    if (dipCourseData) {
-      setNewDipCourseData(dipCourseData)
+    if (getAllDipData) {
+      setNewDipCourseData(getAllDipData)
     }
-  }, [dipCourseData])
+  }, [getAllDipData])
   const {
     isOpen: AddDipCourse,
     onOpen: OpenAddDipCourse,
@@ -113,6 +132,11 @@ export default function VocationalManage() {
     onOpen: OpenDeleteDipCourse,
     onClose: CloseDeleteDipCourse
   } = useDisclosure()
+  const {
+    isOpen: SearchDipCourse,
+    onOpen: OpenSearchDipCourse,
+    onClose: CloseSearchDipCourse
+  } = useDisclosure()
   const [modalData, setModalData] = useState({
     createdDate: "",
     createdBy: "",
@@ -131,7 +155,13 @@ export default function VocationalManage() {
     dipCredit: 0,
     uniId: 0
   })
-
+  const [searchCourseData, setSearchCourseData] = useState<ISearchDipResponse>({
+    dipCourseId: "",
+    dipCourseName: "",
+    uniCourseId: "",
+    uniCourseName: "",
+    dipCredit: ""
+  })
   const handleOpenMoreInformaion = (item: any): void => {
     setModalData({
       createdDate: item.createdDate,
@@ -199,11 +229,24 @@ export default function VocationalManage() {
 
     setModalEditData((prevData) => ({
       ...prevData,
-      [field]: value // อัปเดต field ของ state ตามที่เลือก
+      [field]: value
     }))
-    console.log(value)
   }
+  const handleSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    field: string
+  ) => {
+    let value: number | string = e.target.value
 
+    if (field === "dipCredit" && Number(value) > 3) {
+      value = 3
+    }
+
+    setSearchCourseData((prevData) => ({
+      ...prevData,
+      [field]: value
+    }))
+  }
   const handleEditSubmit = () => {
     const _submit = onEditDipCourseData({
       id: getId,
@@ -214,8 +257,8 @@ export default function VocationalManage() {
         uniId: modalEditData.uniId
       }
     }).then(() => {
-      refreshApiAfterEdit()
       CloseEditDipCourse()
+      refreshApiAfterEdit()
     })
   }
   const handleOpenDeleteDipCourse = (id: number) => {
@@ -230,30 +273,17 @@ export default function VocationalManage() {
     })
   }
 
-  const handleNextPage = () => {
-    setPage((prevPage) => {
-      const newPage = prevPage + 1
-
-      getNextDipCourse(newPage).then((newDipData) => {
-        setNewDipCourseData(newDipData)
-        setSortConfig({ key: null, direction: "ascending" })
-      })
-      return newPage
+  const handleCloseSearchData = () => {
+    setSearchCourseData({
+      dipCourseId: "",
+      dipCourseName: "",
+      dipCredit: "",
+      uniCourseId: "",
+      uniCourseName: ""
     })
-    console.log(sortConfig)
+    CloseSearchDipCourse()
   }
-  const handlePrevPage = () => {
-    setPage((prevPage) => {
-      const newPage = prevPage - 1
 
-      getNextDipCourse(newPage).then((newDipData) => {
-        setNewDipCourseData(newDipData)
-        setSortConfig({ key: null, direction: "ascending" })
-      })
-      return newPage
-    })
-    console.log(sortConfig)
-  }
   const refreshApiAfterEdit = useCallback(async () => {
     try {
       const newDipData = await getNextDipCourse(page)
@@ -262,7 +292,56 @@ export default function VocationalManage() {
       console.error("Error fetching new data:", error)
     }
   }, [page])
+  const handleSearchSubmit = useCallback(async () => {
+    try {
+      const searchData = await searchDipCourseData(searchCourseData)
 
+      if (searchData && searchData._embedded) {
+        setNewDipCourseData(searchData)
+        CloseSearchDipCourse()
+      } else {
+        toast({
+          title: "ไม่มีข้อมูลที่ต้องการ",
+          status: "error",
+          isClosable: true
+        })
+      }
+    } catch (error) {
+      toast({
+        title: (error as Error).message,
+        status: "error",
+        isClosable: true
+      })
+    }
+  }, [CloseSearchDipCourse, searchCourseData, toast])
+  const handleNextPage = () => {
+    setPage((prevPage) => {
+      const newPage = prevPage + 1
+
+      getNextSearchDipCourseData(searchCourseData, newPage).then(
+        (newDipData) => {
+          setNewDipCourseData(newDipData)
+          setSortConfig({ key: null, direction: "ascending" })
+        }
+      )
+      return newPage
+    })
+    console.log(sortConfig)
+  }
+  const handlePrevPage = () => {
+    setPage((prevPage) => {
+      const newPage = prevPage - 1
+
+      getNextSearchDipCourseData(searchCourseData, newPage).then(
+        (newDipData) => {
+          setNewDipCourseData(newDipData)
+          setSortConfig({ key: null, direction: "ascending" })
+        }
+      )
+      return newPage
+    })
+    console.log(sortConfig)
+  }
   const columnHelper = createColumnHelper<IDiplomaCourseResponseList>()
   const columns = [
     columnHelper.accessor("dipCourseId", {
@@ -314,7 +393,7 @@ export default function VocationalManage() {
     })
   ]
   const table = useReactTable({
-    data: dipCourseData?._embedded?.diplomaCourseResponseList || [],
+    data: getAllDipData?._embedded?.diplomaCourseResponseList || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     debugTable: true
@@ -354,7 +433,8 @@ export default function VocationalManage() {
     <>
       <SideBar id={2} />
       <Box
-        height="100%"
+        minHeight="100vh"
+        height="auto"
         backgroundSize="cover"
         background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
       >
@@ -379,51 +459,99 @@ export default function VocationalManage() {
                 display="flex"
                 flexDirection="column"
               >
-                <Button
-                  alignSelf="flex-end"
-                  label="เพิ่มวิชา"
-                  backgroundColor="#2ABE0D"
-                  color="#FFFFFF"
-                  paddingY="14px"
-                  paddingX="79px"
-                  borderRadius="8px"
-                  onClick={OpenAddDipCourse}
-                />
                 <Box
                   display="flex"
-                  alignSelf="flex-start"
-                  fontWeight={700}
-                  fontSize="32px"
-                >
-                  จัดการวิชา ปวส
-                </Box>
-                {/* <Box
-                  display="flex"
                   flexDirection="row"
-                  gap="8px"
+                  justifyContent="flex-end"
+                  gap="24px"
                 >
-                  <Button
-                    label={<RiArrowLeftSLine />}
-                    isDisabled={checkPrevPage()}
-                    onClick={handlePrevPage}
-                  ></Button>
                   <Box
                     display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    padding="6px"
-                    borderWidth={1}
-                    borderColor="black"
-                    borderRadius={8}
+                    flexDirection="row"
+                    gap="8px"
                   >
-                    {`${currentPage}/${newDipCourseData?.page.totalPages}`}
+                    <Box
+                      as="button"
+                      display="flex"
+                      width="40px"
+                      height="40px"
+                      backgroundColor="black"
+                      borderRadius="8px"
+                      justifyContent="center"
+                      alignItems="center"
+                      onClick={() => {
+                        refreshApiAfterEdit()
+                      }}
+                    >
+                      <Box>
+                        <RiRefreshLine color="#FFFFFF" />
+                      </Box>
+                    </Box>
+                    <Button
+                      leftIcon={<RiSearchFill />}
+                      label="ค้นหาวิชา"
+                      backgroundColor="black"
+                      color="#FFFFFF"
+                      paddingY="14px"
+                      paddingX="59px"
+                      borderRadius="8px"
+                      onClick={OpenSearchDipCourse}
+                    />
                   </Box>
                   <Button
-                    label={<RiArrowRightSLine />}
-                    isDisabled={checkNextPage()}
-                    onClick={handleNextPage}
-                  ></Button>
-                </Box> */}
+                    label="เพิ่มวิชา"
+                    backgroundColor="#2ABE0D"
+                    color="#FFFFFF"
+                    paddingY="14px"
+                    paddingX="79px"
+                    borderRadius="8px"
+                    onClick={OpenAddDipCourse}
+                  />
+                </Box>
+
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  marginTop="24px"
+                  marginBottom="12px"
+                  justifyContent="space-between"
+                >
+                  <Box
+                    display="flex"
+                    fontWeight={700}
+                    fontSize="32px"
+                  >
+                    จัดการวิชา ปวส
+                  </Box>
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    gap="8px"
+                  >
+                    <Button
+                      label={<RiArrowLeftSLine />}
+                      isDisabled={checkPrevPage()}
+                      onClick={handlePrevPage}
+                    ></Button>
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      width="40px"
+                      padding="6px"
+                      borderWidth={1}
+                      borderColor="black"
+                      borderRadius={8}
+                    >
+                      {`${currentPage}/${newDipCourseData?.page.totalPages}`}
+                    </Box>
+                    <Button
+                      label={<RiArrowRightSLine />}
+                      isDisabled={checkNextPage()}
+                      onClick={handleNextPage}
+                    ></Button>
+                  </Box>
+                </Box>
               </Box>
               <TableContainer
                 sx={{ tableLayout: "auto" }}
@@ -444,6 +572,7 @@ export default function VocationalManage() {
                         {headerGroup.headers.map((header) => {
                           const isMoreInformaion =
                             header.column.id === "iconColumn"
+
                           return (
                             <Th
                               padding="16px"
@@ -597,7 +726,9 @@ export default function VocationalManage() {
 
               <Input
                 placeholder="หน่วยกิต"
-                value={addCourseData.dipCredit}
+                value={
+                  addCourseData.dipCredit === 0 ? "" : addCourseData.dipCredit
+                }
                 onChange={(e) => handleAddDipCourseData(e, "dipCredit")}
                 display="flex"
                 alignItems="center"
@@ -635,8 +766,12 @@ export default function VocationalManage() {
               gap="16px"
             >
               <Button
-                label="อัพโหลด"
+                label="เพิ่ม"
                 width="100%"
+                backgroundColor={
+                  checkAddCourseValue() ? "#2ABE0D" : "transparent"
+                }
+                isDisabled={!checkAddCourseValue()}
                 onClick={handleSubmitAddDipCourse}
               />
               <Button
@@ -807,7 +942,7 @@ export default function VocationalManage() {
                   placeholder="วิชามหาวิทยาลัย"
                   borderWidth="1px"
                   borderColor="black"
-                  value={modalEditData.uniId} // เพิ่ม value ของ select ให้แสดงค่าเริ่มต้น
+                  value={modalEditData.uniId}
                   onChange={(e) => handleEditChange(e, "uniId")}
                 >
                   {dropdownUniData?.map((item) => (
@@ -884,6 +1019,119 @@ export default function VocationalManage() {
                 label="ยกเลิก"
                 width="100%"
                 onClick={CloseDeleteDipCourse}
+                backgroundColor="red"
+                color="white"
+              />
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+        <Modal
+          isOpen={SearchDipCourse}
+          onClose={CloseSearchDipCourse}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader
+              display="flex"
+              justifyContent="center"
+              fontSize="24px"
+            >
+              ค้นหาวิชา
+            </ModalHeader>
+            <ModalBody
+              display="flex"
+              flexDirection="column"
+              gap="16px"
+            >
+              <Box
+                display="flex"
+                height="100%"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                gap="32px"
+              >
+                <Input
+                  value={searchCourseData.dipCourseId}
+                  placeholder="รหัสวิชา ปวส"
+                  onChange={(e) => handleSearchChange(e, "dipCourseId")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+
+                <Input
+                  value={searchCourseData.dipCourseName}
+                  placeholder="ชื่อวิชา ปวส"
+                  onChange={(e) => handleSearchChange(e, "dipCourseName")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+                <Input
+                  type="number"
+                  value={searchCourseData.dipCredit}
+                  placeholder="หน่วยกิต ปวส"
+                  onChange={(e) => handleSearchChange(e, "dipCredit")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+                <Input
+                  value={searchCourseData.uniCourseId}
+                  placeholder="รหัสวิชา UTCC"
+                  onChange={(e) => handleSearchChange(e, "uniCourseId")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+                <Input
+                  value={searchCourseData.uniCourseName}
+                  placeholder="ชื่อวิชา UTCC"
+                  onChange={(e) => handleSearchChange(e, "uniCourseName")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+              </Box>
+            </ModalBody>
+
+            <ModalFooter
+              display="flex"
+              padding="24px"
+              justifyContent="space-between"
+              gap="16px"
+            >
+              <Button
+                label="ตกลง"
+                width="100%"
+                backgroundColor="#2ABE0D"
+                onClick={handleSearchSubmit}
+              />
+              <Button
+                label="ยกเลิก"
+                width="100%"
+                onClick={handleCloseSearchData}
                 backgroundColor="red"
                 color="white"
               />

@@ -355,14 +355,14 @@ export default function Report() {
                       colSpan={1}
                       borderWidth={1}
                     >
-                      {data?.totalCredit}
+                      {data?.totalDipCredit}
                     </Td>
                     <Td
                       backgroundColor="white"
                       colSpan={2}
                       borderWidth={1}
                     >
-                      {data?.totalCredit}
+                      {data?.totalUniCredit}
                     </Td>
                     <Td
                       backgroundColor="white"
@@ -529,7 +529,7 @@ export default function Report() {
                     colSpan={1}
                     borderWidth={1}
                   >
-                    {data?.totalCredit}
+                    {data?.totalDipCredit}
                   </Td>
                   <Td
                     backgroundColor="white"
@@ -543,7 +543,7 @@ export default function Report() {
                     colSpan={2}
                     borderWidth={1}
                   >
-                    {data?.totalCredit}
+                    {data?.totalUniCredit}
                   </Td>
                 </Tr>
               </Table>

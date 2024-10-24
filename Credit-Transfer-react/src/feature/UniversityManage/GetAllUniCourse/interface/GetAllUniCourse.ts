@@ -26,3 +26,11 @@ export interface IPage {
   totalPages: number
   number: number
 }
+
+export interface ISearchUniResponse {
+  uniCourseId: string
+  uniCourseName: string
+  courseCategory: string
+  uniCredit: string
+  preSubject: string
+}

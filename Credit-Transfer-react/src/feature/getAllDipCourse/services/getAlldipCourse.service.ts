@@ -7,7 +7,7 @@ export const getAllDipCourse = async () => {
 }
 
 export const getNextDipCourse = async (page: number) => {
-  const response = await services.get<IDipCourseRespone>(`/api/dip`, {
+  const response = await services.get<IDipCourseRespone>(`/api/dip/search`, {
     params: { page: page }
   })
   return response.data

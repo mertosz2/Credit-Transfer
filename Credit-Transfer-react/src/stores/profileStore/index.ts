@@ -1,5 +1,6 @@
 import { ITokenPayload } from "@/feature/authentication/interface/auth"
 import { encryptedStorage } from "@/util/encryptedStorage"
+import { useToast } from "@chakra-ui/react"
 import { cloneDeep } from "lodash"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
@@ -38,7 +39,8 @@ const useProfileStore = create<IProfileStore>()(
             "profile/OnsetProfileData"
           ),
         onReset: () => {
-          set(resetState)
+          console.log("onReset called")
+          set(() => resetState)
         }
       }),
 

@@ -14,15 +14,22 @@ import useMutateAddUniCourseData from "@/feature/UniversityManage/AddUniCourseDa
 import { IAddUniCourseResponse } from "@/feature/UniversityManage/AddUniCourseData/interface/AddUniCourseData"
 import useGetCategoryDropdownData from "@/feature/UniversityManage/CategoryCourseDropdownData/hooks/useGetCategoryDropdownData"
 import useMutateDeleteUniCourseData from "@/feature/UniversityManage/DeleteUniCourseData/hooks/useMutateDeleteUniCourseData"
-import useGetEditUniCourseDropdown from "@/feature/UniversityManage/EditUniCourseData/hooks/usegetEditUniCourseDropdown"
 import useMutateEditUniCourseData from "@/feature/UniversityManage/EditUniCourseData/hooks/useMutateEditUniCourseData"
+import useGetAllNewUniCourse from "@/feature/UniversityManage/GetAllUniCourse/hooks/useGetAllNewUniCourse"
 import useGetAllUniCourse from "@/feature/UniversityManage/GetAllUniCourse/hooks/useGetAllUniCourse"
 import {
+  ISearchUniResponse,
   IUniCourseResponse,
   IUniCourseResponseList
 } from "@/feature/UniversityManage/GetAllUniCourse/interface/GetAllUniCourse"
-import { uniNextPage } from "@/feature/UniversityManage/GetAllUniCourse/services/getAllUniCourse.service"
-import useGetUniCourseDropdownData from "@/feature/UniversityManage/UniCourseDropdownData/hooks/useGetUniCourseDropdownData"
+import {
+  getNextSearchUniCourseData,
+  searchUniCourseData,
+  uniNextPage
+} from "@/feature/UniversityManage/GetAllUniCourse/services/getAllUniCourse.service"
+import useMutateSortUniCourseData from "@/feature/UniversityManage/SortUniCourseData/hooks/useMutateSortUniCourseData"
+import { TUniKey } from "@/feature/UniversityManage/SortUniCourseData/interface/SortUniCourseData"
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons"
 import {
   Box,
   Icon,
@@ -37,19 +44,21 @@ import {
   TableContainer,
   Tbody,
   Td,
-  Tfoot,
   Th,
   Thead,
   Tr,
   useDisclosure,
-  Select
+  Select,
+  useToast
 } from "@chakra-ui/react"
 import {
   RiArrowLeftSLine,
   RiArrowRightSLine,
   RiDeleteBin2Fill,
   RiEdit2Fill,
-  RiFileTextFill
+  RiFileTextFill,
+  RiRefreshLine,
+  RiSearchFill
 } from "@remixicon/react"
 import {
   createColumnHelper,
@@ -57,25 +66,27 @@ import {
   getCoreRowModel,
   useReactTable
 } from "@tanstack/react-table"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 export default function UniversityManage() {
+  const toast = useToast()
+  const { getUniCourseData } = useGetAllNewUniCourse()
   const [page, setPage] = useState(0)
-  const [newUniCourseData, setNewUniCourseData] =
-    useState<IUniCourseResponse | null>(null)
-  const checkValue = () => {
-    return modalEditData.courseCategory === 0
-  }
-
+  const [newUniCourseData, setNewUniCourseData] = useState<IUniCourseResponse>()
   const { getUniCourseDropdown } = useGetCreateUniCourseDropdown()
   const { onEditUniCourseData } = useMutateEditUniCourseData()
   const { categoryCourseData } = useGetCategoryDropdownData()
   const [selectUniCourseId, setSelectUniCourseId] = useState<number>(0)
-  const { uniCourseData, onUniCourseDataRefetch } = useGetAllUniCourse()
+  const { uniCourseData } = useGetAllUniCourse()
   const { onAddUniCourseData } = useMutateAddUniCourseData()
   const { onDeleteUniCourse } = useMutateDeleteUniCourseData()
+  const { onSortUniCourseData } = useMutateSortUniCourseData()
   const [getId, setGetId] = useState<number>(0)
   const currentPage = (newUniCourseData?.page?.number ?? 0) + 1
+  const checkValue = () =>
+    modalEditData.courseCategory > 0 && modalEditData.uniCredit > 0
+  const checkAddCourseValue = () =>
+    addUniCourseData.uniCredit > 0 && addUniCourseData.courseCategory > 0
   const checkPrevPage = () => {
     if (newUniCourseData) {
       if (newUniCourseData?.page?.number <= 0) {
@@ -95,15 +106,12 @@ export default function UniversityManage() {
       return false
     }
   }
-  const updateUniCourseData = useCallback(() => {
+  console.log(getUniCourseData)
+  useEffect(() => {
     if (uniCourseData) {
       setNewUniCourseData(uniCourseData)
     }
   }, [uniCourseData])
-
-  useEffect(() => {
-    updateUniCourseData()
-  }, [updateUniCourseData])
   const {
     isOpen: AddUniCourse,
     onOpen: OpenAddUniCourse,
@@ -137,6 +145,11 @@ export default function UniversityManage() {
     preSubject: "",
     courseCategory: 0
   })
+  const {
+    isOpen: SearchUniCourse,
+    onOpen: OpenSearchUniCourse,
+    onClose: CloseSearchUniCourse
+  } = useDisclosure()
   const [addUniCourseData, setAddUniCourseData] =
     useState<IAddUniCourseResponse>({
       uniCourseId: "",
@@ -145,7 +158,13 @@ export default function UniversityManage() {
       preSubject: "",
       courseCategory: 0
     })
-
+  const [searchCourseData, setSearchCourseData] = useState<ISearchUniResponse>({
+    uniCourseId: "",
+    uniCourseName: "",
+    courseCategory: "",
+    uniCredit: "",
+    preSubject: ""
+  })
   const handleOpenMoreInformaion = (item: any): void => {
     setModalData({
       createdDate: item.createdDate,
@@ -252,6 +271,21 @@ export default function UniversityManage() {
       preSubject: value
     }))
   }
+  const handleUniSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    field: string
+  ) => {
+    let value: number | string = e.target.value
+
+    if (field === "uniCredit" && Number(value) > 3) {
+      value = 3
+    }
+
+    setSearchCourseData((prevData) => ({
+      ...prevData,
+      [field]: value
+    }))
+  }
 
   const handleEditSubmit = () => {
     const submit = onEditUniCourseData({
@@ -264,7 +298,6 @@ export default function UniversityManage() {
         courseCategory: modalEditData.courseCategory
       }
     }).then(() => {
-      onUniCourseDataRefetch()
       CloseEditUniCourse()
       refreshApiAfterEdit()
     })
@@ -280,28 +313,15 @@ export default function UniversityManage() {
       CloseDeleteUniCourse()
     })
   }
-
-  const handleNextPage = () => {
-    setPage((prevPage) => {
-      const newPage = prevPage + 1
-
-      uniNextPage(newPage).then((newUniData) => {
-        setNewUniCourseData(newUniData)
-      })
-
-      return newPage
+  const handleCloseUniSearchData = () => {
+    setSearchCourseData({
+      uniCourseId: "",
+      uniCourseName: "",
+      courseCategory: "",
+      uniCredit: "",
+      preSubject: ""
     })
-  }
-  const handlePrevPage = () => {
-    setPage((prevPage) => {
-      const newPage = prevPage - 1
-
-      uniNextPage(newPage).then((newUniData) => {
-        setNewUniCourseData(newUniData)
-      })
-
-      return newPage
-    })
+    CloseSearchUniCourse()
   }
   const refreshApiAfterEdit = useCallback(async () => {
     try {
@@ -311,6 +331,55 @@ export default function UniversityManage() {
       console.error("Error fetching new data:", error)
     }
   }, [page])
+  const handleUniSearchSubmit = useCallback(async () => {
+    try {
+      const searchUnidata = await searchUniCourseData(searchCourseData)
+
+      if (searchUnidata && searchUnidata._embedded) {
+        setNewUniCourseData(searchUnidata)
+        CloseSearchUniCourse()
+      } else {
+        toast({
+          title: "ไม่มีข้อมูลที่ต้องการ",
+          status: "error",
+          isClosable: true
+        })
+      }
+    } catch (error) {
+      toast({
+        title: (error as Error).message,
+        status: "error",
+        isClosable: true
+      })
+    }
+  }, [CloseSearchUniCourse, searchCourseData, toast])
+
+  const handleNextPage = () => {
+    setPage((prevPage) => {
+      const newPage = prevPage + 1
+
+      getNextSearchUniCourseData(searchCourseData, newPage).then(
+        (newUniData) => {
+          setNewUniCourseData(newUniData)
+        }
+      )
+
+      return newPage
+    })
+  }
+  const handlePrevPage = () => {
+    setPage((prevPage) => {
+      const newPage = prevPage - 1
+
+      getNextSearchUniCourseData(searchCourseData, newPage).then(
+        (newUniData) => {
+          setNewUniCourseData(newUniData)
+        }
+      )
+
+      return newPage
+    })
+  }
 
   const columnHelper = createColumnHelper<IUniCourseResponseList>()
   const columns = [
@@ -354,21 +423,48 @@ export default function UniversityManage() {
     })
   ]
   const table = useReactTable({
-    data: uniCourseData?._embedded?.uniCourseResponseList || [],
+    data: getUniCourseData?._embedded?.uniCourseResponseList || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     debugTable: true
   })
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof IUniCourseResponseList | string | null
+    key: TUniKey | string | null
     direction: "ascending" | "descending"
   } | null>(null)
 
+  const handleSortUniCourseData = useCallback(
+    async (key: TUniKey) => {
+      let direction: "ascending" | "descending" = "ascending"
+
+      if (
+        sortConfig &&
+        sortConfig.key === key &&
+        sortConfig.direction === "ascending"
+      ) {
+        direction = "descending"
+      }
+
+      if (sortConfig) {
+        if (newUniCourseData) {
+          const sortedData = await onSortUniCourseData({
+            data: newUniCourseData,
+            key: key as TUniKey,
+            direction: sortConfig.direction === "ascending"
+          })
+          setNewUniCourseData(sortedData)
+        }
+      }
+      setSortConfig({ key, direction })
+    },
+    [newUniCourseData, onSortUniCourseData, sortConfig]
+  )
   return (
     <>
       <SideBar id={3} />
       <Box
-        height="100vh"
+        minHeight="100vh"
+        height="auto"
         backgroundSize="cover"
         background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
       >
@@ -393,51 +489,100 @@ export default function UniversityManage() {
                 display="flex"
                 flexDirection="column"
               >
-                <Button
-                  alignSelf="flex-end"
-                  label="เพิ่มวิชา"
-                  backgroundColor="#2ABE0D"
-                  color="#FFFFFF"
-                  paddingY="14px"
-                  paddingX="79px"
-                  borderRadius="8px"
-                  onClick={OpenAddUniCourse}
-                />
                 <Box
                   display="flex"
-                  alignSelf="flex-start"
-                  fontWeight={700}
-                  fontSize="32px"
-                >
-                  จัดการวิชา UTCC
-                </Box>
-                {/* <Box
-                  display="flex"
                   flexDirection="row"
-                  gap="8px"
+                  justifyContent="flex-end"
+                  gap="24px"
                 >
-                  <Button
-                    label={<RiArrowLeftSLine />}
-                    isDisabled={checkPrevPage()}
-                    onClick={handlePrevPage}
-                  ></Button>
                   <Box
                     display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    padding="6px"
-                    borderWidth={1}
-                    borderColor="black"
-                    borderRadius={8}
+                    flexDirection="row"
+                    gap="8px"
                   >
-                    {`${currentPage}/${newUniCourseData?.page.totalPages}`}
+                    <Box
+                      as="button"
+                      display="flex"
+                      width="40px"
+                      height="40px"
+                      backgroundColor="black"
+                      borderRadius="8px"
+                      justifyContent="center"
+                      alignItems="center"
+                      onClick={() => {
+                        refreshApiAfterEdit()
+                      }}
+                    >
+                      <Box>
+                        <RiRefreshLine color="#FFFFFF" />
+                      </Box>
+                    </Box>
+                    <Button
+                      leftIcon={<RiSearchFill />}
+                      label="ค้นหาวิชา"
+                      backgroundColor="black"
+                      color="#FFFFFF"
+                      paddingY="14px"
+                      paddingX="59px"
+                      borderRadius="8px"
+                      onClick={OpenSearchUniCourse}
+                    />
                   </Box>
                   <Button
-                    label={<RiArrowRightSLine />}
-                    isDisabled={checkNextPage()}
-                    onClick={handleNextPage}
-                  ></Button>
-                </Box> */}
+                    alignSelf="flex-end"
+                    label="เพิ่มวิชา"
+                    backgroundColor="#2ABE0D"
+                    color="#FFFFFF"
+                    paddingY="14px"
+                    paddingX="79px"
+                    borderRadius="8px"
+                    onClick={OpenAddUniCourse}
+                  />
+                </Box>
+
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  marginTop="24px"
+                  marginBottom="12px"
+                  justifyContent="space-between"
+                >
+                  <Box
+                    display="flex"
+                    fontWeight={700}
+                    fontSize="32px"
+                  >
+                    จัดการวิชา UTCC
+                  </Box>
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    gap="8px"
+                  >
+                    <Button
+                      label={<RiArrowLeftSLine />}
+                      isDisabled={checkPrevPage()}
+                      onClick={handlePrevPage}
+                    ></Button>
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      width="40px"
+                      padding="6px"
+                      borderWidth={1}
+                      borderColor="black"
+                      borderRadius={8}
+                    >
+                      {`${currentPage}/${newUniCourseData?.page.totalPages}`}
+                    </Box>
+                    <Button
+                      label={<RiArrowRightSLine />}
+                      isDisabled={checkNextPage()}
+                      onClick={handleNextPage}
+                    ></Button>
+                  </Box>
+                </Box>
               </Box>
               <TableContainer
                 sx={{ tableLayout: "auto" }}
@@ -455,17 +600,43 @@ export default function UniversityManage() {
                   <Thead bgColor="#D7D7D7">
                     {table.getHeaderGroups().map((headerGroup) => (
                       <Tr key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                          <Th
-                            key={header.id}
-                            padding="16px"
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                          </Th>
-                        ))}
+                        {headerGroup.headers.map((header) => {
+                          const isMoreInformaion =
+                            header.column.id === "iconColumn"
+                          return (
+                            <Th
+                              padding="16px"
+                              cursor={
+                                isMoreInformaion ? "not-allowed" : "pointer"
+                              }
+                              key={header.id}
+                              onClick={() => {
+                                if (!isMoreInformaion) {
+                                  handleSortUniCourseData(header.column.id)
+                                }
+                              }}
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                              {isMoreInformaion ? (
+                                <Box height="16px" />
+                              ) : sortConfig &&
+                                sortConfig.key === header.column.id ? (
+                                <Icon
+                                  as={
+                                    sortConfig.direction === "ascending"
+                                      ? ChevronUpIcon
+                                      : ChevronDownIcon
+                                  }
+                                />
+                              ) : (
+                                <Icon as={ChevronDownIcon} />
+                              )}
+                            </Th>
+                          )
+                        })}
                       </Tr>
                     ))}
                   </Thead>
@@ -583,7 +754,11 @@ export default function UniversityManage() {
                 borderColor="black"
               />
               <Input
-                value={addUniCourseData.uniCredit}
+                value={
+                  addUniCourseData.uniCredit === 0
+                    ? ""
+                    : addUniCourseData.uniCredit
+                }
                 placeholder="หน่วยกิต"
                 onChange={(e) => handleAddUniCourseData(e, "uniCredit")}
                 display="flex"
@@ -640,8 +815,12 @@ export default function UniversityManage() {
               gap="16px"
             >
               <Button
-                label="อัพโหลด"
+                label="เพิ่ม"
                 width="100%"
+                backgroundColor={
+                  checkAddCourseValue() ? "#2ABE0D" : "transparent"
+                }
+                isDisabled={!checkAddCourseValue()}
                 onClick={handleSubmitAddUniCourse}
               />
               <Button
@@ -858,6 +1037,7 @@ export default function UniversityManage() {
                 width="100%"
                 backgroundColor={checkValue() ? "#2ABE0D" : "transparent"}
                 onClick={handleEditSubmit}
+                isDisabled={!checkValue()}
               />
               <Button
                 label="ยกเลิก"
@@ -908,6 +1088,119 @@ export default function UniversityManage() {
                 label="ยกเลิก"
                 width="100%"
                 onClick={CloseDeleteUniCourse}
+                backgroundColor="red"
+                color="white"
+              />
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+        <Modal
+          isOpen={SearchUniCourse}
+          onClose={CloseSearchUniCourse}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader
+              display="flex"
+              justifyContent="center"
+              fontSize="24px"
+            >
+              ค้นหาวิชา
+            </ModalHeader>
+            <ModalBody
+              display="flex"
+              flexDirection="column"
+              gap="16px"
+            >
+              <Box
+                display="flex"
+                height="100%"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                gap="32px"
+              >
+                <Input
+                  value={searchCourseData.uniCourseId}
+                  placeholder="รหัสวิชา UTCC"
+                  onChange={(e) => handleUniSearchChange(e, "uniCourseId")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+
+                <Input
+                  value={searchCourseData.uniCourseName}
+                  placeholder="ชื่อวิชา UTCC"
+                  onChange={(e) => handleUniSearchChange(e, "uniCourseName")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+                <Input
+                  type="number"
+                  value={searchCourseData.uniCredit}
+                  placeholder="หน่วยกิต UTCC"
+                  onChange={(e) => handleUniSearchChange(e, "uniCredit")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+                <Input
+                  value={searchCourseData.courseCategory}
+                  placeholder="หมวดหมู่"
+                  onChange={(e) => handleUniSearchChange(e, "courseCategory")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+                <Input
+                  value={searchCourseData.preSubject}
+                  placeholder="วิชาก่อนหน้า"
+                  onChange={(e) => handleUniSearchChange(e, "preSubject")}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  padding="4px"
+                  textAlign="center"
+                  borderWidth="1px"
+                  borderColor="black"
+                />
+              </Box>
+            </ModalBody>
+
+            <ModalFooter
+              display="flex"
+              padding="24px"
+              justifyContent="space-between"
+              gap="16px"
+            >
+              <Button
+                label="ตกลง"
+                width="100%"
+                backgroundColor="#2ABE0D"
+                onClick={handleUniSearchSubmit}
+              />
+              <Button
+                label="ยกเลิก"
+                width="100%"
+                onClick={handleCloseUniSearchData}
                 backgroundColor="red"
                 color="white"
               />

@@ -46,5 +46,6 @@ export interface IDataSection extends IFlatDiplomaCourseList {
   firstSectionList: ICreditTransferResponse[]
   secondSectionList: ICreditTransferResponse[]
   thirdSectionList: ICreditTransferResponse[]
-  totalCredit: number
+  totalDipCredit: number
+  totalUniCredit: number
 }

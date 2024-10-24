@@ -1,20 +1,17 @@
 "use client"
-import { NextRequest, NextResponse } from "next/server"
 
 import { Box, Image, Input } from "@chakra-ui/react"
 import TextField from "../components/TextField"
 import Button from "../components/Button"
 import { useRouter } from "next/navigation"
-import { ChangeEvent, useEffect, useState } from "react"
+import { ChangeEvent, useState } from "react"
 import useMutateLogin from "@/feature/authentication/hooks/useMutateLogin"
-import { decodeToken } from "@/util/jwtToken"
-import { IToken, ITokenPayload } from "@/feature/authentication/interface/auth"
+import { ITokenPayload } from "@/feature/authentication/interface/auth"
 import { jwtDecode } from "jwt-decode"
 import Cookies from "js-cookie"
-import { checkExpireToken } from "@/configs/axiosConfig"
 import useProfileStore, { selectOnsetProfileData } from "@/stores/profileStore"
-import { ImageCustom } from "@/components/Image/Image"
 import Homepage from "../asset/image/page1.jpg"
+import { onRemoveCookie } from "@/configs/handleCookie"
 interface IProps {
   username: string
   password: string
@@ -22,13 +19,16 @@ interface IProps {
 
 export default function Home() {
   const router = useRouter()
-  const [password, setPassword] = useState<string>("")
-  const [username, setUsername] = useState<string>("")
-  const { onLogin, isPending } = useMutateLogin()
+  const [login, setLogin] = useState<IProps>({
+    username: "",
+    password: ""
+  })
+
+  const { onLogin } = useMutateLogin()
   const setData = useProfileStore(selectOnsetProfileData)
   const decodeToken = (token: string): ITokenPayload | null => {
     try {
-      const decoded: ITokenPayload = jwtDecode<ITokenPayload>(token) // Decode token string โดยตรง
+      const decoded: ITokenPayload = jwtDecode<ITokenPayload>(token)
       return decoded
     } catch (error) {
       console.error("Invalid token", error)
@@ -37,24 +37,28 @@ export default function Home() {
   }
 
   const handleLogin = async () => {
-    const loginData: IProps = { username, password }
-    const loginToken = await onLogin(loginData)
+    const loginToken = await onLogin(login)
     if (loginToken) {
       const decodeData = decodeToken(loginToken)
       if (decodeData) {
         setData(decodeData)
       }
-      Cookies.set("accessToken", loginToken, { expires: 1 / 48 })
+      onRemoveCookie()
+      Cookies.set("accessToken", loginToken)
+      console.log(decodeData)
 
       router.push("/transfer")
     }
   }
 
-  const handleChangeUsername = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value)
-  }
-  const handleChangePassword = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value)
+  const handleLoginChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    field: string
+  ) => {
+    setLogin((prevValue) => ({
+      ...prevValue,
+      [field]: e.target.value
+    }))
   }
 
   return (
@@ -129,16 +133,16 @@ export default function Home() {
             >
               <Input
                 type="text"
-                value={username}
-                onChange={handleChangeUsername}
+                value={login.username}
+                onChange={(e) => handleLoginChange(e, "username")}
                 placeholder="ชื่อผู้ใช้งาน"
                 borderWidth="2px"
                 borderColor="black"
               />
               <TextField
                 type="password"
-                value={password}
-                onChange={handleChangePassword}
+                value={login.password}
+                onChange={(e) => handleLoginChange(e, "password")}
                 placeholder="รหัสผ่าน"
               />
               <Button

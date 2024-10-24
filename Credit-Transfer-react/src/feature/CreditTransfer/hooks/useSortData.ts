@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
-import { sortData } from "../services/creditTransfer.service"
+import { sortData } from "../services/CreditTransfer.service"
 import { useToast } from "@chakra-ui/react"
 
 const useSortData = () => {

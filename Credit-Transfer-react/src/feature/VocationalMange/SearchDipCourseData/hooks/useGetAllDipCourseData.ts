@@ -1,14 +1,14 @@
-import { useQuery } from "@tanstack/react-query"
-import { getCreditTransferData } from "../services/CreditTransfer.service"
 import { useToast } from "@chakra-ui/react"
+import { useQuery } from "@tanstack/react-query"
+import { getSearchDipCourseData } from "../services/getAllDipCourseData.service"
 
-const useGetCreditTransfer = () => {
+const useGetAllDipCourseData = () => {
   const toast = useToast()
-  const { data: creditTransferData } = useQuery({
-    queryKey: ["getCreditTransferData"],
+  const { data: getAllDipData } = useQuery({
+    queryKey: ["searchDipCourseData"],
     queryFn: async () => {
       try {
-        return await getCreditTransferData()
+        return await getSearchDipCourseData()
       } catch (error) {
         if (typeof (error as Error)?.message === "string") {
           toast({
@@ -19,9 +19,8 @@ const useGetCreditTransfer = () => {
         }
       }
     },
-
     retry: false
   })
-  return { creditTransferData }
+  return { getAllDipData }
 }
-export default useGetCreditTransfer
+export default useGetAllDipCourseData

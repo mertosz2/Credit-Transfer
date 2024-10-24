@@ -531,14 +531,17 @@ export default function Main() {
                         )}
                         {isTransferable ? (
                           <Box height="16px" />
-                        ) : (
+                        ) : sortConfig &&
+                          sortConfig.key === header.column.id ? (
                           <Icon
                             as={
-                              sortConfig && sortConfig.direction === "ascending"
+                              sortConfig.direction === "ascending"
                                 ? ChevronUpIcon
                                 : ChevronDownIcon
                             }
                           />
+                        ) : (
+                          <Icon as={ChevronDownIcon} />
                         )}
                       </Th>
                     )
@@ -678,6 +681,7 @@ export default function Main() {
       <SideBar id={1} />
       <Box
         minHeight={{ lg: "100vh", xl: "100vh" }}
+        height="auto"
         width="100%"
         backgroundSize="cover"
         background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"

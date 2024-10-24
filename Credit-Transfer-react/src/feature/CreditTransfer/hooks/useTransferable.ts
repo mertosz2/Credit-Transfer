@@ -2,7 +2,7 @@ import { useToast } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 import { IResponseAPI } from "@/interfaces/errorType"
-import { getTransferable } from "../services/creditTransfer.service"
+import { getTransferable } from "../services/CreditTransfer.service"
 
 const useTransferable = () => {
   const toast = useToast()

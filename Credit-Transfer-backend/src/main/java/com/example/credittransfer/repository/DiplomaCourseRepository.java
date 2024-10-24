@@ -47,19 +47,19 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
     @Query("select d from DiplomaCourse d where d.isActive = true")
     Page<DiplomaCourse> findAllDip(Pageable pageable);
 
-    @Query("SELECT d FROM DiplomaCourse d WHERE" +
-            "(d.dipCourseId LIKE %:dipCourseId% OR " +
-            "d.dipCourseName LIKE %:dipCourseName% OR " +
-            "d.universityCourse.uniCourseId LIKE %:uniCourseId% OR " +
-            "d.universityCourse.uniCourseName LIKE %:uniCourseName% OR " +
-            "d.dipCredit =:dipCredit) AND " +
+    @Query("SELECT d FROM DiplomaCourse d WHERE " +
+            "(:dipCourseId IS NULL OR d.dipCourseId LIKE %:dipCourseId%) AND " +
+            "(:dipCourseName IS NULL OR d.dipCourseName LIKE %:dipCourseName%) AND " +
+            "(:uniCourseId IS NULL OR d.universityCourse.uniCourseId LIKE %:uniCourseId%) AND " +
+            "(:uniCourseName IS NULL OR d.universityCourse.uniCourseName LIKE %:uniCourseName%) AND " +
+            "(:dipCredit IS NULL OR d.dipCredit = :dipCredit) AND " +
             "d.isActive = true")
     Page<DiplomaCourse> searchUniCourse(Pageable pageable,
-                                                String dipCourseId,
-                                                String dipCourseName,
-                                                String uniCourseId,
-                                                String uniCourseName,
-                                                Integer dipCredit);
+                                        @Param("dipCourseId") String dipCourseId,
+                                        @Param("dipCourseName") String dipCourseName,
+                                        @Param("uniCourseId") String uniCourseId,
+                                        @Param("uniCourseName") String uniCourseName,
+                                        @Param("dipCredit") Integer dipCredit);
 
 
 

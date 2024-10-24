@@ -3,21 +3,14 @@ import { ImageCustom } from "../Image/Image"
 import Button from "../Button/Button"
 import { RiLogoutBoxFill } from "@remixicon/react"
 import logo from "../SideBar/image/logo.png"
-import Cookies from "js-cookie"
 import { onRemoveCookie } from "@/configs/handleCookie"
-import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { decodeToken } from "@/util/jwtToken"
+import { useRouter } from "next/navigation"
 import useProfileStore, {
   resetProfile,
   selectProfileData
 } from "@/stores/profileStore"
 
 const SideBar = ({ id }: { id: number }) => {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    Cookies.get("accessToken")
-  )
-
   const onResetProfile = useProfileStore(resetProfile)
   const data = useProfileStore(selectProfileData)
   const toast = useToast()
@@ -30,22 +23,21 @@ const SideBar = ({ id }: { id: number }) => {
       isClosable: true
     })
     onRemoveCookie()
-    setAccessToken(undefined)
     onResetProfile()
     router.replace("/")
   }
 
   const handleCreditTransfer = () => {
-    router.replace("/transfer")
+    router.push("/transfer")
   }
   const handleVocationalManage = () => {
-    router.replace("/vocationalmanage")
+    router.push("/vocationalmanage")
   }
   const handleUniversityManage = () => {
-    router.replace("/universitymanage")
+    router.push("/universitymanage")
   }
   const handleManageAccount = () => {
-    router.replace("/manageaccount")
+    router.push("/manageaccount")
   }
   const checkRole = () => {
     if (data?.role.includes("SUPER_ADMIN")) {
@@ -53,6 +45,7 @@ const SideBar = ({ id }: { id: number }) => {
     }
     return false
   }
+console.log(data)
   return (
     <Box display="flex">
       {data?.role && data.role.length > 0 ? (
@@ -159,11 +152,11 @@ const SideBar = ({ id }: { id: number }) => {
       ) : (
         <Box
           display="flex"
-          position="absolute"
+          position="fixed"
           flexDirection={{ lg: "row", xl: "column" }}
           padding="20px"
           width={{ lg: "100%", xl: "auto" }}
-          height={{ lg: "100px", xl: "100vh" }}
+          height={{ lg: "100px", xl: "100%" }}
           borderWidth="1px"
           borderColor="black"
           alignItems="center"
