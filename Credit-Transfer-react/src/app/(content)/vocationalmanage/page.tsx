@@ -21,6 +21,7 @@ import {
 } from "@/feature/VocationalMange/SearchDipCourseData/services/getAllDipCourseData.service"
 import useMutateSortDipCourseData from "@/feature/VocationalMange/SortDipCourseData/hooks/useMutateSortDipCourseData"
 import { TDipKey } from "@/feature/VocationalMange/SortDipCourseData/interface/SortDipCourseData"
+import useProfileStore, { selectProfileData } from "@/stores/profileStore"
 
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons"
 import {
@@ -63,6 +64,7 @@ import {
 import { useCallback, useEffect, useState } from "react"
 
 export default function VocationalManage() {
+  const data = useProfileStore(selectProfileData)
   const toast = useToast()
   const { getAllDipData } = useGetAllDipCourseData()
   const [page, setPage] = useState(0)
@@ -162,6 +164,12 @@ export default function VocationalManage() {
     uniCourseName: "",
     dipCredit: ""
   })
+  const [modalDeleteData, setModalDeleteData] = useState({
+    dipCourseId: "",
+    dipCourseName: "",
+    dipCredit: 0,
+    uniId: 0
+  })
   const handleOpenMoreInformaion = (item: any): void => {
     setModalData({
       createdDate: item.createdDate,
@@ -191,7 +199,14 @@ export default function VocationalManage() {
       [field]: e.target.value
     }))
   }
-
+  const handleSelectAddDipCourseChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setAddCourseData((prevData) => ({
+      ...prevData,
+      uniId: parseInt(e.target.value)
+    }))
+  }
   const handleSubmitAddDipCourse = () => {
     const _sentDipCourse = onAddDipCourseData(addCourseData).then(() => {
       setAddCourseData({
@@ -201,7 +216,7 @@ export default function VocationalManage() {
         uniId: 0
       })
       CloseAddDipCourse()
-      refreshApiAfterEdit()
+      handleRefresh()
     })
   }
   const handleOnCloseAddDipCourse = () => {
@@ -213,14 +228,7 @@ export default function VocationalManage() {
     })
     CloseAddDipCourse()
   }
-  const handleSelectAddDipCourseChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setAddCourseData((prevData) => ({
-      ...prevData,
-      uniId: parseInt(e.target.value)
-    }))
-  }
+
   const handleEditChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     field: string
@@ -258,17 +266,23 @@ export default function VocationalManage() {
       }
     }).then(() => {
       CloseEditDipCourse()
-      refreshApiAfterEdit()
+      handleRefresh()
     })
   }
-  const handleOpenDeleteDipCourse = (id: number) => {
-    setSelectDipCourseId(id)
+  const handleOpenDeleteDipCourse = (item: any) => {
+    setSelectDipCourseId(item.id)
+    setModalDeleteData({
+      dipCourseId: item.dipCourseId,
+      dipCourseName: item.dipCourseName,
+      dipCredit: item.dipCredit,
+      uniId: item.uniId
+    })
     OpenDeleteDipCourse()
   }
   const handleDeleteSubmit = () => {
     const _data = onDeleteDipCourse(selectDipCourseId).then(() => {
       setSelectDipCourseId(0)
-      refreshApiAfterEdit()
+      handleRefresh()
       CloseDeleteDipCourse()
     })
   }
@@ -284,19 +298,31 @@ export default function VocationalManage() {
     CloseSearchDipCourse()
   }
 
-  const refreshApiAfterEdit = useCallback(async () => {
-    try {
-      const newDipData = await getNextDipCourse(page)
+  const handleRefresh = () => {
+    getNextSearchDipCourseData(searchCourseData, page).then((newDipData) => {
       setNewDipCourseData(newDipData)
-    } catch (error) {
-      console.error("Error fetching new data:", error)
-    }
-  }, [page])
+    })
+  }
+  const handleSearchRefresh = useCallback(() => {
+    setPage(0)
+    setSearchCourseData({
+      dipCourseId: "",
+      dipCourseName: "",
+      uniCourseId: "",
+      uniCourseName: "",
+      dipCredit: ""
+    })
+    searchDipCourseData(searchCourseData).then((getRefreshData) => {
+      setNewDipCourseData(getRefreshData)
+    })
+  }, [searchCourseData])
+
   const handleSearchSubmit = useCallback(async () => {
     try {
       const searchData = await searchDipCourseData(searchCourseData)
 
       if (searchData && searchData._embedded) {
+        setPage(0)
         setNewDipCourseData(searchData)
         CloseSearchDipCourse()
       } else {
@@ -308,40 +334,135 @@ export default function VocationalManage() {
       }
     } catch (error) {
       toast({
-        title: (error as Error).message,
+        title: "ERROR!",
         status: "error",
         isClosable: true
       })
     }
   }, [CloseSearchDipCourse, searchCourseData, toast])
-  const handleNextPage = () => {
-    setPage((prevPage) => {
+
+  const handleNextPage1 = useCallback(async () => {
+    await setPage((prevPage) => {
       const newPage = prevPage + 1
+      const toastId = "search-toast"
 
       getNextSearchDipCourseData(searchCourseData, newPage).then(
         (newDipData) => {
-          setNewDipCourseData(newDipData)
-          setSortConfig({ key: null, direction: "ascending" })
+          if (newDipData && newDipData._embedded) {
+            setNewDipCourseData(newDipData)
+            setSortConfig({ key: null, direction: "ascending" })
+          } else {
+            if (!toast.isActive(toastId)) {
+              toast({
+                id: toastId,
+                title: "กรุณาลองอีกครั้ง",
+                status: "error",
+                isClosable: true,
+                duration: 1000
+              })
+            }
+            handleSearchSubmit()
+            setPage(0)
+          }
         }
       )
+
       return newPage
     })
-    console.log(sortConfig)
-  }
-  const handlePrevPage = () => {
+  }, [handleSearchSubmit, searchCourseData, toast])
+  const handlePrevPage1 = useCallback(() => {
     setPage((prevPage) => {
       const newPage = prevPage - 1
+      const toastId = "search-toast"
 
       getNextSearchDipCourseData(searchCourseData, newPage).then(
         (newDipData) => {
-          setNewDipCourseData(newDipData)
-          setSortConfig({ key: null, direction: "ascending" })
+          if (newDipData && newDipData._embedded) {
+            setNewDipCourseData(newDipData)
+            setSortConfig({ key: null, direction: "ascending" })
+          } else {
+            if (!toast.isActive(toastId)) {
+              toast({
+                id: toastId,
+                title: "กรุณาลองอีกครั้ง",
+                status: "error",
+                isClosable: true,
+                duration: 1000
+              })
+            }
+            handleSearchSubmit()
+            setPage(0)
+          }
         }
       )
+
       return newPage
     })
-    console.log(sortConfig)
-  }
+  }, [handleSearchSubmit, searchCourseData, toast])
+  // const handleNextPage = () => {
+  //   setPage((NextPage) => {
+  //     const newPage = NextPage + 1
+
+  //     getNextSearchDipCourseData(searchCourseData, newPage).then(
+  //       (newDipData) => {
+  //         setNewDipCourseData(newDipData)
+  //         setSortConfig({ key: null, direction: "ascending" })
+
+  //         console.log("page", page)
+  //         console.log("Newpage", page)
+  //       }
+  //     )
+  //     return newPage
+  //   })
+  // }
+
+  // const handlePrevPage = () => {
+  //   setPage((prevPage) => {
+  //     const newPage = prevPage - 1
+
+  //     getNextSearchDipCourseData(searchCourseData, newPage).then(
+  //       (newDipData) => {
+  //         setNewDipCourseData(newDipData)
+  //         setSortConfig({ key: null, direction: "ascending" })
+  //         console.log("Newpage", page)
+  //         console.log(page)
+  //       }
+  //     )
+  //     return newPage
+  //   })
+  // }
+
+  const [sortConfig, setSortConfig] = useState<{
+    key: TDipKey | string | null
+    direction: "ascending" | "descending"
+  } | null>(null)
+
+  const handleSortDipCourseData = useCallback(
+    async (key: TDipKey) => {
+      let direction: "ascending" | "descending" = "ascending"
+
+      if (
+        sortConfig &&
+        sortConfig.key === key &&
+        sortConfig.direction === "ascending"
+      ) {
+        direction = "descending"
+      }
+
+      if (sortConfig) {
+        if (newDipCourseData) {
+          const sortedData = await onSortDipCourseData({
+            data: newDipCourseData,
+            key: key as TDipKey,
+            direction: sortConfig.direction === "ascending"
+          })
+          setNewDipCourseData(sortedData)
+        }
+      }
+      setSortConfig({ key, direction })
+    },
+    [newDipCourseData, onSortDipCourseData, sortConfig]
+  )
   const columnHelper = createColumnHelper<IDiplomaCourseResponseList>()
   const columns = [
     columnHelper.accessor("dipCourseId", {
@@ -398,37 +519,7 @@ export default function VocationalManage() {
     getCoreRowModel: getCoreRowModel(),
     debugTable: true
   })
-  const [sortConfig, setSortConfig] = useState<{
-    key: TDipKey | string | null
-    direction: "ascending" | "descending"
-  } | null>(null)
-
-  const handleSortDipCourseData = useCallback(
-    async (key: TDipKey) => {
-      let direction: "ascending" | "descending" = "ascending"
-
-      if (
-        sortConfig &&
-        sortConfig.key === key &&
-        sortConfig.direction === "ascending"
-      ) {
-        direction = "descending"
-      }
-
-      if (sortConfig) {
-        if (newDipCourseData) {
-          const sortedData = await onSortDipCourseData({
-            data: newDipCourseData,
-            key: key as TDipKey,
-            direction: sortConfig.direction === "ascending"
-          })
-          setNewDipCourseData(sortedData)
-        }
-      }
-      setSortConfig({ key, direction })
-    },
-    [newDipCourseData, onSortDipCourseData, sortConfig]
-  )
+  // console.log(getAllDipData)
   return (
     <>
       <SideBar id={2} />
@@ -479,9 +570,7 @@ export default function VocationalManage() {
                       borderRadius="8px"
                       justifyContent="center"
                       alignItems="center"
-                      onClick={() => {
-                        refreshApiAfterEdit()
-                      }}
+                      onClick={handleSearchRefresh}
                     >
                       <Box>
                         <RiRefreshLine color="#FFFFFF" />
@@ -531,7 +620,7 @@ export default function VocationalManage() {
                     <Button
                       label={<RiArrowLeftSLine />}
                       isDisabled={checkPrevPage()}
-                      onClick={handlePrevPage}
+                      onClick={handlePrevPage1}
                     ></Button>
                     <Box
                       display="flex"
@@ -548,7 +637,7 @@ export default function VocationalManage() {
                     <Button
                       label={<RiArrowRightSLine />}
                       isDisabled={checkNextPage()}
-                      onClick={handleNextPage}
+                      onClick={handleNextPage1}
                     ></Button>
                   </Box>
                 </Box>
@@ -654,7 +743,7 @@ export default function VocationalManage() {
                                   as="button"
                                   title="ลบ"
                                   onClick={() =>
-                                    handleOpenDeleteDipCourse(item.id)
+                                    handleOpenDeleteDipCourse(item)
                                   }
                                 >
                                   <RiDeleteBin2Fill color="red" />
@@ -999,8 +1088,9 @@ export default function VocationalManage() {
               color="red"
               fontSize="18px"
               fontWeight={700}
+              whiteSpace="pre-warp"
             >
-              * ยืนยันที่จะลบวิชาใช่หรือไม่? *
+              {`  ยืนยันที่จะลบวิชา ** ${modalDeleteData.dipCourseId} ${modalDeleteData.dipCourseName} ** ใช่หรือไม่? `}
             </ModalBody>
             <ModalFooter
               display="flex"

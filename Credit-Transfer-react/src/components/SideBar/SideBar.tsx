@@ -39,120 +39,117 @@ const SideBar = ({ id }: { id: number }) => {
   const handleManageAccount = () => {
     router.push("/manageaccount")
   }
-  const checkRole = () => {
+  const checkRoleSuperAdmin = () => {
     if (data?.role.includes("SUPER_ADMIN")) {
       return true
     }
     return false
   }
-console.log(data)
+  const checkRole = () => {
+    if (data?.role.includes("ADMIN") || data?.role.includes("SUPER_ADMIN")) {
+      return true
+    }
+    return false
+  }
   return (
     <Box display="flex">
-      {data?.role && data.role.length > 0 ? (
-        <Box>
-          {data?.role.map((item, index) => {
-            return (
-              <Box key={index}>
-                <Box
-                  display="flex"
-                  position="fixed"
-                  flexDirection="column"
-                  padding="20px"
-                  height="100vh"
-                  borderWidth="1px"
-                  borderColor="black"
-                  alignItems="center"
-                  backgroundColor="#000080"
-                  textColor="white"
-                  gap="24px"
-                >
-                  <ImageCustom
-                    width={220}
-                    height={108}
-                    src={logo}
-                    alt={"logo"}
+      {checkRole() ? (
+        <Box
+          display="flex"
+          position="fixed"
+          flexDirection="column"
+          padding="20px"
+          height="100vh"
+          borderWidth="1px"
+          borderColor="black"
+          alignItems="center"
+          backgroundColor="#000080"
+          textColor="white"
+          gap="24px"
+        >
+          <ImageCustom
+            width={220}
+            height={108}
+            src={logo}
+            alt={"logo"}
+          />
+          <Box
+            display="flex"
+            flexDirection="column"
+            height="100%"
+            gap="10px"
+          >
+            <Box
+              flex={1}
+              display="flex"
+              flexDirection="column"
+              gap="10px"
+            >
+              <Box
+                display="flex"
+                flexDirection="column"
+                gap="10px"
+              >
+                <Button
+                  label={"เทียบโอนรายวิชา"}
+                  onClick={handleCreditTransfer}
+                  color={id == 1 ? " white" : "black"}
+                  borderRadius="8px"
+                  backgroundColor={id == 1 ? " #00E0FF" : "white"}
+                />
+                <Button
+                  paddingY="8px"
+                  paddingX="60px"
+                  label={"จัดการวิชา ปวส"}
+                  onClick={handleVocationalManage}
+                  color={id == 2 ? " white" : "black"}
+                  borderRadius="8px"
+                  backgroundColor={id == 2 ? " #00E0FF" : "white"}
+                />
+                <Button
+                  label={"จัดการวิชา UTCC"}
+                  onClick={handleUniversityManage}
+                  color={id == 3 ? " white" : "black"}
+                  borderRadius="8px"
+                  backgroundColor={id == 3 ? " #00E0FF" : "white"}
+                />
+                {checkRoleSuperAdmin() ? (
+                  <Button
+                    label={"จัดการบัญชีผู้ใช้"}
+                    onClick={handleManageAccount}
+                    color={id == 4 ? " white" : "black"}
+                    borderRadius="8px"
+                    backgroundColor={id == 4 ? " #00E0FF" : "white"}
                   />
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    height="100%"
-                    gap="10px"
-                  >
-                    <Box
-                      flex={1}
-                      display="flex"
-                      flexDirection="column"
-                      gap="10px"
-                    >
-                      <Box
-                        display="flex"
-                        flexDirection="column"
-                        gap="10px"
-                      >
-                        <Button
-                          label={"เทียบโอนรายวิชา"}
-                          onClick={handleCreditTransfer}
-                          color={id == 1 ? " white" : "black"}
-                          borderRadius="8px"
-                          backgroundColor={id == 1 ? " #00E0FF" : "white"}
-                        />
-                        <Button
-                          paddingY="8px"
-                          paddingX="60px"
-                          label={"จัดการวิชา ปวส"}
-                          onClick={handleVocationalManage}
-                          color={id == 2 ? " white" : "black"}
-                          borderRadius="8px"
-                          backgroundColor={id == 2 ? " #00E0FF" : "white"}
-                        />
-                        <Button
-                          label={"จัดการวิชา UTCC"}
-                          onClick={handleUniversityManage}
-                          color={id == 3 ? " white" : "black"}
-                          borderRadius="8px"
-                          backgroundColor={id == 3 ? " #00E0FF" : "white"}
-                        />
-                        {checkRole() ? (
-                          <Button
-                            label={"จัดการบัญชี"}
-                            onClick={handleManageAccount}
-                            color={id == 4 ? " white" : "black"}
-                            borderRadius="8px"
-                            backgroundColor={id == 4 ? " #00E0FF" : "white"}
-                          />
-                        ) : null}
-                      </Box>
-                    </Box>
-
-                    <Box
-                      display="flex"
-                      justifyContent="center"
-                      paddingY="8px"
-                      paddingX="60px"
-                      backgroundColor="white"
-                      color="black"
-                      borderRadius="8px"
-                    >
-                      {data.name}
-                    </Box>
-                    <Button
-                      label={"ออกจากระบบ"}
-                      onClick={handleLogout}
-                      color="white"
-                      borderRadius="8px"
-                      backgroundColor="#FF4E4E"
-                      leftIcon={<RiLogoutBoxFill color="#FFFFFF" />}
-                    />
-                  </Box>
-                </Box>
+                ) : null}
               </Box>
-            )
-          })}
+            </Box>
+
+            <Box
+              display="flex"
+              justifyContent="center"
+              paddingY="8px"
+              paddingX="60px"
+              backgroundColor="white"
+              color="black"
+              borderRadius="8px"
+            >
+              {data.name}
+            </Box>
+            <Button
+              label={"ออกจากระบบ"}
+              onClick={handleLogout}
+              color="white"
+              borderRadius="8px"
+              backgroundColor="#FF4E4E"
+              leftIcon={<RiLogoutBoxFill color="#FFFFFF" />}
+            />
+          </Box>
         </Box>
       ) : (
         <Box
           display="flex"
-          position="fixed"
+          position="absolute"
           flexDirection={{ lg: "row", xl: "column" }}
           padding="20px"
           width={{ lg: "100%", xl: "auto" }}

@@ -19,7 +19,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/users")
-//@PreAuthorize("hasAnyAuthority('ADMIN')")
+@PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
 public class UsersController {
     private final UsersService usersService;
 

@@ -27,7 +27,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @RequestMapping("/api/uni")
 @Validated
-//@PreAuthorize("hasAnyAuthority('ADMIN')")
+@PreAuthorize("hasAnyAuthority('ADMIN','SUPER_ADMIN')")
 public class UniversityCourseController {
 
     private final UniversityCourseService universityCourseService;
@@ -91,9 +91,8 @@ public class UniversityCourseController {
                                                       @RequestParam(required = false) String uniCourseId,
                                                       @RequestParam(required = false) String uniCourseName,
                                                       @RequestParam(required = false) String courseCategory,
-                                                      @RequestParam(required = false) String courseCategoryName,
                                                       @RequestParam(required = false) Integer uniCredit,
                                                       @RequestParam(required = false) String preSubject) {
-        return universityCourseService.searchCourse(page, size, uniCourseId, uniCourseName, courseCategory, courseCategoryName, uniCredit, preSubject);
+        return universityCourseService.searchCourse(page, size, uniCourseId, uniCourseName, courseCategory, uniCredit, preSubject);
     }
 }

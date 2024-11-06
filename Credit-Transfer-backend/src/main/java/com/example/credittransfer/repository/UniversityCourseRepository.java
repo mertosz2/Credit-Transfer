@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -44,20 +45,17 @@ public interface UniversityCourseRepository extends JpaRepository<UniversityCour
     Page<UniversityCourse> findAllUniCourse(Pageable pageable);
 
     @Query("SELECT uc FROM UniversityCourse uc WHERE " +
-            "(uc.uniCourseId IS NULL OR uc.uniCourseId LIKE %:uniCourseId% OR " +
-            "uc.uniCourseName IS NULL OR uc.uniCourseName LIKE %:uniCourseName% OR " +
-            "uc.courseCategory.courseCategoryCode IS NULL OR uc.courseCategory.courseCategoryCode LIKE %:courseCategory% OR " +
-            "uc.courseCategory.courseCategoryName IS NULL OR uc.courseCategory.courseCategoryName LIKE %:courseCategoryName% OR " +
-            "uc.uniCredit IS NULL OR uc.uniCredit = :uniCredit OR " +
-            "uc.preSubject IS NULL OR uc.preSubject LIKE %:preSubject%) AND " +
+            "(:uniCourseId IS NULL OR uc.uniCourseId LIKE %:uniCourseId%) AND " +
+            "(:uniCourseName IS NULL OR uc.uniCourseName LIKE %:uniCourseName%) AND " +
+            "(:courseCategory IS NULL OR uc.courseCategory.courseCategoryCode LIKE %:courseCategory%) AND " +
+            "(:uniCredit IS NULL OR uc.uniCredit = :uniCredit) AND " +
+            "(:preSubject IS NULL OR uc.preSubject = :preSubject) AND " +
             "uc.isActive = true")
     Page<UniversityCourse> searchUniCourse(Pageable pageable,
-                                           String uniCourseId,
-                                           String uniCourseName,
-                                           String courseCategory,
-                                           String courseCategoryName,
-                                           Integer uniCredit,
-                                           String preSubject);
-
-
+                                           @Param("uniCourseId") String uniCourseId,
+                                           @Param("uniCourseName") String uniCourseName,
+                                           @Param("courseCategory") String courseCategory,
+                                           @Param("uniCredit") Integer uniCredit,
+                                           @Param("preSubject") String preSubject);
 }
+

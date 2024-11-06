@@ -114,4 +114,13 @@ public class GlobalHandleException extends ResponseEntityExceptionHandler {
         );
         return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
     }
+
+    @ExceptionHandler(ExistByDepartmentNameException.class)
+    public ResponseEntity<Object> handleExistByDepartmentNameException(ExistByDepartmentNameException ex) {
+        ResponseAPI responseAPI = new ResponseAPI(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(responseAPI, responseAPI.getHttpStatus());
+    }
 }

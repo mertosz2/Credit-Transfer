@@ -125,6 +125,7 @@ public class UsersService {
             usersResponse.setFullName(users.getFirstName() + " " + users.getLastName());
             usersResponse.setPhone(users.getPhone());
             usersResponse.setRole(users.getRole().getRoleName());
+            usersResponse.setDepartment(users.getDepartment().getDepartmentName());
         }
         return usersResponse;
     }
@@ -152,6 +153,9 @@ public class UsersService {
                 break;
             case "role":
                 comparator = Comparator.comparing(UsersResponse::getRole);
+                break;
+            case "department":
+                comparator = Comparator.comparing(UsersResponse::getDepartment);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid sorting key: " + key);

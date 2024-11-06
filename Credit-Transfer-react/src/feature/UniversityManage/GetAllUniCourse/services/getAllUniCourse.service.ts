@@ -21,11 +21,11 @@ export const searchUniCourseData = async (data: ISearchUniResponse) => {
     data
   const response = await services.get<IUniCourseResponse>(`/api/uni/search`, {
     params: {
-      uniCourseId: uniCourseId,
-      uniCourseName: uniCourseName,
-      courseCategory: courseCategory,
-      uniCredit: uniCredit,
-      preSubject: preSubject
+      uniCourseId: uniCourseId || null,
+      uniCourseName: uniCourseName || null,
+      courseCategory: courseCategory || null,
+      uniCredit: uniCredit || null,
+      preSubject: preSubject || null
     }
   })
   return response.data
@@ -44,11 +44,11 @@ export const getNextSearchUniCourseData = async (
     data
   const response = await services.get<IUniCourseResponse>(`/api/uni/search`, {
     params: {
-      uniCourseId: uniCourseId,
-      uniCourseName: uniCourseName,
-      courseCategory: courseCategory,
-      uniCredit: uniCredit,
-      preSubject: preSubject,
+      uniCourseId: uniCourseId || null,
+      uniCourseName: uniCourseName || null,
+      courseCategory: courseCategory || null,
+      uniCredit: uniCredit || null,
+      preSubject: preSubject || null,
       page: page
     }
   })

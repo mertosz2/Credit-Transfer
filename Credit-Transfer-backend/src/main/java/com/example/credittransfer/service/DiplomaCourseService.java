@@ -205,7 +205,7 @@ public class DiplomaCourseService {
                                                           Integer dipCredit) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<DiplomaCourse> diplomaCoursesPage = diplomaCourseRepository.searchUniCourse(
+        Page<DiplomaCourse> diplomaCoursesPage = diplomaCourseRepository.searchDipCourse(
                 pageable, dipCourseId, dipCourseName, uniCourseId, uniCourseName, dipCredit);
 
         List<DiplomaCourseResponse> diplomaCourseResponses = diplomaCoursesPage.getContent().stream()

@@ -5,7 +5,7 @@ import { getSearchUniCourseData } from "../services/getAllUniCourse.service"
 const useGetAllNewUniCourse = () => {
   const toast = useToast()
   const { data: getUniCourseData } = useQuery({
-    queryKey: ["getSearchUniCourseData"],
+    queryKey: ["SearchUniCourseData"],
     queryFn: async () => {
       try {
         return await getSearchUniCourseData()

@@ -54,7 +54,7 @@ public interface DiplomaCourseRepository extends JpaRepository<DiplomaCourse, In
             "(:uniCourseName IS NULL OR d.universityCourse.uniCourseName LIKE %:uniCourseName%) AND " +
             "(:dipCredit IS NULL OR d.dipCredit = :dipCredit) AND " +
             "d.isActive = true")
-    Page<DiplomaCourse> searchUniCourse(Pageable pageable,
+    Page<DiplomaCourse> searchDipCourse(Pageable pageable,
                                         @Param("dipCourseId") String dipCourseId,
                                         @Param("dipCourseName") String dipCourseName,
                                         @Param("uniCourseId") String uniCourseId,

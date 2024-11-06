@@ -45,8 +45,6 @@ export default function Home() {
       }
       onRemoveCookie()
       Cookies.set("accessToken", loginToken)
-      console.log(decodeData)
-
       router.push("/transfer")
     }
   }

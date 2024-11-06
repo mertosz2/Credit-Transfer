@@ -106,12 +106,11 @@ export default function UniversityManage() {
       return false
     }
   }
-  console.log(getUniCourseData)
   useEffect(() => {
-    if (uniCourseData) {
-      setNewUniCourseData(uniCourseData)
+    if (getUniCourseData) {
+      setNewUniCourseData(getUniCourseData)
     }
-  }, [uniCourseData])
+  }, [getUniCourseData])
   const {
     isOpen: AddUniCourse,
     onOpen: OpenAddUniCourse,
@@ -226,7 +225,7 @@ export default function UniversityManage() {
         courseCategory: 0
       })
       CloseAddUniCourse()
-      refreshApiAfterEdit()
+      handleRefresh()
     })
   }
   const handleOnCloseAddUniCourse = () => {
@@ -299,7 +298,7 @@ export default function UniversityManage() {
       }
     }).then(() => {
       CloseEditUniCourse()
-      refreshApiAfterEdit()
+      handleRefresh()
     })
   }
   const handleOpenDeleteUniCourse = (id: number) => {
@@ -309,7 +308,7 @@ export default function UniversityManage() {
   const handleDeleteSubmit = () => {
     const data = onDeleteUniCourse(selectUniCourseId).then(() => {
       setSelectUniCourseId(0)
-      refreshApiAfterEdit()
+      handleRefresh()
       CloseDeleteUniCourse()
     })
   }
@@ -331,11 +330,31 @@ export default function UniversityManage() {
       console.error("Error fetching new data:", error)
     }
   }, [page])
+  const handleRefresh = async () => {
+    await getNextSearchUniCourseData(searchCourseData, page).then(
+      (newDipData) => {
+        setNewUniCourseData(newDipData)
+      }
+    )
+  }
+  const handleSearchRefresh = async () => {
+    setPage(0)
+    setSearchCourseData({
+      uniCourseId: "",
+      uniCourseName: "",
+      courseCategory: "",
+      uniCredit: "",
+      preSubject: ""
+    })
+    const getRefreshData = await searchUniCourseData(searchCourseData)
+    setNewUniCourseData(getRefreshData)
+  }
+
   const handleUniSearchSubmit = useCallback(async () => {
     try {
       const searchUnidata = await searchUniCourseData(searchCourseData)
-
       if (searchUnidata && searchUnidata._embedded) {
+        setPage(0)
         setNewUniCourseData(searchUnidata)
         CloseSearchUniCourse()
       } else {
@@ -347,40 +366,98 @@ export default function UniversityManage() {
       }
     } catch (error) {
       toast({
-        title: (error as Error).message,
+        title: "ERROR!",
         status: "error",
         isClosable: true
       })
     }
   }, [CloseSearchUniCourse, searchCourseData, toast])
 
-  const handleNextPage = () => {
+  const handleNextPage = useCallback(() => {
     setPage((prevPage) => {
       const newPage = prevPage + 1
+      const toastId = "search-toast"
 
       getNextSearchUniCourseData(searchCourseData, newPage).then(
         (newUniData) => {
-          setNewUniCourseData(newUniData)
+          if (newUniData && newUniData._embedded) {
+            setNewUniCourseData(newUniData)
+            setSortConfig({ key: null, direction: "ascending" })
+          } else {
+            if (toast.isActive(toastId)) {
+              toast({
+                id: toastId,
+                title: "กรุณาลองอีกครั้ง",
+                status: "error",
+                isClosable: true,
+                duration: 3000
+              })
+            }
+            handleUniSearchSubmit()
+            setPage(0)
+          }
         }
       )
 
       return newPage
     })
-  }
-  const handlePrevPage = () => {
+  }, [handleUniSearchSubmit, searchCourseData, toast])
+
+  const handlePrevPage = useCallback(() => {
     setPage((prevPage) => {
       const newPage = prevPage - 1
+      const toastId = "search-toast"
 
       getNextSearchUniCourseData(searchCourseData, newPage).then(
         (newUniData) => {
-          setNewUniCourseData(newUniData)
+          if (newUniData && newUniData._embedded) {
+            setNewUniCourseData(newUniData)
+            setSortConfig({ key: null, direction: "ascending" })
+          } else {
+            if (!toast.isActive(toastId)) {
+              toast({
+                id: toastId,
+                title: "กรุณาลองอีกครั้ง",
+                status: "error",
+                isClosable: true,
+                duration: 3000
+              })
+            }
+            handleUniSearchSubmit()
+            setPage(0)
+          }
         }
       )
 
       return newPage
     })
-  }
+  }, [handleUniSearchSubmit, searchCourseData, toast])
 
+  // const handleNextPage = () => {
+  //   setPage((prevPage) => {
+  //     const newPage = prevPage + 1
+
+  //     getNextSearchUniCourseData(searchCourseData, newPage).then(
+  //       (newUniData) => {
+  //         setNewUniCourseData(newUniData)
+  //       }
+  //     )
+
+  //     return newPage
+  //   })
+  // }
+  // const handlePrevPage = () => {
+  //   setPage((prevPage) => {
+  //     const newPage = prevPage - 1
+
+  //     getNextSearchUniCourseData(searchCourseData, newPage).then(
+  //       (newUniData) => {
+  //         setNewUniCourseData(newUniData)
+  //       }
+  //     )
+  //     return newPage
+  //   })
+  // }
   const columnHelper = createColumnHelper<IUniCourseResponseList>()
   const columns = [
     columnHelper.accessor("uniCourseId", {
@@ -461,6 +538,7 @@ export default function UniversityManage() {
   )
   return (
     <>
+      {}
       <SideBar id={3} />
       <Box
         minHeight="100vh"
@@ -509,9 +587,7 @@ export default function UniversityManage() {
                       borderRadius="8px"
                       justifyContent="center"
                       alignItems="center"
-                      onClick={() => {
-                        refreshApiAfterEdit()
-                      }}
+                      onClick={handleSearchRefresh}
                     >
                       <Box>
                         <RiRefreshLine color="#FFFFFF" />

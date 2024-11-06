@@ -426,7 +426,7 @@ export default function Main() {
       header: () => <Box whiteSpace="pre-wrap">เกรด{"\n"}Grade</Box>,
       cell: (info) => (
         <Input
-          width={{ lg: "30px", xl: "60px" }}
+          width={{ lg: "60px", xl: "60px" }}
           type="number"
           step="0.5"
           fontSize={{ lg: "12px", xl: "16px" }}

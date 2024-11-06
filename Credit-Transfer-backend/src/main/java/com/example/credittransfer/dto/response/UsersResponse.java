@@ -18,4 +18,6 @@ public class UsersResponse {
     private String phone;
 
     private String role;
+
+    private String department;
 }

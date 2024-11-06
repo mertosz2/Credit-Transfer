@@ -3,6 +3,7 @@ package com.example.credittransfer.config;
 import com.example.credittransfer.service.AuthService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -33,7 +34,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/transfer/ttp").permitAll()
                         .requestMatchers("/api/transfer/exportExcel").permitAll()
                         .requestMatchers("api/transfer/import/").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers(HttpMethod.GET,"api/dip/").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .userDetailsService(authService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

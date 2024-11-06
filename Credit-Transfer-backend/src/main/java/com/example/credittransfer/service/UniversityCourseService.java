@@ -223,19 +223,22 @@ public class UniversityCourseService {
                                                       String uniCourseId,
                                                       String uniCourseName,
                                                       String courseCategory,
-                                                      String courseCategoryName,
                                                       Integer uniCredit,
                                                       String preSubject) {
-
+        
         Pageable pageable = PageRequest.of(page, size);
         Page<UniversityCourse> uniCoursePage = universityCourseRepository.searchUniCourse(
-                pageable, uniCourseId, uniCourseName, courseCategory, courseCategoryName, uniCredit, preSubject);
+                pageable, uniCourseId, uniCourseName, courseCategory, uniCredit, preSubject);
 
         List<UniCourseResponse> uniCourseResponseList = uniCoursePage.getContent()
                 .stream().map(this::mapToUniCourseResponse).toList();
 
+
         PageMetadata pageMetadata = new PageMetadata(size, page, uniCoursePage.getTotalElements(), uniCoursePage.getTotalPages());
+
         PagedModel<UniCourseResponse> pagedModel = PagedModel.of(uniCourseResponseList, pageMetadata);
+
+
 
         return pagedModel;
     }
