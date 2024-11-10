@@ -12,6 +12,7 @@ export interface IUsersResponseList {
   username: string
   fullName: string
   phone: string
+  departmentName: string
   role: string
 }
 

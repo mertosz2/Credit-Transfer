@@ -64,7 +64,6 @@ import {
 import { useCallback, useEffect, useState } from "react"
 
 export default function VocationalManage() {
-  const data = useProfileStore(selectProfileData)
   const toast = useToast()
   const { getAllDipData } = useGetAllDipCourseData()
   const [page, setPage] = useState(0)
@@ -72,7 +71,6 @@ export default function VocationalManage() {
   const { dropdownUniData } = useGetUniCourseDropdownData()
   const { onEditDipCourseData } = useMutateEditDipCourseData()
   const [selectDipCourseId, setSelectDipCourseId] = useState<number>(0)
-  const { dipCourseData } = useGetAllDipCourse()
   const { onAddDipCourseData } = useMutateAddDipCourse()
   const { onDeleteDipCourse } = useMutateDeleteDipCourseData()
   const { onSortDipCourseData } = useMutateSortDipCourseData()
@@ -1074,7 +1072,14 @@ export default function VocationalManage() {
           onClose={CloseDeleteDipCourse}
         >
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent
+            minWidth="454px"
+            minHeight="300px"
+            maxWidth="600px"
+            width="auto"
+            height="auto"
+            padding="16px"
+          >
             <ModalHeader
               display="flex"
               justifyContent="center"
@@ -1084,13 +1089,16 @@ export default function VocationalManage() {
             </ModalHeader>
             <ModalBody
               display="flex"
+              flexDirection="column"
               justifyContent="center"
+              alignItems="center"
               color="red"
               fontSize="18px"
               fontWeight={700}
-              whiteSpace="pre-warp"
             >
-              {`  ยืนยันที่จะลบวิชา ** ${modalDeleteData.dipCourseId} ${modalDeleteData.dipCourseName} ** ใช่หรือไม่? `}
+              <Box>ยืนยันที่จะลบวิชานี้ใช่หรือไม่?</Box>
+              <Box>{`** รหัสวิชา: ${modalDeleteData.dipCourseId} **`}</Box>
+              <Box>{`** ชื่อวิชา: ${modalDeleteData.dipCourseName} **`}</Box>
             </ModalBody>
             <ModalFooter
               display="flex"

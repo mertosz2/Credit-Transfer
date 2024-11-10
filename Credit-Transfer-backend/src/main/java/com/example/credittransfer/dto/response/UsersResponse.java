@@ -19,5 +19,5 @@ public class UsersResponse {
 
     private String role;
 
-    private String department;
+    private String departmentName;
 }

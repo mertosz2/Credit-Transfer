@@ -4,5 +4,6 @@ export interface ICreateUserResponse {
   firstName: string
   lastName: string
   phone: string
+  department: number
   role: number
 }

@@ -9,6 +9,7 @@ import com.example.credittransfer.exception.ExistByFirstNameAndLastName;
 import com.example.credittransfer.exception.ExistByPhoneNumber;
 import com.example.credittransfer.exception.ExistByUsername;
 import com.example.credittransfer.projection.DropDown;
+import com.example.credittransfer.repository.DepartmentRepository;
 import com.example.credittransfer.repository.RolesRepository;
 import com.example.credittransfer.repository.UsersRepository;
 import jakarta.transaction.Transactional;
@@ -32,11 +33,14 @@ import java.util.stream.Collectors;
 public class UsersService {
     private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
+
+    private final DepartmentRepository departmentRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UsersService(UsersRepository usersRepository, RolesRepository rolesRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UsersService(UsersRepository usersRepository, RolesRepository rolesRepository, DepartmentRepository departmentRepository, BCryptPasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
         this.rolesRepository = rolesRepository;
+        this.departmentRepository = departmentRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -65,6 +69,8 @@ public class UsersService {
             users.setPhone(request.getPhone());
             users.setActive(true);
             users.setRole(rolesRepository.findById(request.getRole()).orElseThrow());
+            users.setDepartment(departmentRepository.findById(request.getDepartment()).orElseThrow());
+
             usersRepository.save(users);
         }
         return new ResponseAPI(HttpStatus.CREATED, "สร้างบัญชีสำเร็จ");
@@ -82,15 +88,18 @@ public class UsersService {
                     &&!usersRepository.existsByFirstNameAndLastName(users.getFirstName(), users.getLastName()) ) {
                 throw new ExistByFirstNameAndLastName(request.getFirstName(), request.getLastName());
             }
-            if (usersRepository.existsByPhone(request.getPhone())) {
+            if (usersRepository.existsByPhone(request.getPhone()) && !Objects.equals(users.getPhone(), request.getPhone())) {
                 throw new ExistByPhoneNumber(request.getPhone());
             }
             users.setUsername(request.getUsername());
-            users.setPassword(passwordEncoder.encode(request.getPassword()));
+            if(!Objects.isNull(request.getPassword())) {
+                users.setPassword(passwordEncoder.encode(request.getPassword()));
+            }
             users.setFirstName(request.getFirstName());
             users.setLastName(request.getLastName());
             users.setPhone(request.getPhone());
             users.setRole(rolesRepository.findById(request.getRole()).orElseThrow());
+            users.setDepartment(departmentRepository.findById(request.getDepartment()).orElseThrow());
             usersRepository.save(users);
         }
         return new ResponseAPI(HttpStatus.OK, "อัพเดทบัญชีสำเร็จ");
@@ -100,7 +109,7 @@ public class UsersService {
     public ResponseAPI deleteUser(Integer userId) {
         Optional<Users> users = usersRepository.findById(userId);
         if (users.isPresent()) {
-            usersRepository.deleteUsersByUsersId(userId);
+            usersRepository.deleteById(userId);
             return new ResponseAPI(HttpStatus.OK, "ลบผู้ใช้สำเร็จ");
         } else {
             return new ResponseAPI(HttpStatus.BAD_REQUEST, "ไม่พบผู้ใช้ดังกล่าว: " + userId);
@@ -125,7 +134,7 @@ public class UsersService {
             usersResponse.setFullName(users.getFirstName() + " " + users.getLastName());
             usersResponse.setPhone(users.getPhone());
             usersResponse.setRole(users.getRole().getRoleName());
-            usersResponse.setDepartment(users.getDepartment().getDepartmentName());
+            usersResponse.setDepartmentName(users.getDepartment().getDepartmentName());
         }
         return usersResponse;
     }
@@ -155,7 +164,7 @@ public class UsersService {
                 comparator = Comparator.comparing(UsersResponse::getRole);
                 break;
             case "department":
-                comparator = Comparator.comparing(UsersResponse::getDepartment);
+                comparator = Comparator.comparing(UsersResponse::getDepartmentName);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid sorting key: " + key);

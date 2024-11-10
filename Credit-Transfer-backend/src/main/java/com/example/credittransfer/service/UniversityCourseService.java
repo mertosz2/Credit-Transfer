@@ -124,7 +124,7 @@ public class UniversityCourseService {
     public ResponseAPI deleteUniCourse(Integer uniId) {
         Optional<UniversityCourse> universityCourse = universityCourseRepository.findByUniId(uniId);
         if (universityCourse.isPresent()) {
-            universityCourseRepository.deleteByUniId(universityCourse.get().getUniId());
+            universityCourseRepository.deleteById(universityCourse.get().getUniId());
             return new ResponseAPI(HttpStatus.OK, "ลบวิชาสำเร็จ");
         } else {
             return new ResponseAPI(HttpStatus.BAD_REQUEST, "ไม่พบรหัสวิชาดังกล่าว: " + uniId);

@@ -7,18 +7,22 @@ import Cookies from "js-cookie"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient()
+
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      localStorage.clear()
-      Cookies.remove("accessToken")
+    const handlePageHide = (event: PageTransitionEvent) => {
+      if (!event.persisted) {
+        localStorage.clear()
+        Cookies.remove("accessToken")
+      }
     }
 
-    window.addEventListener("beforeunload", handleBeforeUnload)
+    window.addEventListener("pagehide", handlePageHide)
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload)
+      window.removeEventListener("pagehide", handlePageHide)
     }
   }, [])
+
 
   return (
     <QueryClientProvider client={queryClient}>

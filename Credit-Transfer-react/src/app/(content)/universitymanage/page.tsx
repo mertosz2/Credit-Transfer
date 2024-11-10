@@ -77,7 +77,6 @@ export default function UniversityManage() {
   const { onEditUniCourseData } = useMutateEditUniCourseData()
   const { categoryCourseData } = useGetCategoryDropdownData()
   const [selectUniCourseId, setSelectUniCourseId] = useState<number>(0)
-  const { uniCourseData } = useGetAllUniCourse()
   const { onAddUniCourseData } = useMutateAddUniCourseData()
   const { onDeleteUniCourse } = useMutateDeleteUniCourseData()
   const { onSortUniCourseData } = useMutateSortUniCourseData()
@@ -164,6 +163,14 @@ export default function UniversityManage() {
     uniCredit: "",
     preSubject: ""
   })
+  const [modalDeleteData, setModalDeleteData] = useState({
+    uniCourseId: "",
+    uniCourseName: "",
+    courseCategory: "",
+    uniCredit: "",
+    preSubject: ""
+  })
+
   const handleOpenMoreInformaion = (item: any): void => {
     setModalData({
       createdDate: item.createdDate,
@@ -228,6 +235,7 @@ export default function UniversityManage() {
       handleRefresh()
     })
   }
+
   const handleOnCloseAddUniCourse = () => {
     setAddUniCourseData({
       uniCourseId: "",
@@ -301,10 +309,18 @@ export default function UniversityManage() {
       handleRefresh()
     })
   }
-  const handleOpenDeleteUniCourse = (id: number) => {
-    setSelectUniCourseId(id)
+  const handleOpenDeleteUniCourse = (item: any) => {
+    setSelectUniCourseId(item.id)
+    setModalDeleteData({
+      uniCourseId: item.uniCourseId,
+      uniCourseName: item.uniCourseName,
+      courseCategory: item.courseCategory,
+      uniCredit: item.uniCredit,
+      preSubject: item.preSubject
+    })
     OpenDeleteUniCourse()
   }
+
   const handleDeleteSubmit = () => {
     const data = onDeleteUniCourse(selectUniCourseId).then(() => {
       setSelectUniCourseId(0)
@@ -322,14 +338,14 @@ export default function UniversityManage() {
     })
     CloseSearchUniCourse()
   }
-  const refreshApiAfterEdit = useCallback(async () => {
-    try {
-      const newUniData = await uniNextPage(page) // เรียก API และส่ง page ปัจจุบันไป
-      setNewUniCourseData(newUniData) // อัปเดตข้อมูลใหม่
-    } catch (error) {
-      console.error("Error fetching new data:", error)
-    }
-  }, [page])
+  // const refreshApiAfterEdit = useCallback(async () => {
+  //   try {
+  //     const newUniData = await uniNextPage(page) // เรียก API และส่ง page ปัจจุบันไป
+  //     setNewUniCourseData(newUniData) // อัปเดตข้อมูลใหม่
+  //   } catch (error) {
+  //     console.error("Error fetching new data:", error)
+  //   }
+  // }, [page])
   const handleRefresh = async () => {
     await getNextSearchUniCourseData(searchCourseData, page).then(
       (newDipData) => {
@@ -760,7 +776,7 @@ export default function UniversityManage() {
                                   as="button"
                                   title="ลบ"
                                   onClick={() =>
-                                    handleOpenDeleteUniCourse(item.uniId)
+                                    handleOpenDeleteUniCourse(item)
                                   }
                                 >
                                   <RiDeleteBin2Fill color="red" />
@@ -1130,7 +1146,14 @@ export default function UniversityManage() {
           onClose={CloseDeleteUniCourse}
         >
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent
+            minWidth="454px"
+            minHeight="300px"
+            maxWidth="600px"
+            width="auto"
+            height="auto"
+            padding="16px"
+          >
             <ModalHeader
               display="flex"
               justifyContent="center"
@@ -1140,12 +1163,16 @@ export default function UniversityManage() {
             </ModalHeader>
             <ModalBody
               display="flex"
+              flexDirection="column"
               justifyContent="center"
+              alignItems="center"
               color="red"
               fontSize="18px"
               fontWeight={700}
             >
-              * ยืนยันที่จะลบวิชาใช่หรือไม่? *
+              <Box>ยืนยันที่จะลบวิชานี้ใช่หรือไม่?</Box>
+              <Box>{`** รหัสวิชา: ${modalDeleteData.uniCourseId} **`}</Box>
+              <Box>{`** ชื่อวิชา: ${modalDeleteData.uniCourseName} **`}</Box>
             </ModalBody>
             <ModalFooter
               display="flex"

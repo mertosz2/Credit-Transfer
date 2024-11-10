@@ -28,4 +28,7 @@ public class UsersRequest {
 
     @NotBlank(message = "กรุณาเลือกตำแหน่ง")
     private Integer role;
+
+    @NotBlank(message = "กรุณาเลือกแผนก")
+    private Integer department;
 }

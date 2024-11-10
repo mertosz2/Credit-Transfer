@@ -39,6 +39,9 @@ const SideBar = ({ id }: { id: number }) => {
   const handleManageAccount = () => {
     router.push("/manageaccount")
   }
+  const handleDepartment = () =>{
+    router.push("/department")
+  }
   const checkRoleSuperAdmin = () => {
     if (data?.role.includes("SUPER_ADMIN")) {
       return true
@@ -113,13 +116,20 @@ const SideBar = ({ id }: { id: number }) => {
                   borderRadius="8px"
                   backgroundColor={id == 3 ? " #00E0FF" : "white"}
                 />
+                <Button
+                  label={"จัดการแผนก"}
+                  onClick={handleDepartment}
+                  color={id == 4 ? " white" : "black"}
+                  borderRadius="8px"
+                  backgroundColor={id == 4 ? " #00E0FF" : "white"}
+                />
                 {checkRoleSuperAdmin() ? (
                   <Button
                     label={"จัดการบัญชีผู้ใช้"}
                     onClick={handleManageAccount}
-                    color={id == 4 ? " white" : "black"}
+                    color={id == 5 ? " white" : "black"}
                     borderRadius="8px"
-                    backgroundColor={id == 4 ? " #00E0FF" : "white"}
+                    backgroundColor={id == 5 ? " #00E0FF" : "white"}
                   />
                 ) : null}
               </Box>
@@ -134,7 +144,7 @@ const SideBar = ({ id }: { id: number }) => {
               color="black"
               borderRadius="8px"
             >
-              {data.name}
+              {data?.name}
             </Box>
             <Button
               label={"ออกจากระบบ"}

@@ -3,5 +3,5 @@ export interface IAddUniCourseResponse {
   uniCourseName: string
   uniCredit: number
   preSubject: string
-  courseCategory:number
+  courseCategory: number
 }

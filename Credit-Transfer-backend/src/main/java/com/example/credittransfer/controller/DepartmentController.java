@@ -1,9 +1,11 @@
 package com.example.credittransfer.controller;
 
 import com.example.credittransfer.dto.request.DepartmentRequest;
+import com.example.credittransfer.dto.response.DepartmentResponse;
 import com.example.credittransfer.dto.response.ResponseAPI;
 import com.example.credittransfer.projection.DropDown;
 import com.example.credittransfer.service.DepartmentService;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +32,12 @@ public class DepartmentController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ResponseAPI> createDepartment(DepartmentRequest departmentRequest) {
+    public ResponseEntity<ResponseAPI> createDepartment(@RequestBody DepartmentRequest departmentRequest) {
         return ResponseEntity.status(CREATED).body(departmentService.createDepartment(departmentRequest));
     }
 
     @PutMapping("/{departmentId}")
-    public ResponseEntity<ResponseAPI> editDepartment(DepartmentRequest departmentRequest, @PathVariable Integer departmentId) {
+    public ResponseEntity<ResponseAPI> editDepartment(@RequestBody DepartmentRequest departmentRequest, @PathVariable Integer departmentId) {
         return ResponseEntity.status(OK).body(departmentService.editDepartment(departmentId, departmentRequest));
 
     }
@@ -43,6 +45,13 @@ public class DepartmentController {
     @DeleteMapping("/{departmentId}")
     public ResponseEntity<ResponseAPI> deleteDepartment(@PathVariable Integer departmentId) {
         return ResponseEntity.status(OK).body(departmentService.deleteDepartment(departmentId));
+    }
+
+    @GetMapping("/")
+    public PagedModel<DepartmentResponse> getAllDepartment(@RequestParam(defaultValue = "0") Integer page,
+                                                           @RequestParam(defaultValue = "10") Integer size,
+                                                           @RequestParam(required = false) String departmentName) {
+        return departmentService.getAllDepartment(size, page, departmentName);
     }
 
 }

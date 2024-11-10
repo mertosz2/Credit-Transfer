@@ -113,7 +113,7 @@ public class DiplomaCourseService {
     public ResponseAPI deleteDipCourse(Integer dipId) {
         Optional<DiplomaCourse> diplomaCourse = diplomaCourseRepository.findByDipId(dipId);
         if (diplomaCourse.isPresent()) {
-            diplomaCourseRepository.deleteByDipId(diplomaCourse.get().getDipId());
+            diplomaCourseRepository.deleteById(diplomaCourse.get().getDipId());
             return new ResponseAPI(HttpStatus.OK, "ลบวิชาสำเร็จ");
         } else {
             return new ResponseAPI(HttpStatus.BAD_REQUEST, "ไม่พบรหัสวิชาดังกล่าว: " + dipId);

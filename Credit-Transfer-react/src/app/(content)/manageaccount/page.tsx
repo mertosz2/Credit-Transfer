@@ -56,6 +56,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { getNextUser } from "@/feature/ManageAccount/AllUserData/services/allUserData.service"
 import useGetRoleDorpdownData from "@/feature/ManageAccount/RoleDropdownData/hooks/useGetRoleDropdownData"
 import { TUniKey } from "@/feature/UniversityManage/SortUniCourseData/interface/SortUniCourseData"
+import useGetDepartmentDropdownData from "@/feature/Department/GetAllDepartment/hooks/useGetDepartmentDropdrownData"
 
 export default function ManageAccount() {
   const [page, setPage] = useState(0)
@@ -68,47 +69,45 @@ export default function ManageAccount() {
     CreateUserData.username !== "" &&
     CreateUserData.password !== "" &&
     CreateUserData.phone !== "" &&
-    CreateUserData.role > 0
+    CreateUserData.role > 0 &&
+    CreateUserData.department > 0
+
   const checkEditValue = () =>
-    modalEditData.firstName !== "" &&
-    modalEditData.lastName !== "" &&
-    modalEditData.username !== "" &&
-    modalEditData.password !== "" &&
-    modalEditData.phone !== "" &&
-    modalEditData.role > 0
+    modalEditData.role > 0 && modalEditData.department > 0
+  const { getDepartData } = useGetDepartmentDropdownData()
   const { roleDropdown } = useGetRoleDorpdownData()
   const { onEditUserData } = useMutateEditUserData()
-  const [selectUniCourseId, setSelectUniCourseId] = useState<number>(0)
+  const [selectUserId, setSelectUserId] = useState<number>(0)
   const { getAllUserData } = useGetAllUserData()
   const { onCreateUser } = useMutateCreateUser()
   const { onDeleteUserData } = useMutateDeleteUserData()
   const [getId, setGetId] = useState<number>(0)
-  const currentPage = (newAllUserData?.page?.number ?? 0) + 1
-  const checkPrevPage = () => {
-    if (newAllUserData) {
-      if (newAllUserData?.page?.number <= 0) {
-        return true
-      }
-      return false
-    }
-  }
-  const checkNextPage = () => {
-    if (newAllUserData) {
-      if (newAllUserData.page.number + 1 >= newAllUserData.page.totalPages) {
-        return true
-      }
-      return false
-    }
-  }
-  const updateUserCourseData = useCallback(() => {
+  // const currentPage = (newAllUserData?.page?.number ?? 0) + 1
+  // const checkPrevPage = () => {
+  //   if (newAllUserData) {
+  //     if (newAllUserData?.page?.number <= 0) {
+  //       return true
+  //     }
+  //     return false
+  //   }
+  // }
+  // const checkNextPage = () => {
+  //   if (newAllUserData) {
+  //     if (newAllUserData.page.number + 1 >= newAllUserData.page.totalPages) {
+  //       return true
+  //     }
+  //     return false
+  //   }
+  // }
+  const updateUserData = useCallback(() => {
     if (getAllUserData) {
       setnewAllUserData(getAllUserData)
     }
   }, [getAllUserData])
 
   useEffect(() => {
-    updateUserCourseData()
-  }, [updateUserCourseData])
+    updateUserData()
+  }, [updateUserData])
   const {
     isOpen: CreateUser,
     onOpen: OpenCreateUser,
@@ -130,7 +129,8 @@ export default function ManageAccount() {
     firstName: "",
     lastName: "",
     phone: "",
-    role: 0
+    role: 0,
+    department: 0
   })
   const [CreateUserData, setCreateUserData] = useState<ICreateUserResponse>({
     username: "",
@@ -138,23 +138,28 @@ export default function ManageAccount() {
     firstName: "",
     lastName: "",
     phone: "",
+    role: 0,
+    department: 0
+  })
+  const [modalDeleteData, setModalDeleteData] = useState({
+    fullName: "",
+    username: "",
+    phone: "",
     role: 0
   })
-
   const handleOpenEditUserData = (item: any) => {
-    console.log(item)
-    setGetId(item.userId)
+    setSelectUserId(item.userId)
     setModalEditData({
       username: item.username,
       password: item.password,
       firstName: item.firstName,
       lastName: item.lastName,
       phone: item.phone,
-      role: item.role
+      role: item.role,
+      department: item.department
     })
     OpenEditUserData()
   }
-
   const handleCreateUserData = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: string
@@ -175,6 +180,16 @@ export default function ManageAccount() {
       role: value
     }))
   }
+  const handleSelectDepartmentChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    _p0: string
+  ) => {
+    const value = Number(e.target.value)
+    setCreateUserData((prevData) => ({
+      ...prevData,
+      department: value
+    }))
+  }
   const handleSubmitAddUniCourse = () => {
     const _sendUniCourse = onCreateUser(CreateUserData).then(() => {
       setCreateUserData({
@@ -183,7 +198,8 @@ export default function ManageAccount() {
         firstName: "",
         lastName: "",
         phone: "",
-        role: 0
+        role: 0,
+        department: 0
       })
       CloseCreateUser()
       refreshApiAfterEdit()
@@ -196,7 +212,8 @@ export default function ManageAccount() {
       firstName: "",
       lastName: "",
       phone: "",
-      role: 0
+      role: 0,
+      department: 0
     })
     CloseCreateUser()
   }
@@ -222,30 +239,48 @@ export default function ManageAccount() {
       role: value
     }))
   }
-
+  const handleSelectEditDepartmentChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    _p0: string
+  ) => {
+    const value = Number(e.target.value)
+    setModalEditData((prevData) => ({
+      ...prevData,
+      department: value
+    }))
+  }
   const handleEditSubmit = () => {
     const submit = onEditUserData({
+      id: selectUserId,
       data: {
         username: modalEditData.username,
         password: modalEditData.password,
         firstName: modalEditData.firstName,
         lastName: modalEditData.lastName,
         phone: modalEditData.phone,
-        role: modalEditData.role
-      },
-      id: getId
+        role: modalEditData.role,
+        department: modalEditData.department
+      }
     }).then(() => {
       CloseEditUserData()
       refreshApiAfterEdit()
     })
   }
-  const handleOpenDeleteUser = (id: number) => {
-    setSelectUniCourseId(id)
+  const handleOpenDeleteUser = (item: any) => {
+    setSelectUserId(item.userId)
+    console.log(selectUserId)
+    setModalDeleteData({
+      fullName: item.fullName,
+      username: item.username,
+      phone: item.phone,
+      role: item.role
+    })
     OpenDeleteUser()
   }
   const handleDeleteSubmit = () => {
-    const data = onDeleteUserData(selectUniCourseId).then(() => {
-      setSelectUniCourseId(0)
+    console.log(selectUserId)
+    const data = onDeleteUserData(selectUserId).then(() => {
+      setSelectUserId(0)
       refreshApiAfterEdit()
       CloseDeleteUser()
     })
@@ -292,7 +327,10 @@ export default function ManageAccount() {
       header: () => <Box whiteSpace="pre-wrap">ชื่อผู้ใช้{"\n"}UserName</Box>,
       cell: (info) => info.getValue()
     }),
-
+    columnHelper.accessor("departmentName", {
+      header: () => <Box whiteSpace="pre-wrap">ชื่อแผนก{"\n"}Department</Box>,
+      cell: (info) => info.getValue()
+    }),
     columnHelper.accessor("phone", {
       header: () => <Box whiteSpace="pre-wrap">เบอร์โทรศัพท์{"\n"}Phone</Box>,
       cell: (info) => info.getValue()
@@ -322,7 +360,7 @@ export default function ManageAccount() {
 
   return (
     <>
-      <SideBar id={4} />
+      <SideBar id={5} />
       <Box
         minHeight="100vh"
         height="auto"
@@ -438,6 +476,7 @@ export default function ManageAccount() {
                           >
                             <Td>{item.fullName}</Td>
                             <Td>{item.username}</Td>
+                            <Td>{item.departmentName}</Td>
                             <Td>{item.phone}</Td>
                             <Td>{item.role}</Td>
 
@@ -458,9 +497,7 @@ export default function ManageAccount() {
                                 <Box
                                   as="button"
                                   title="ลบ"
-                                  onClick={() =>
-                                    handleOpenDeleteUser(item.userId)
-                                  }
+                                  onClick={() => handleOpenDeleteUser(item)}
                                 >
                                   <RiDeleteBin2Fill color="red" />
                                 </Box>
@@ -563,6 +600,8 @@ export default function ManageAccount() {
                 textAlign="center"
                 borderWidth="1px"
                 borderColor="black"
+                maxLength={10}
+                type="tel"
               />
 
               <Select
@@ -574,6 +613,24 @@ export default function ManageAccount() {
                 onChange={(e) => handleSelectRoleChange(e, "role")}
               >
                 {roleDropdown?.map((item) => (
+                  <option
+                    key={item.id}
+                    value={item.id}
+                  >
+                    {item.label}
+                  </option>
+                ))}
+              </Select>
+
+              <Select
+                display="flex"
+                textAlign="center"
+                placeholder="แผนก"
+                borderWidth="1px"
+                borderColor="black"
+                onChange={(e) => handleSelectDepartmentChange(e, "department")}
+              >
+                {getDepartData?.map((item) => (
                   <option
                     key={item.id}
                     value={item.id}
@@ -694,6 +751,8 @@ export default function ManageAccount() {
                   textAlign="center"
                   borderWidth="1px"
                   borderColor="black"
+                  maxLength={10}
+                  type="tel"
                 />
 
                 <Select
@@ -705,6 +764,25 @@ export default function ManageAccount() {
                   onChange={(e) => handleSelectEditRoleChange(e, "role")}
                 >
                   {roleDropdown?.map((item) => (
+                    <option
+                      key={item.id}
+                      value={item.id}
+                    >
+                      {item.label}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  display="flex"
+                  textAlign="center"
+                  placeholder="แผนก"
+                  borderWidth="1px"
+                  borderColor="black"
+                  onChange={(e) =>
+                    handleSelectEditDepartmentChange(e, "department")
+                  }
+                >
+                  {getDepartData?.map((item) => (
                     <option
                       key={item.id}
                       value={item.id}
@@ -727,7 +805,7 @@ export default function ManageAccount() {
                 width="100%"
                 backgroundColor={checkEditValue() ? "#2ABE0D" : "transparent"}
                 onClick={handleEditSubmit}
-                 isDisabled={!checkEditValue()}
+                isDisabled={!checkEditValue()}
               />
               <Button
                 label="ยกเลิก"
@@ -744,7 +822,14 @@ export default function ManageAccount() {
           onClose={CloseDeleteUser}
         >
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent
+            minWidth="454px"
+            minHeight="300px"
+            maxWidth="600px"
+            width="auto"
+            height="auto"
+            padding="16px"
+          >
             <ModalHeader
               display="flex"
               justifyContent="center"
@@ -754,12 +839,16 @@ export default function ManageAccount() {
             </ModalHeader>
             <ModalBody
               display="flex"
+              flexDirection="column"
               justifyContent="center"
+              alignItems="center"
               color="red"
               fontSize="18px"
               fontWeight={700}
             >
-              * ยืนยันที่จะลบวิชาใช่หรือไม่? *
+              <Box>ยืนยันที่จะลบผู้ใช้นี้ใช่หรือไม่?</Box>
+              <Box>{`** ชื่อ: ${modalDeleteData.fullName} **`}</Box>
+              <Box>{`** ชื่อผู้ใช้: ${modalDeleteData.username} **`}</Box>
             </ModalBody>
             <ModalFooter
               display="flex"
