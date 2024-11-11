@@ -66,6 +66,14 @@ public class TransferCreditService {
         transferCreditResponseList.addAll(processDuplicateRequest(duplicatedRequests));
         transferCreditResponseList.sort(Comparator.comparing(transferCreditResponse -> transferCreditResponse.getUniversityCourse().getUniCourseId()));
 
+        for(TransferCreditResponse response: transferCreditResponseList) {
+            for (DipCourseResponse dipCourseResponse: response.getDiplomaCourseList()) {
+                if(dipCourseResponse.getGrade() > 4) {
+                    dipCourseResponse.setGrade(0);
+                }
+            }
+        }
+
         return transferCreditResponseList;
     }
 
@@ -74,6 +82,9 @@ public class TransferCreditService {
         TransferCreditResponse transferCreditResponse = new TransferCreditResponse();
         DiplomaCourse diplomaCourse = request.getDiplomaCourse();
         diplomaCourseList.add(mapToDipCourseResponse(diplomaCourse, request.getDipGrade()));
+        if(request.getDipGrade() > 4) {
+            request.setDipGrade(0);
+        }
 
         if (diplomaCourse.getDipCredit() < diplomaCourse.getUniversityCourse().getUniCredit() || request.getDipGrade() < 2) {
             transferCreditResponse.setTransferable(false);
@@ -83,6 +94,7 @@ public class TransferCreditService {
 
         transferCreditResponse.setDiplomaCourseList(diplomaCourseList);
         transferCreditResponse.setUniversityCourse(diplomaCourse.getUniversityCourse());
+
 
         return transferCreditResponse;
     }
@@ -113,6 +125,9 @@ public class TransferCreditService {
 
             for (TransferCreditRequest request : requests) {
                 DiplomaCourse diplomaCourse = request.getDiplomaCourse();
+                if(request.getDipGrade() > 4) {
+                    request.setDipGrade(0);
+                }
                 diplomaCourseList.add(mapToDipCourseResponse(diplomaCourse, request.getDipGrade()));
                 if (request.getDipGrade() >= 2) {
                     totalDipCredit += diplomaCourse.getDipCredit();

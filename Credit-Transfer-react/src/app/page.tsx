@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Image, Input } from "@chakra-ui/react"
+import { Box, Image, Img, Input } from "@chakra-ui/react"
 import TextField from "../components/TextField"
 import Button from "../components/Button"
 import { useRouter } from "next/navigation"
@@ -66,7 +66,6 @@ export default function Home() {
       height="100vh"
       paddingX={{ lg: "120px", xl: "240px" }}
       paddingY={{ lg: "90px", xl: "180px" }}
-      //background="linear-gradient(356deg, rgba(180,231,229,1) 0%, rgba(240,233,196,1) 46%, rgba(242,247,247,1) 100%)"
       background=" linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"
     >
       <Box
@@ -84,13 +83,13 @@ export default function Home() {
           height="100%"
         >
           <Box width={{ lg: "60%", xl: "65%" }}>
-            <Image
+            <Img
               width="100%"
               height="100%"
               backgroundSize="cover"
               borderTopLeftRadius={16}
               borderBottomLeftRadius={16}
-              src={Homepage.src}
+              src="https://credit-transferz2.s3.ap-southeast-1.amazonaws.com/img/page1.jpg"
               alt="Homepage"
             />
           </Box>

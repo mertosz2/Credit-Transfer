@@ -192,9 +192,12 @@ export default function VocationalManage() {
     e: React.ChangeEvent<HTMLInputElement>,
     field: string
   ) => {
+    const inputValue = e.target.value
+    const value =
+      field === "dipCredit" && Number(inputValue) > 3 ? "3" : inputValue
     setAddCourseData((prevData) => ({
       ...prevData,
-      [field]: e.target.value
+      [field]: value
     }))
   }
   const handleSelectAddDipCourseChange = (
@@ -231,8 +234,9 @@ export default function VocationalManage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     field: string
   ) => {
-    const value = e.target.value
-
+    const inputValue = e.target.value
+    const value =
+      field === "dipCredit" && Number(inputValue) > 3 ? "3" : inputValue
     setModalEditData((prevData) => ({
       ...prevData,
       [field]: value
@@ -824,6 +828,7 @@ export default function VocationalManage() {
                 textAlign="center"
                 borderWidth="1px"
                 borderColor="black"
+                type="number"
               />
 
               <Select
@@ -1021,6 +1026,7 @@ export default function VocationalManage() {
                   textAlign="center"
                   borderWidth="1px"
                   borderColor="black"
+                  type="number"
                 />
 
                 <Select

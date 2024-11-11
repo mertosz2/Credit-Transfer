@@ -142,7 +142,6 @@ export default function Report() {
       // </a>
       // ทำให้มันกด
       link.click()
-      // ลบ
       document.body.removeChild(link)
     }
   }
@@ -225,6 +224,16 @@ export default function Report() {
                   ))}
                 </Thead>
                 <Tbody>
+                  <Td
+                    colSpan={7}
+                    style={{
+                      backgroundColor: "#2E99FC",
+                      color: "white",
+                      fontWeight: 700
+                    }}
+                  >
+                    ส่วนที่ 1.1 รายวิชาภาษาอังกฤษ
+                  </Td>
                   {flatData.length > 0 ? (
                     table.getRowModel().rows.map((row) => (
                       <Tr key={row.id}>
@@ -369,7 +378,7 @@ export default function Report() {
                       colSpan={2}
                       borderWidth={1}
                     >
-                      18
+                      {data?.totalUniCredit}
                     </Td>
                   </Tr>
                 </Tbody>
@@ -396,6 +405,16 @@ export default function Report() {
                     </Tr>
                   ))}
                 </Thead>
+                <Td
+                      colSpan={7}
+                      style={{
+                        backgroundColor: "#2E99FC",
+                        color: "white",
+                        fontWeight: 700
+                      }}
+                    >
+                      ส่วนที่ 1.1 รายวิชาภาษาอังกฤษ
+                    </Td>
                 <Tbody>
                   {flatData.length > 0 ? (
                     table.getRowModel().rows.map((row) => (

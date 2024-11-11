@@ -8,10 +8,7 @@ import com.example.credittransfer.exception.FileEmptyException;
 import com.example.credittransfer.exception.FileExtensionNotMatchException;
 import com.example.credittransfer.repository.DiplomaCourseRepository;
 import com.example.credittransfer.repository.UniversityCourseRepository;
-import com.example.credittransfer.service.CourseHistoryService;
-import com.example.credittransfer.service.OCRService;
-import com.example.credittransfer.service.PDFGeneratorService;
-import com.example.credittransfer.service.TransferCreditService;
+import com.example.credittransfer.service.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,18 +33,22 @@ public class TransferCreditController {
     private final PDFGeneratorService pdfGeneratorService;
     private final UniversityCourseRepository universityCourseRepository;
 
-    public TransferCreditController(TransferCreditService transferCreditService, OCRService ocrService, CourseHistoryService courseHistoryService, DiplomaCourseRepository diplomaCourseRepository, PDFGeneratorService pdfGeneratorService, UniversityCourseRepository universityCourseRepository) {
+    private final DiplomaCourseService diplomaCourseService;
+
+    public TransferCreditController(TransferCreditService transferCreditService, OCRService ocrService, CourseHistoryService courseHistoryService, DiplomaCourseRepository diplomaCourseRepository, PDFGeneratorService pdfGeneratorService, UniversityCourseRepository universityCourseRepository, DiplomaCourseService diplomaCourseService) {
         this.transferCreditService = transferCreditService;
         this.ocrService = ocrService;
         this.courseHistoryService = courseHistoryService;
         this.diplomaCourseRepository = diplomaCourseRepository;
         this.pdfGeneratorService = pdfGeneratorService;
         this.universityCourseRepository = universityCourseRepository;
+        this.diplomaCourseService = diplomaCourseService;
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<TransferCreditResponse>> getAllTransferCourse() {
-        return ResponseEntity.status(OK).body(transferCreditService.getAllTransferCourse());
+    @GetMapping("/")
+    public ResponseEntity<TransferCreditResponse> findByDipCourseId(@RequestParam String dipCourseId) {
+        return ResponseEntity.status(OK).body(diplomaCourseService.findByDipCourseId(dipCourseId));
+
     }
 
     @PostMapping("/import/")
@@ -61,7 +62,6 @@ public class TransferCreditController {
         File file = ocrService.convertFile(multipartFile);
         DipCourseIdResponse dipCourseIdResponse = ocrService.getCourseIdByImport(file);
         List<TransferCreditRequest> transferCreditRequestList = new ArrayList<>(ocrService.getCourse(file));
-        System.out.println("Request is = " + transferCreditRequestList);
         List<String> allIdFound = dipCourseIdResponse.getFoundedDipCourseIdList();
         List<String> inListOfRequest = transferCreditRequestList.stream().map(request -> request.getDiplomaCourse().getDipCourseId()).toList();
         List<String> dipCourseIdList = new ArrayList<>();
@@ -154,16 +154,6 @@ public class TransferCreditController {
     @PostMapping("/sort")
     public ResponseEntity<List<TransferCreditResponse>> sortData(@RequestBody List<TransferCreditResponse> responseList, @RequestParam("key") String key, @RequestParam("direction") boolean ascending) {
         return ResponseEntity.status(OK).body(transferCreditService.sortData(responseList, key, ascending));
-    }
-
-    @GetMapping("/oc2")
-    public String tssa() throws IOException {
-        return ocrService.getCourseId3();
-    }
-
-    @GetMapping("/oc3")
-    public String tsaa() throws IOException {
-        return ocrService.getCourseId2();
     }
 
     @GetMapping("/za")

@@ -164,9 +164,13 @@ export default function ManageAccount() {
     e: React.ChangeEvent<HTMLInputElement>,
     field: string
   ) => {
+    const value = e.target.value
+    if (field === "phone" && value.length > 10) {
+      return
+    }
     setCreateUserData((prevData) => ({
       ...prevData,
-      [field]: e.target.value
+      [field]: value
     }))
   }
 
@@ -223,6 +227,9 @@ export default function ManageAccount() {
     field: string
   ) => {
     const value = e.target.value
+    if (field === "phone" && value.length > 10) {
+      return
+    }
 
     setModalEditData((prevData) => ({
       ...prevData,
@@ -564,6 +571,7 @@ export default function ManageAccount() {
                 textAlign="center"
                 borderWidth="1px"
                 borderColor="black"
+                type="password"
               />
               <Input
                 value={CreateUserData.firstName}
@@ -600,8 +608,7 @@ export default function ManageAccount() {
                 textAlign="center"
                 borderWidth="1px"
                 borderColor="black"
-                maxLength={10}
-                type="tel"
+                type="number"
               />
 
               <Select
@@ -715,6 +722,7 @@ export default function ManageAccount() {
                   textAlign="center"
                   borderWidth="1px"
                   borderColor="black"
+                  type="password"
                 />
                 <Input
                   value={modalEditData.firstName}
@@ -751,8 +759,7 @@ export default function ManageAccount() {
                   textAlign="center"
                   borderWidth="1px"
                   borderColor="black"
-                  maxLength={10}
-                  type="tel"
+                  type="number"
                 />
 
                 <Select

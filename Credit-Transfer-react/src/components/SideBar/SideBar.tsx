@@ -1,8 +1,8 @@
-import { Box, useToast } from "@chakra-ui/react"
+import { Box, Img, useToast } from "@chakra-ui/react"
 import { ImageCustom } from "../Image/Image"
 import Button from "../Button/Button"
 import { RiLogoutBoxFill } from "@remixicon/react"
-import logo from "../SideBar/image/logo.png"
+import logo from "../../asset/image/logo.png"
 import { onRemoveCookie } from "@/configs/handleCookie"
 import { useRouter } from "next/navigation"
 import useProfileStore, {
@@ -15,7 +15,6 @@ const SideBar = ({ id }: { id: number }) => {
   const data = useProfileStore(selectProfileData)
   const toast = useToast()
   const router = useRouter()
-
   const handleLogout = () => {
     toast({
       title: "ออกจากระบบ",
@@ -39,7 +38,7 @@ const SideBar = ({ id }: { id: number }) => {
   const handleManageAccount = () => {
     router.push("/manageaccount")
   }
-  const handleDepartment = () =>{
+  const handleDepartment = () => {
     router.push("/department")
   }
   const checkRoleSuperAdmin = () => {
@@ -70,10 +69,10 @@ const SideBar = ({ id }: { id: number }) => {
           textColor="white"
           gap="24px"
         >
-          <ImageCustom
+          <Img
             width={220}
             height={108}
-            src={logo}
+            src="https://credit-transferz2.s3.ap-southeast-1.amazonaws.com/img/logo.png"
             alt={"logo"}
           />
           <Box
@@ -116,21 +115,24 @@ const SideBar = ({ id }: { id: number }) => {
                   borderRadius="8px"
                   backgroundColor={id == 3 ? " #00E0FF" : "white"}
                 />
-                <Button
-                  label={"จัดการแผนก"}
-                  onClick={handleDepartment}
-                  color={id == 4 ? " white" : "black"}
-                  borderRadius="8px"
-                  backgroundColor={id == 4 ? " #00E0FF" : "white"}
-                />
+
                 {checkRoleSuperAdmin() ? (
-                  <Button
-                    label={"จัดการบัญชีผู้ใช้"}
-                    onClick={handleManageAccount}
-                    color={id == 5 ? " white" : "black"}
-                    borderRadius="8px"
-                    backgroundColor={id == 5 ? " #00E0FF" : "white"}
-                  />
+                  <>
+                    <Button
+                      label={"จัดการแผนก"}
+                      onClick={handleDepartment}
+                      color={id == 4 ? " white" : "black"}
+                      borderRadius="8px"
+                      backgroundColor={id == 4 ? " #00E0FF" : "white"}
+                    />
+                    <Button
+                      label={"จัดการบัญชีผู้ใช้"}
+                      onClick={handleManageAccount}
+                      color={id == 5 ? " white" : "black"}
+                      borderRadius="8px"
+                      backgroundColor={id == 5 ? " #00E0FF" : "white"}
+                    />
+                  </>
                 ) : null}
               </Box>
             </Box>
@@ -172,10 +174,10 @@ const SideBar = ({ id }: { id: number }) => {
           gap="24px"
         >
           <Box>
-            <ImageCustom
+            <Img
               width={220}
               height={108}
-              src={logo}
+              src="https://credit-transferz2.s3.ap-southeast-1.amazonaws.com/img/logo.png"
               alt={"logo"}
             />
           </Box>

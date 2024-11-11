@@ -2,7 +2,8 @@ import { decodeToken } from "@/util/jwtToken"
 import axios from "axios"
 import Cookies from "js-cookie"
 import dayjs from "dayjs"
-const baseUrl = `http://localhost:8080/`
+// const baseUrl = `http://localhost:8080/`
+const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}`
 
 const services = axios.create({
   baseURL: baseUrl,

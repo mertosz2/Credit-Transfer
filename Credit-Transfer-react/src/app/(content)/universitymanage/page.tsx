@@ -196,9 +196,12 @@ export default function UniversityManage() {
     e: React.ChangeEvent<HTMLInputElement>,
     field: string
   ) => {
+    const inputValue = e.target.value
+    const value =
+      field === "uniCredit" && Number(inputValue) > 3 ? "3" : inputValue
     setAddUniCourseData((prevData) => ({
       ...prevData,
-      [field]: e.target.value
+      [field]: value
     }))
   }
 
@@ -251,7 +254,9 @@ export default function UniversityManage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     field: string
   ) => {
-    const value = e.target.value
+    const inputValue = e.target.value
+    const value =
+      field === "uniCredit" && Number(inputValue) > 3 ? "3" : inputValue
 
     setModalEditData((prevData) => ({
       ...prevData,
@@ -860,6 +865,7 @@ export default function UniversityManage() {
                 textAlign="center"
                 borderWidth="1px"
                 borderColor="black"
+                type="number"
               />
 
               <Select
@@ -1077,6 +1083,7 @@ export default function UniversityManage() {
                   textAlign="center"
                   borderWidth="1px"
                   borderColor="black"
+                  type="number"
                 />
 
                 <Select
