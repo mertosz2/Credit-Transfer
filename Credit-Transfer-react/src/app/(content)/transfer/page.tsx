@@ -104,7 +104,6 @@ export default function Main() {
       // ตรวจสอบว่ามีหลักสูตรมากกว่าหรือเท่ากับ 2 รายการ
       if (diplomaCourseList.length >= 2) {
         console.log("ตรวจสอบว่ามีหลักสูตรมากกว่าหรือเท่ากับ 2 รายการ")
-        // ตรวจสอบว่าเกรดทั้งหมดใน diplomaCourseList >= 2 หรือไม่
         const allGradesValid = diplomaCourseList.every(
           (course) => course.grade >= 2
         )
@@ -278,7 +277,6 @@ export default function Main() {
           const duplicateIdsArray = Array.from(duplicateIds)
           const uniqueNewItemsArray = Array.from(uniqueIds)
 
-          // อัปเดต displayData และ modalData
           const newArray = [...transferCreditResponseList, ...uniqueNewItems]
           setDisplayData(newArray)
           setFlatData(flattenData(newArray))
@@ -292,7 +290,6 @@ export default function Main() {
             totalcourse: newFile.total
           })
 
-          // เปิด modal สำหรับการแสดงผล
           if (displayData.length > 0) {
             onOpen()
           } else {

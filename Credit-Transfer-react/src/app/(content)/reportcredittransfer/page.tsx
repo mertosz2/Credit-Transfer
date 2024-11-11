@@ -112,7 +112,6 @@ export default function Report() {
     getCoreRowModel: getCoreRowModel()
   })
 
-  // การสร้าง table สำหรับ flatData3
   const table3 = useReactTable({
     data: flatData3,
     columns,

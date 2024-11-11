@@ -10,7 +10,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const handlePageHide = (event: PageTransitionEvent) => {
-      if (!event.persisted) {
+      // persisted == false means reload ok very good
+      if (event.persisted) {
         localStorage.clear()
         Cookies.remove("accessToken")
       }
@@ -22,7 +23,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       window.removeEventListener("pagehide", handlePageHide)
     }
   }, [])
-
 
   return (
     <QueryClientProvider client={queryClient}>

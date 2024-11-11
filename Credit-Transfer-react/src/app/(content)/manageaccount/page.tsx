@@ -275,7 +275,6 @@ export default function ManageAccount() {
   }
   const handleOpenDeleteUser = (item: any) => {
     setSelectUserId(item.userId)
-    console.log(selectUserId)
     setModalDeleteData({
       fullName: item.fullName,
       username: item.username,
@@ -285,7 +284,6 @@ export default function ManageAccount() {
     OpenDeleteUser()
   }
   const handleDeleteSubmit = () => {
-    console.log(selectUserId)
     const data = onDeleteUserData(selectUserId).then(() => {
       setSelectUserId(0)
       refreshApiAfterEdit()

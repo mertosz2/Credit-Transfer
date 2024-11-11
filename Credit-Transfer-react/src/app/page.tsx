@@ -23,7 +23,6 @@ export default function Home() {
     username: "",
     password: ""
   })
-
   const { onLogin } = useMutateLogin()
   const setData = useProfileStore(selectOnsetProfileData)
   const decodeToken = (token: string): ITokenPayload | null => {

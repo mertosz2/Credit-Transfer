@@ -521,7 +521,6 @@ export default function VocationalManage() {
     getCoreRowModel: getCoreRowModel(),
     debugTable: true
   })
-  // console.log(getAllDipData)
   return (
     <>
       <SideBar id={2} />
